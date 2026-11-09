@@ -11,9 +11,9 @@ Unconferences are like conferences (but are different in 3 ways):
 
 Unconferences often:
 
-    1. last a day or 2,
-    2. start by creating an agenda,
-    3. include parallel discussions that happen thoughout the event.
+1. last a day or 2,
+2. start by creating an agenda,
+3. include parallel discussions that happen thoughout the event.
 
 ![Sticky notes containing discussion topics are stuck to a large glass wall, and arranged into rooms and times on a grid.](/assets/img/unconference-1.jpg)
 
