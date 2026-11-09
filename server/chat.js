@@ -101,7 +101,7 @@ function clientIp(req) {
 }
 
 export function createChatHandler({ contextFile, env = process.env } = {}) {
-  const model = env.CHAT_MODEL || "claude-opus-5-5";
+  const model = env.CHAT_MODEL || "claude-haiku-5-5";
   const perMinute = new RateLimiter(Number(env.CHAT_PER_MINUTE || 6), 60 * 1000);
   const perDay = new RateLimiter(Number(env.CHAT_PER_DAY || 40), 24 * 60 * 60 * 1000);
   // A cap on all visitors together, so a busy day cannot run up a large bill.
@@ -145,7 +145,8 @@ export function createChatHandler({ contextFile, env = process.env } = {}) {
       system,
       messages,
       output_config: { effort: "low" },
-      // If the model declines a request, let the API retry it on its default fallback model.
+      // If the model declines a request, let the API retry it on a fallback model.
+      // Models without a fallback (such as Claude Haiku 5.5) ignore this.
       betas: ["server-side-fallback-2026-07-01"],
       fallbacks: "default",
     });

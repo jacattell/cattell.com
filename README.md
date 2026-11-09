@@ -95,7 +95,7 @@ Environment variables:
 | Name | Needed? | What it does |
 | --- | --- | --- |
 | `ANTHROPIC_API_KEY` | For chat | Key from the [Claude Console](https://platform.claude.com/). Without it the site works and the chat page says it is not set up. |
-| `CHAT_MODEL` | No | Claude model to use. Default `claude-opus-5-5`. |
+| `CHAT_MODEL` | No | Claude model to use. Default `claude-haiku-5-5`. |
 | `CHAT_PER_MINUTE` | No | Messages one visitor can send per minute. Default 6. |
 | `CHAT_PER_DAY` | No | Messages one visitor can send per day. Default 40. |
 | `CHAT_DAILY_LIMIT` | No | Messages all visitors together can send per day. Default 300. |
