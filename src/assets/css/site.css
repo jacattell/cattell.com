@@ -1,0 +1,86 @@
+:root {
+  --text: #0b0c0c;
+  --muted: #505a5f;
+  --bg: #ffffff;
+  --panel: #f3f2f1;
+  --border: #b1b4b6;
+  --link: #1d70b8;
+  --link-visited: #4c2c92;
+  --focus: #ffdd00;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #f3f2f1;
+    --muted: #b1b4b6;
+    --bg: #0b0c0c;
+    --panel: #1f2224;
+    --border: #505a5f;
+    --link: #73b7f0;
+    --link-visited: #c4a8f5;
+  }
+}
+* { box-sizing: border-box; }
+html { font-size: 112.5%; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg);
+}
+.wrap { max-width: 42rem; margin: 0 auto; padding: 0 1rem; }
+main { padding-top: 1.5rem; padding-bottom: 3rem; }
+a { color: var(--link); text-underline-offset: 0.15em; }
+a:visited { color: var(--link-visited); }
+a:hover { text-decoration-thickness: 3px; }
+a:focus-visible, button:focus-visible, textarea:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 0;
+  box-shadow: 0 0 0 6px var(--text);
+}
+.skip { position: absolute; left: -999rem; }
+.skip:focus { position: static; display: block; padding: 0.5rem 1rem; }
+h1, h2, h3, h4 { line-height: 1.25; margin: 2rem 0 0.75rem; overflow-wrap: break-word; }
+h1 { font-size: 2rem; margin-top: 0.5rem; }
+h2 { font-size: 1.45rem; }
+h3 { font-size: 1.15rem; }
+h4 { font-size: 1rem; }
+p, ul, ol { margin: 0 0 1rem; }
+li { margin-bottom: 0.25rem; }
+img { max-width: 100%; height: auto; }
+.video { position: relative; aspect-ratio: 16 / 9; margin-bottom: 1rem; }
+.video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+
+.site-header { border-bottom: 1px solid var(--border); background: var(--panel); }
+.site-header .wrap { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 1.5rem; padding-top: 0.75rem; padding-bottom: 0.75rem; }
+.site-name { font-weight: 700; color: var(--text); text-decoration: none; }
+.site-name:visited { color: var(--text); }
+.site-header ul { list-style: none; display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; margin: 0; padding: 0; }
+.site-header li { margin: 0; }
+.site-header nav a[aria-current] { font-weight: 700; color: var(--text); }
+.site-footer { border-top: 1px solid var(--border); color: var(--muted); font-size: 0.9rem; padding: 1rem 0; }
+.site-footer p { margin: 0; }
+
+.crumb { color: var(--muted); font-size: 0.9rem; margin-bottom: 0.25rem; }
+.goal { color: var(--muted); }
+.years ul { list-style: none; display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; padding: 0; }
+.note-list { list-style: none; padding: 0; }
+.note-list li { display: grid; grid-template-columns: 5.5rem 1fr; gap: 0.75rem; padding: 0.4rem 0; margin: 0; border-top: 1px solid var(--border); }
+.note-list .summary { color: var(--muted); }
+.pager { display: flex; justify-content: space-between; gap: 1rem; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.pager .next { margin-left: auto; text-align: right; }
+.pager span { display: block; font-size: 0.85rem; color: var(--muted); }
+
+.chat-log { border: 1px solid var(--border); padding: 1rem; min-height: 12rem; margin-bottom: 1rem; }
+.chat-log:empty::before { content: "Your conversation will appear here."; color: var(--muted); }
+.msg { margin: 0 0 1rem; white-space: pre-wrap; overflow-wrap: break-word; }
+.msg .who { display: block; font-weight: 700; font-size: 0.85rem; color: var(--muted); }
+.msg.error { color: #d4351c; }
+.chat-form label { display: block; font-weight: 700; margin-bottom: 0.25rem; }
+.chat-form textarea { width: 100%; font: inherit; padding: 0.5rem; border: 2px solid var(--text); background: var(--bg); color: var(--text); }
+.chat-form .row { display: flex; gap: 1rem; align-items: center; margin-top: 0.5rem; }
+button { font: inherit; padding: 0.5rem 1rem; border: 0; cursor: pointer; background: #00703c; color: #fff; font-weight: 700; }
+button.secondary { background: var(--panel); color: var(--text); border: 1px solid var(--border); font-weight: 400; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+.hint { color: var(--muted); font-size: 0.9rem; }

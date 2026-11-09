@@ -1,0 +1,15 @@
+---
+layout: layouts/base.njk
+pagination:
+  data: collections.noteYears
+  size: 1
+  alias: y
+permalink: "/week-notes/{{ y.year }}/"
+eleventyComputed:
+  title: "Week notes {{ y.year }}"
+---
+<p class="crumb"><a href="/week-notes/">Week notes</a></p>
+<h1>Week notes {{ y.year }}</h1>
+{%- if goals[y.year] %}<p class="goal">Goal: {{ goals[y.year] }}</p>{% endif %}
+{%- set notes = y.notes %}
+{% include "note-list.njk" %}

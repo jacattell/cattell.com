@@ -1,0 +1,21 @@
+---
+layout: layouts/base.njk
+---
+<h1>{{ title }}</h1>
+<p>{{ collections.weekNotes.length }} notes since {{ (collections.noteYears | last).year }}. Subscribe to the <a href="/week-notes/feed.xml">feed</a>.</p>
+<nav class="years" aria-label="Years">
+  <ul>
+    {%- for y in collections.noteYears %}
+    <li><a href="#y{{ y.year }}">{{ y.year }}</a></li>
+    {%- endfor %}
+  </ul>
+</nav>
+{%- for y in collections.noteYears %}
+<section aria-labelledby="y{{ y.year }}">
+  <h2 id="y{{ y.year }}"><a href="/week-notes/{{ y.year }}/">{{ y.year }}</a></h2>
+  {%- if goals[y.year] %}<p class="goal">Goal: {{ goals[y.year] }}</p>{% endif %}
+  {%- set notes = y.notes %}
+  {% include "note-list.njk" %}
+</section>
+{%- endfor %}
+{{ content | safe }}

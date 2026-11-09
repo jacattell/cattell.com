@@ -1,0 +1,27 @@
+---
+permalink: /week-notes/feed.xml
+eleventyExcludeFromCollections: true
+layout: false
+---
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>{{ site.title }} - Week notes</title>
+  <link href="{{ site.url }}/week-notes/feed.xml" rel="self"/>
+  <link href="{{ site.url }}/week-notes/"/>
+  {%- set notes = collections.weekNotes | reverse %}
+  <updated>{{ notes[0].data.weekStart | isoDate }}</updated>
+  <id>{{ site.url }}/week-notes/</id>
+  <author><name>{{ site.author }}</name></author>
+  {%- for note in notes.slice(0, 20) %}
+  <entry>
+    <title>{{ note.data.noteTitle }}</title>
+    <link href="{{ site.url }}{{ note.url }}"/>
+    <id>{{ site.url }}{{ note.url }}</id>
+    <updated>{{ note.data.weekStart | isoDate }}</updated>
+    {%- if note.data.summary %}
+    <summary>{{ note.data.summary }}</summary>
+    {%- endif %}
+    <content type="html">{{ note.templateContent | absoluteUrls(site.url) }}</content>
+  </entry>
+  {%- endfor %}
+</feed>

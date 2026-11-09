@@ -1,0 +1,14 @@
+---
+layout: layouts/base.njk
+---
+{%- set older = collections.weekNotes | getPreviousCollectionItem %}
+{%- set newer = collections.weekNotes | getNextCollectionItem %}
+<article class="note">
+  <p class="crumb"><a href="/week-notes/">Week notes</a> › <a href="/week-notes/{{ year }}/">{{ year }}</a></p>
+  <h1>{{ noteTitle }}</h1>
+  {{ content | safe }}
+</article>
+<nav class="pager" aria-label="Week notes">
+  {%- if older %}<a class="prev" href="{{ older.url }}" rel="prev"><span>Older</span> {{ older.data.noteTitle }}</a>{% endif %}
+  {%- if newer %}<a class="next" href="{{ newer.url }}" rel="next"><span>Newer</span> {{ newer.data.noteTitle }}</a>{% endif %}
+</nav>

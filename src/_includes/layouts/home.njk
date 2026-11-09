@@ -1,0 +1,10 @@
+---
+layout: layouts/base.njk
+---
+<h1>{{ title }}</h1>
+{{ content | safe }}
+{%- set latest = collections.weekNotes | last %}
+{%- if latest %}
+<h2>Latest week note</h2>
+<p><a href="{{ latest.url }}">{{ latest.data.noteTitle }}</a>{% if latest.data.summary %} - {{ latest.data.summary }}{% endif %}</p>
+{%- endif %}

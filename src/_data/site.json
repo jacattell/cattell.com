@@ -1,0 +1,13 @@
+{
+  "title": "James Arthur Cattell",
+  "url": "https://www.cattell.com",
+  "author": "James Arthur Cattell",
+  "description": "Bring us together, make things better.",
+  "nav": [
+    { "text": "Delivery", "url": "/delivery/" },
+    { "text": "Week notes", "url": "/week-notes/" },
+    { "text": "Unconference", "url": "/unconference/" },
+    { "text": "Chat", "url": "/chat/" },
+    { "text": "Contact", "url": "/contact/" }
+  ]
+}

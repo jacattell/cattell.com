@@ -1,0 +1,8 @@
+<ul class="note-list">
+  {%- for note in notes %}
+  <li>
+    <a href="{{ note.url }}">Week {{ note.data.week }}</a>
+    {%- if note.data.summary %}<span class="summary">{{ note.data.summary }}</span>{% endif %}
+  </li>
+  {%- endfor %}
+</ul>

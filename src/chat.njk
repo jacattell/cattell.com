@@ -1,0 +1,24 @@
+---
+title: Chat with Claude
+description: Ask Claude, an AI assistant made by Anthropic, about James and this website.
+---
+<p>Claude is an AI assistant made by <a href="https://www.anthropic.com/claude">Anthropic</a>. It has read this website, so you can ask it about James, his work, week notes and unconferences - or anything else.</p>
+<ul class="hint">
+  <li>Claude is not James and can get things wrong. To reach James, use the <a href="/contact/">contact page</a>.</li>
+  <li>Your messages are sent to Anthropic to get a reply. This website does not save them.</li>
+  <li>Please do not share personal or sensitive information.</li>
+</ul>
+
+<div id="chat-log" class="chat-log" role="log" aria-live="polite" aria-label="Conversation"></div>
+
+<form id="chat-form" class="chat-form">
+  <label for="chat-input">Your message</label>
+  <textarea id="chat-input" rows="3" maxlength="2000" required></textarea>
+  <div class="row">
+    <button type="submit" id="chat-send">Send</button>
+    <button type="button" id="chat-reset" class="secondary">Start again</button>
+    <span id="chat-status" class="hint" role="status"></span>
+  </div>
+</form>
+<noscript><p>This page needs JavaScript to work.</p></noscript>
+<script src="/assets/js/chat.js" defer></script>

@@ -1,0 +1,33 @@
+---
+permalink: /chat-context.txt
+eleventyExcludeFromCollections: true
+layout: false
+---
+{%- macro pageText(url) -%}
+{%- for p in collections.all %}{% if p.url == url %}{{ p.templateContent | stripTags | safe }}{% endif %}{% endfor -%}
+{%- endmacro -%}
+WEBSITE: {{ site.url }} - the personal website of {{ site.author }}.
+
+HOME PAGE
+{{ pageText("/") }}
+
+DELIVERY ({{ site.url }}/delivery/)
+{{ pageText("/delivery/") }}
+
+CONTACT ({{ site.url }}/contact/)
+{{ pageText("/contact/") }}
+
+UNCONFERENCE ({{ site.url }}/unconference/)
+{{ pageText("/unconference/") }}
+
+WEEK NOTES ({{ site.url }}/week-notes/) - list of every note, newest first
+{%- for y in collections.noteYears %}
+{{ y.year }}{% if goals[y.year] %} (goal: {{ goals[y.year] | safe }}){% endif %}
+{%- for note in y.notes %}
+- Week {{ note.data.week }}: {{ site.url }}{{ note.url }}{% if note.data.summary %} - {{ note.data.summary | safe }}{% endif %}
+{%- endfor %}
+{%- endfor %}
+
+LATEST WEEK NOTE IN FULL
+{%- set latest = collections.weekNotes | last %}
+{{ latest.data.noteTitle }}: {{ latest.templateContent | stripTags | safe }}

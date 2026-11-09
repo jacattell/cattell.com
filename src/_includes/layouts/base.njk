@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {%- set pageTitle = noteTitle or title %}
+  <title>{% if pageTitle and pageTitle != site.title %}{{ pageTitle }} - {% endif %}{{ site.title }}</title>
+  <meta name="description" content="{{ summary or description or site.description }}">
+  <link rel="stylesheet" href="/assets/css/site.css">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="alternate" type="application/atom+xml" title="Week notes" href="/week-notes/feed.xml">
+  <link rel="canonical" href="{{ site.url }}{{ page.url }}">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to main content</a>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="site-name" href="/">{{ site.title }}</a>
+      <nav aria-label="Main">
+        <ul>
+          {%- for item in site.nav %}
+          <li><a href="{{ item.url }}"{% if page.url.startsWith(item.url) %} aria-current="{{ 'page' if page.url == item.url else 'true' }}"{% endif %}>{{ item.text }}</a></li>
+          {%- endfor %}
+        </ul>
+      </nav>
+    </div>
+  </header>
+  <main id="main" class="wrap">
+    {{ content | safe }}
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>© {{ site.author }}. <a href="/contact/">Contact me</a> · <a href="/week-notes/feed.xml">Week notes feed</a> · <a href="https://github.com/jacattell/cattell.com">Source on GitHub</a></p>
+    </div>
+  </footer>
+</body>
+</html>
