@@ -1,0 +1,4 @@
+# Cloudflare Pages settings. See README for how the project is set up.
+name = "cattell-com"
+pages_build_output_dir = "_site"
+compatibility_date = "2026-11-01"

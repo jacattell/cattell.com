@@ -10,11 +10,14 @@
   "scripts": {
     "build": "eleventy",
     "dev": "eleventy --serve",
-    "start": "node server/index.js",
-    "test": "node --test"
+    "preview": "npm run build && wrangler pages dev",
+    "test": "npm run build && node --test \"test/*.test.js\""
   },
   "dependencies": {
     "@11ty/eleventy": "^3.1.8",
     "@anthropic-ai/sdk": "^1.7.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.159.0"
   }
 }

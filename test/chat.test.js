@@ -1,8 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import path from "node:path";
-import { validateMessages, RateLimiter } from "./chat.js";
-import { oldUrlRedirect, resolveFile } from "./static.js";
+import fs from "node:fs";
+import { validateMessages, RateLimiter, handleChat } from "../lib/chat.js";
 
 test("accepts a normal conversation", () => {
   const { messages, error } = validateMessages({
@@ -48,20 +47,22 @@ test("rate limiter blocks after the limit and recovers", () => {
   assert.equal(limiter.allow("a"), true);
 });
 
-test("redirects old Google Sites addresses", () => {
-  assert.equal(oldUrlRedirect("/week-notes/2026-week-7"), "/week-notes/2026/07/");
-  assert.equal(oldUrlRedirect("/week-notes/2025-week-09/"), "/week-notes/2025/09/");
-  assert.equal(oldUrlRedirect("/week-notes/2022/2022-week-39"), "/week-notes/2022/39/");
-  assert.equal(oldUrlRedirect("/james"), "/");
-  assert.equal(oldUrlRedirect("/week-notes/2026/07/"), null);
-  assert.equal(oldUrlRedirect("/delivery"), null);
+test("chat says it is not set up when there is no API key", async () => {
+  const req = new Request("https://example.com/api/chat", { method: "POST", body: "{}" });
+  const res = await handleChat(req, {});
+  assert.equal(res.status, 503);
 });
 
-test("never serves files outside the site folder", () => {
-  const root = path.resolve("/srv/site");
-  assert.equal(resolveFile(root, "/delivery/"), path.join(root, "delivery"));
-  assert.equal(resolveFile(root, "/../etc/passwd"), path.join(root, "etc/passwd"));
-  assert.equal(resolveFile(root, "/..%2f..%2fetc/passwd"), path.join(root, "etc/passwd"));
-  assert.equal(resolveFile(root, "/%00"), null);
-  assert.equal(resolveFile(root, "/%E0%A4%A"), null);
+test("chat only accepts POST", async () => {
+  const res = await handleChat(new Request("https://example.com/api/chat"), { ANTHROPIC_API_KEY: "x" });
+  assert.equal(res.status, 405);
+});
+
+test("old Google Sites addresses have redirects", () => {
+  const rules = fs.readFileSync("_site/_redirects", "utf8");
+  assert.match(rules, /^\/week-notes\/2026-week-7 \/week-notes\/2026\/07\/ 301$/m);
+  assert.match(rules, /^\/week-notes\/2026-week-07 \/week-notes\/2026\/07\/ 301$/m);
+  assert.match(rules, /^\/week-notes\/2025-week-09 \/week-notes\/2025\/09\/ 301$/m);
+  assert.match(rules, /^\/week-notes\/2024-week-46 \/week-notes\/2024\/46\/ 301$/m);
+  assert.match(rules, /^\/james \/ 301$/m);
 });

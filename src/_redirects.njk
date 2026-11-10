@@ -1,0 +1,20 @@
+---
+permalink: /_redirects
+eleventyExcludeFromCollections: true
+layout: false
+---
+{#- Addresses from the old Google Sites website, with and without a slash at the end. -#}
+{%- set rules = [
+  ["/james", "/"], ["/home", "/"], ["/personal", "/"], ["/weeknotes", "/week-notes/"],
+  ["/week-notes/2022/2022-week-39", "/week-notes/2022/39/"]
+] %}
+{%- for note in collections.weekNotes %}
+{%- set w = note.data.week | string %}
+{%- set rules = (rules.push(["/week-notes/" + note.data.year + "-week-" + (("0" + w) if note.data.week < 10 else w), note.url]), rules) %}
+{%- if note.data.week < 10 %}{% set rules = (rules.push(["/week-notes/" + note.data.year + "-week-" + w, note.url]), rules) %}{% endif %}
+{%- endfor %}
+# Addresses from the old Google Sites website.
+{%- for r in rules %}
+{{ r[0] }} {{ r[1] }} 301
+{{ r[0] }}/ {{ r[1] }} 301
+{%- endfor %}
