@@ -106,18 +106,22 @@ Optional: add `CHAT_MODEL` to use a different Claude model. The default is `clau
 
 ### Limit chat use
 
-The function slows down a single visitor who sends lots of messages, but Cloudflare runs many copies of it, so this is not a firm limit. For firm limits:
+The function slows down a single visitor who sends lots of messages, but Cloudflare runs many copies of it, so this is not a firm limit. The firm limit is the monthly spend limit on the API key: it caps what you can be charged.
 
-- the spend limit on the API key caps what you can be charged
-- a free Cloudflare rate limiting rule caps messages per visitor: once cattell.com is on Cloudflare, go to **Security** > **WAF** > **Rate limiting rules** and add a rule for requests whose URI path equals `/api/chat`, for example 10 requests per minute per IP address
+### Use www.cattell.com
 
-### Use cattell.com
+The DNS for cattell.com stays at GoDaddy, so email and other records are not affected. The site lives at `www.cattell.com`, the same address as the old Google Sites website.
 
-In the project, go to **Custom domains** and add `cattell.com` and `www.cattell.com`. Cloudflare explains the steps.
+Do these steps in order. Only start once the `pages.dev` version looks right.
 
-The simplest way is to move the domain's DNS to Cloudflare (free). Your email at cattell.com runs on Google Workspace, so before you switch, check that Cloudflare has copied every existing DNS record, especially the `MX`, `TXT` (SPF, DKIM, DMARC) and any Google verification records. If those are missing, email stops working.
+1. In Cloudflare, open the project, go to **Custom domains** and add `www.cattell.com`. Do this before changing GoDaddy, or the site will show errors.
+2. In GoDaddy, go to the cattell.com **DNS** settings and edit the `CNAME` record named `www`. It currently points to Google Sites (`ghs.googlehosted.com`). Change it to the project's address, for example `cattell-com.pages.dev`. Do not change any other records.
+3. Wait for Cloudflare to show the domain as **Active**. This can take from a few minutes to a day. Cloudflare sets up HTTPS for you.
+4. To send `cattell.com` (without `www`) to the site, use GoDaddy's **Forwarding**: forward `cattell.com` to `https://www.cattell.com`, choosing **Permanent (301)**. Check it works with both `http://` and `https://` afterwards.
 
-Only switch once the `pages.dev` version looks right. Keep Google Sites until then.
+If something goes wrong, change the `www` record back to `ghs.googlehosted.com` to return to Google Sites.
+
+Cloudflare can only host `cattell.com` without `www` directly if the DNS moves to Cloudflare, which is why the forwarding step is needed.
 
 ## The chat page
 
