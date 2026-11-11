@@ -6,7 +6,7 @@
 {%- set shareText = (pageName + " - " + site.title) if (pageName and pageName != site.title) else site.title %}
 {%- set newTab = '<span class="visually-hidden"> (opens in a new tab)</span>' %}
 <details class="share" data-url="{{ shareUrl }}" data-text="{{ shareText }}">
-  <summary>Share<span class="visually-hidden"> this page</span></summary>
+  <summary>Share this page</summary>
   <div class="share-panel">
     <p class="share-heading" id="share-heading">Share this page</p>
     <ul aria-labelledby="share-heading">
