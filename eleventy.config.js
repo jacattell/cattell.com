@@ -93,6 +93,8 @@ export default function (eleventyConfig) {
     new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" })
   );
 
+  eleventyConfig.addFilter("oneLine", (text) => String(text).replace(/\s+/g, " ").trim());
+
   eleventyConfig.addFilter("stripTags", (html) =>
     String(html).replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/&quot;/g, "\"").replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/\s+/g, " ").trim()
   );

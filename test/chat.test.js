@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { validateMessages, RateLimiter, handleChat } from "../lib/chat.js";
+import { validateMessages, RateLimiter, handleChat, buildSystem } from "../lib/chat.js";
 
 test("accepts a normal conversation", () => {
   const { messages, error } = validateMessages({
@@ -137,4 +137,16 @@ test("the archive finds YouTube videos but not channels or playlists", async () 
     { id: "hHxgruAozjo", short: false },
     { id: "gm0b_ijaYMQ", short: false },
   ]);
+});
+
+test("the chat can read the social media archive, and caches it", () => {
+  const context = fs.readFileSync("_site/chat-context.txt", "utf8");
+  assert.match(context, /SOCIAL MEDIA ARCHIVE \(https:\/\/www\.cattell\.com\/archive\/\)/);
+  const items = JSON.parse(fs.readFileSync("_site/archive/posts.json", "utf8"));
+  assert.ok(context.includes(items[0].on[0].url), "includes the newest post");
+  assert.ok(context.includes(items.at(-1).on[0].url), "includes the oldest post");
+  const system = buildSystem(context);
+  assert.equal(system.length, 1);
+  assert.deepEqual(system[0].cache_control, { type: "ephemeral" });
+  assert.ok(system[0].text.includes("<website>") && system[0].text.includes("SOCIAL MEDIA ARCHIVE"));
 });
