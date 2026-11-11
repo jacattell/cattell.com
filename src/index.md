@@ -1,10 +1,8 @@
 ---
-title: "James Arthur Cattell"
 layout: "layouts/home.njk"
 ---
 
 Bring us together,
-
 make things better.
 
 I do:
