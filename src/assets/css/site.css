@@ -78,8 +78,6 @@ img { max-width: 100%; height: auto; }
 .site-header .theme-toggle:hover { border-color: var(--text); }
 .site-footer { border-top: 1px solid var(--border); color: var(--muted); font-size: 0.9rem; padding: 1rem 0; }
 .site-footer p { margin: 0; }
-/* The dots between footer links get extra space on each side, doubling the gap between links. */
-.site-footer .sep { margin: 0 0.43em; }
 /* One blank line above the licence and copyright. */
 .footer-legal { margin-top: calc(0.25rem + 1.6em); }
 .site-footer a { white-space: nowrap; }
@@ -106,3 +104,4 @@ button { font: inherit; padding: 0.5rem 1rem; border: 0; cursor: pointer; backgr
 button.secondary { background: var(--panel); color: var(--text); border: 1px solid var(--border); font-weight: 400; }
 button:disabled { opacity: 0.5; cursor: not-allowed; }
 .hint { color: var(--muted); font-size: 0.9rem; }
+.pi { text-align: right; }

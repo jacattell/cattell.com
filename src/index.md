@@ -16,4 +16,4 @@ Please do:
 - [contact](/contact/) me,
 - give [feedback](https://forms.gle/GkRpJKoxsyZK7gz19).
 
-[π](/how-to/)
+<p class="pi"><a href="/how-to/">π</a></p>

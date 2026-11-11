@@ -81,6 +81,6 @@ test("every page footer has the links, licence and copyright", () => {
     const footer = html.slice(html.indexOf("<footer"));
     const text = footer.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
     assert.match(text, /Contact me · Week notes feed · Source on GitHub/, page);
-    assert.match(footer, /All content is available under the <a href="https:\/\/creativecommons\.org\/licenses\/by-sa\/4\.0\/" rel="license">Creative Commons BY-SA 4\.0<\/a> licence, except where otherwise stated<\/p>\s*<p>© James Arthur Cattell<\/p>/, page);
+    assert.match(footer, /© James Arthur Cattell\. All content is available under the <a href="https:\/\/creativecommons\.org\/licenses\/by-sa\/4\.0\/" rel="license">Creative Commons BY-SA 4\.0<\/a> licence, except where otherwise stated<\/p>/, page);
   }
 });

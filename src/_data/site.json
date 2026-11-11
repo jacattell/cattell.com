@@ -7,7 +7,6 @@
     { "text": "Delivery", "url": "/delivery/" },
     { "text": "Week notes", "url": "/week-notes/" },
     { "text": "Unconference", "url": "/unconference/" },
-    { "text": "Chat", "url": "/chat/" },
-    { "text": "Contact", "url": "/contact/" }
+    { "text": "Chat", "url": "/chat/" }
   ]
 }
