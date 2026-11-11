@@ -21,7 +21,7 @@ The attendee sourced agenda from The Facilitator's Unconference 2024 in London, 
 
 I attend, organise and volunteer for unconferences big and small. I've done so for over a decade. Hence starting this post, book, whatever it becomes 🙂.
 
-Initially, I used [National Novel Writing Month](https://nanowrimo.org/) (NaNoWriMo) in November 2023 to start this work. Special thanks to [Samantha Venia Logan](https://www.linkedin.com/in/samanthavlogan/) for 1-2-1 and group writing sessions.
+Initially, I used National Novel Writing Month (NaNoWriMo) in November 2023 to start this work. Special thanks to [Samantha Venia Logan](https://www.linkedin.com/in/samanthavlogan/) for 1-2-1 and group writing sessions.
 
 The uncompleted text is in a [collaborate document](https://docs.google.com/document/d/1tXNFwCKYfDX3FB8v3Gp7DAXlQDMJ1EdAmfwMBdaV4SE/edit?usp=sharing).
 
