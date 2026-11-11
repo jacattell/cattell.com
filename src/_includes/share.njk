@@ -1,0 +1,34 @@
+{#- Floating "Share" button and panel, shown on every page.
+    The links are plain web addresses (no tracking scripts). They work without
+    JavaScript; share.js adds Copy link, Mastodon and the device's own share menu. -#}
+{%- set shareUrl = site.url + page.url %}
+{%- set pageName = noteTitle or title %}
+{%- set shareText = (pageName + " - " + site.title) if (pageName and pageName != site.title) else site.title %}
+{%- set newTab = '<span class="visually-hidden"> (opens in a new tab)</span>' %}
+<details class="share" data-url="{{ shareUrl }}" data-text="{{ shareText }}">
+  <summary>Share<span class="visually-hidden"> this page</span></summary>
+  <div class="share-panel">
+    <p class="share-heading" id="share-heading">Share this page</p>
+    <ul aria-labelledby="share-heading">
+      <li class="js-only" hidden><button type="button" class="share-copy">Copy link</button></li>
+      <li><a href="mailto:?subject={{ shareText | urlencode }}&amp;body={{ shareUrl | urlencode }}">Email</a></li>
+      <li><a href="https://bsky.app/intent/compose?text={{ (shareText + ' ' + shareUrl) | urlencode }}" target="_blank" rel="noopener">Bluesky{{ newTab | safe }}</a></li>
+      <li class="js-only" hidden>
+        <button type="button" class="share-mastodon-toggle" aria-expanded="false" aria-controls="share-mastodon">Mastodon</button>
+        <form class="share-mastodon" id="share-mastodon" hidden>
+          <label for="share-mastodon-server">Your Mastodon server</label>
+          <input id="share-mastodon-server" type="text" inputmode="url" autocomplete="off" placeholder="mastodon.social" required>
+          <button type="submit">Share on Mastodon<span class="visually-hidden"> (opens in a new tab)</span></button>
+        </form>
+      </li>
+      <li><a href="https://www.linkedin.com/sharing/share-offsite/?url={{ shareUrl | urlencode }}" target="_blank" rel="noopener">LinkedIn{{ newTab | safe }}</a></li>
+      <li><a href="https://x.com/intent/post?text={{ shareText | urlencode }}&amp;url={{ shareUrl | urlencode }}" target="_blank" rel="noopener">X (Twitter){{ newTab | safe }}</a></li>
+      <li><a href="https://www.facebook.com/sharer/sharer.php?u={{ shareUrl | urlencode }}" target="_blank" rel="noopener">Facebook{{ newTab | safe }}</a></li>
+      <li><a href="https://www.threads.net/intent/post?text={{ (shareText + ' ' + shareUrl) | urlencode }}" target="_blank" rel="noopener">Threads{{ newTab | safe }}</a></li>
+      <li><a href="https://wa.me/?text={{ (shareText + ' ' + shareUrl) | urlencode }}" target="_blank" rel="noopener">WhatsApp{{ newTab | safe }}</a></li>
+      <li><a href="https://www.reddit.com/submit?url={{ shareUrl | urlencode }}&amp;title={{ shareText | urlencode }}" target="_blank" rel="noopener">Reddit{{ newTab | safe }}</a></li>
+      <li class="share-native-item" hidden><button type="button" class="share-native">More apps…</button></li>
+    </ul>
+    <p class="share-status" role="status"></p>
+  </div>
+</details>

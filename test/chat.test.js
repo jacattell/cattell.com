@@ -84,3 +84,13 @@ test("every page footer has the links, licence and copyright", () => {
     assert.match(footer, /© James Arthur Cattell\. All content is available under the <a href="https:\/\/creativecommons\.org\/licenses\/by-sa\/4\.0\/" rel="license">Creative Commons BY-SA 4\.0<\/a> licence, except where otherwise stated<\/p>/, page);
   }
 });
+
+test("every page has a share panel with that page's address", () => {
+  const html = fs.readFileSync("_site/week-notes/2026/14/index.html", "utf8");
+  const page = encodeURIComponent("https://www.cattell.com/week-notes/2026/14/");
+  assert.match(html, /<details class="share" data-url="https:\/\/www\.cattell\.com\/week-notes\/2026\/14\/"/);
+  assert.ok(html.includes(`https://www.linkedin.com/sharing/share-offsite/?url=${page}`));
+  assert.ok(html.includes(`https://www.facebook.com/sharer/sharer.php?u=${page}`));
+  assert.match(html, /bsky\.app\/intent\/compose\?text=Week%2014%2C%202026%20-%20James%20Arthur%20Cattell%20https/);
+  assert.ok(!fs.readFileSync("_site/404.html", "utf8").includes('class="share"'), "no share panel on the 404 page");
+});
