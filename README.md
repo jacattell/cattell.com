@@ -109,15 +109,18 @@ Optional: add `CHAT_MODEL` to use a different Claude model. The default is `clau
 The function slows down a single visitor who sends lots of messages, but Cloudflare runs many copies of it, so this is not a firm limit. For firm limits:
 
 - the spend limit on the API key caps what you can be charged
-- a free Cloudflare rate limiting rule caps messages per visitor: once cattell.com is on Cloudflare, go to **Security** > **WAF** > **Rate limiting rules** and add a rule for requests whose URI path equals `/api/chat`, for example 10 requests per minute per IP address
+- a free Cloudflare rate limiting rule caps messages per visitor: go to the cattell.com **Security** > **WAF** > **Rate limiting rules** and add a rule for requests whose URI path equals `/api/chat`, for example 10 requests per minute per IP address
 
 ### Use cattell.com
 
-In the project, go to **Custom domains** and add `cattell.com` and `www.cattell.com`. Cloudflare explains the steps.
+The domain is registered with Cloudflare and its DNS is managed there. Email runs on Google Workspace, so never delete the `MX` or `TXT` records.
 
-The simplest way is to move the domain's DNS to Cloudflare (free). Your email at cattell.com runs on Google Workspace, so before you switch, check that Cloudflare has copied every existing DNS record, especially the `MX`, `TXT` (SPF, DKIM, DMARC) and any Google verification records. If those are missing, email stops working.
+1. Check the `pages.dev` version looks right.
+2. In the Pages project, go to **Custom domains** and add `www.cattell.com`. Cloudflare offers to replace the existing `www` record (which points to Google Sites). Accept.
+3. Add `cattell.com` as a custom domain too.
+4. Make `cattell.com` redirect to `www.cattell.com`: go to the cattell.com **Rules** > **Redirect Rules**, and use the "Redirect from root to WWW" template.
 
-Only switch once the `pages.dev` version looks right. Keep Google Sites until then.
+To go back to Google Sites, remove the custom domains and set the `www` record back to a `CNAME` pointing to `ghs.googlehosted.com`, with the proxy turned off (grey cloud).
 
 ## The chat page
 
