@@ -71,7 +71,7 @@ img { max-width: 100%; height: auto; }
 .site-header .wrap { padding-top: 0.75rem; padding-bottom: 0.75rem; }
 .header-top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
 .site-header nav { margin-top: 0.25rem; }
-.site-name { font-weight: 700; color: var(--text); text-decoration: none; }
+.site-name { font-size: 1.5rem; line-height: 1.25; font-weight: 700; color: var(--text); text-decoration: none; }
 .site-name:visited { color: var(--text); }
 .site-header ul { list-style: none; display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; margin: 0; padding: 0; }
 .site-header li { margin: 0; }
