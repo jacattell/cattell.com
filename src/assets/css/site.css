@@ -120,6 +120,7 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .share-panel li { margin: 0; }
 .share-panel a, .share-panel li > button { display: block; width: 100%; padding: 0.3rem 0; text-align: left; }
 .share-panel li > button { background: none; border: 0; color: var(--link); font-weight: 400; text-decoration: underline; text-underline-offset: 0.15em; }
+.share-panel .share-native { font-weight: 700; }
 .share-mastodon { margin: 0.25rem 0 0.5rem; }
 .share-mastodon label { display: block; font-size: 0.85rem; }
 .share-mastodon input { width: 100%; font: inherit; padding: 0.3rem 0.4rem; border: 2px solid var(--text); background: var(--bg); color: var(--text); }
