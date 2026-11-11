@@ -22,11 +22,8 @@
         </form>
       </li>
       <li><a href="https://www.linkedin.com/sharing/share-offsite/?url={{ shareUrl | urlencode }}" target="_blank" rel="noopener">LinkedIn{{ newTab | safe }}</a></li>
-      <li><a href="https://x.com/intent/post?text={{ shareText | urlencode }}&amp;url={{ shareUrl | urlencode }}" target="_blank" rel="noopener">X (Twitter){{ newTab | safe }}</a></li>
       <li><a href="https://www.facebook.com/sharer/sharer.php?u={{ shareUrl | urlencode }}" target="_blank" rel="noopener">Facebook{{ newTab | safe }}</a></li>
-      <li><a href="https://www.threads.net/intent/post?text={{ (shareText + ' ' + shareUrl) | urlencode }}" target="_blank" rel="noopener">Threads{{ newTab | safe }}</a></li>
       <li><a href="https://wa.me/?text={{ (shareText + ' ' + shareUrl) | urlencode }}" target="_blank" rel="noopener">WhatsApp{{ newTab | safe }}</a></li>
-      <li><a href="https://www.reddit.com/submit?url={{ shareUrl | urlencode }}&amp;title={{ shareText | urlencode }}" target="_blank" rel="noopener">Reddit{{ newTab | safe }}</a></li>
       <li class="share-native-item" hidden><button type="button" class="share-native">More apps…</button></li>
     </ul>
     <p class="share-status" role="status"></p>
