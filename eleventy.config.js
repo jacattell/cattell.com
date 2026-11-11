@@ -73,11 +73,17 @@ export default function (eleventyConfig) {
   const missing = new Set();
   eleventyConfig.addTransform("skip-missing-images", function (content) {
     if (!(this.page.outputPath || "").endsWith(".html")) return content;
-    return content.replace(/<img\b[^>]*\bsrc="(\/assets\/img\/[^"]+)"[^>]*>/g, (tag, src) => {
-      if (fs.existsSync(path.join("src", src))) return tag;
+    const isMissing = (src) => {
+      if (fs.existsSync(path.join("src", src))) return false;
       missing.add(src);
-      return "";
-    });
+      return true;
+    };
+    // An image that is a link on its own: keep the link, using the image's description as its text.
+    content = content.replace(
+      /(<a\b[^>]*>)\s*<img\b[^>]*\bsrc="(\/assets\/img\/[^"]+)"[^>]*\balt="([^"]*)"[^>]*>\s*(<\/a>)/g,
+      (tag, open, src, alt, close) => (isMissing(src) ? (alt ? open + alt + close : "") : tag)
+    );
+    return content.replace(/<img\b[^>]*\bsrc="(\/assets\/img\/[^"]+)"[^>]*>/g, (tag, src) => (isMissing(src) ? "" : tag));
   });
   eleventyConfig.on("eleventy.after", () => {
     if (missing.size) console.warn(`[images] ${missing.size} image(s) not found in src/assets/img (see IMAGES.md)`);

@@ -1,7 +1,7 @@
 ---
 layout: layouts/base.njk
 ---
-{%- if title %}<h1>{{ title }}</h1>{% endif %}
+{%- if title %}<h1>{{ title }}</h1>{% else %}<h1 class="visually-hidden">{{ site.title }}</h1>{% endif %}
 {{ content | safe }}
 {%- set latest = collections.weekNotes | last %}
 {%- if latest %}

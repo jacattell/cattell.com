@@ -43,7 +43,7 @@ body {
   background: var(--bg);
 }
 .wrap { max-width: 42rem; margin: 0 auto; padding: 0 1rem; }
-main.wrap { padding-top: 1.5rem; padding-bottom: 3rem; }
+main.wrap { padding-top: 1.5rem; padding-bottom: 3rem; overflow-wrap: anywhere; }
 a { color: var(--link); text-underline-offset: 0.15em; }
 a:visited { color: var(--link-visited); }
 a:hover { text-decoration-thickness: 3px; }
@@ -52,6 +52,8 @@ a:focus-visible, button:focus-visible, textarea:focus-visible {
   outline-offset: 0;
   box-shadow: 0 0 0 6px var(--text);
 }
+/* Hidden on screen but read out by screen readers. */
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .skip { position: absolute; left: -999rem; }
 .skip:focus { position: static; display: block; padding: 0.5rem 1rem; }
 h1, h2, h3, h4 { line-height: 1.25; margin: 2rem 0 0.75rem; overflow-wrap: break-word; }

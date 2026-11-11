@@ -1,0 +1,38 @@
+# Checks every link on the website, including links to other websites.
+# Runs every Monday, when changes are pushed, and when started by hand
+# (Actions tab > Check links > Run workflow). If a link is broken the run
+# fails and GitHub emails you; the run's Summary lists the broken links.
+name: Check links
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+  push:
+    branches: [main, "claude/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Check links
+        uses: lycheeverse/lychee-action@v2
+        with:
+          args: >-
+            --root-dir "${{ github.workspace }}/_site"
+            --no-progress
+            --max-retries 2
+            --timeout 30
+            --max-concurrency 8
+            "_site/**/*.html"
+          fail: true

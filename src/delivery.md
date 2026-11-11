@@ -2,8 +2,6 @@
 title: "Delivery"
 ---
 
-## Agile delivery
-
 I have extensive [agile delivery](https://ddat-capability-framework.service.gov.uk/role/delivery-manager) leadership experience:
 
 [Senior delivery manager](https://ddat-capability-framework.service.gov.uk/role/delivery-manager#senior-delivery-manager), Department for Education (via Transform), April to June 2025:
