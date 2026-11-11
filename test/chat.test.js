@@ -74,3 +74,11 @@ test("pages load CSS and scripts with a version, so browsers do not use old copi
   const chat = fs.readFileSync("_site/chat/index.html", "utf8");
   assert.match(chat, /src="\/assets\/js\/chat\.js\?v=[0-9a-f]{8}"/);
 });
+
+test("every page footer has the links and the licence", () => {
+  for (const page of ["_site/index.html", "_site/week-notes/2026/14/index.html", "_site/404.html"]) {
+    const html = fs.readFileSync(page, "utf8");
+    const footer = html.slice(html.indexOf("<footer"));
+    assert.match(footer, /<p><a href="\/contact\/">Contact me<\/a> · <a href="\/week-notes\/feed\.xml">Week notes feed<\/a> · <a href="https:\/\/github\.com\/jacattell\/cattell\.com">Source on GitHub<\/a><\/p>\s*<p>© James Arthur Cattell\. Licensed under <a href="https:\/\/creativecommons\.org\/licenses\/by-sa\/4\.0\/" rel="license">CC BY-SA 4\.0<\/a><\/p>/, page);
+  }
+});
