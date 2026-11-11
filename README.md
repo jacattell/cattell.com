@@ -46,6 +46,26 @@ To set a goal for a year, edit `src/_data/goals.json`.
 | Chat page | `src/chat.njk`, `src/assets/js/chat.js`, `lib/chat.js` |
 | Old address redirects | `src/_redirects.njk` |
 
+## Social media archive
+
+`/archive/` is a searchable archive of posts from Bluesky and Mastodon. Posts shared on more than one platform within 20 minutes, with mostly the same words, are shown once with a link to each platform.
+
+| What | Where |
+| --- | --- |
+| Saved posts, one file per platform | `archive-data/` |
+| Scripts that download posts | `scripts/archive/` |
+| How cross-posts are matched | `lib/archive.js` |
+| Pages | `src/archive/`, `src/_includes/archive-post.njk` |
+| Search | `src/assets/js/archive.js` |
+
+To collect new posts:
+
+```bash
+npm run archive:fetch
+```
+
+Add `--all` to a script to download every post again rather than just new ones. Only public Mastodon posts are saved; private posts and direct messages never are.
+
 ## Run it on your computer
 
 You need [Node.js](https://nodejs.org/) 20 or newer.

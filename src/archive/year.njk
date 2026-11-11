@@ -1,0 +1,16 @@
+---
+pagination:
+  data: archive.years
+  size: 1
+  alias: y
+permalink: "/archive/{{ y.year }}/"
+eleventyComputed:
+  title: "Social media archive: {{ y.year }}"
+layout: layouts/base.njk
+---
+<p class="crumb"><a href="/archive/">Social media archive</a></p>
+<h1>{{ y.year }}</h1>
+<p class="hint">{{ y.items.length }} posts, newest first.</p>
+{%- for item in y.items %}
+{% include "archive-post.njk" %}
+{%- endfor %}

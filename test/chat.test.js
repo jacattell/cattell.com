@@ -102,3 +102,25 @@ test("the Unconference page lists the chapters and blog posts", () => {
   assert.ok(html.includes('<a href="/unconference/unconference-agenda-creation/">Unconference agenda creation</a>'));
   assert.ok(!/<h2>Blog posts<\/h2>[\s\S]*\/unconference\/basics\//.test(html), "chapters are not listed as blog posts");
 });
+
+test("the archive combines cross-posts and keeps different posts apart", async () => {
+  const { groupPosts } = await import("../lib/archive.js");
+  const p = (platform, id, date, text, extra = {}) => ({ platform, id, url: `https://${platform}.example/${id}`, date, text, reply: null, images: [], link: null, quote: null, ...extra });
+  const items = groupPosts([
+    p("bluesky", "b1", "2026-01-01T10:00:00Z", "Cracking day with @imhuyorks.bsky.social in #Leeds today"),
+    p("mastodon", "m1", "2026-01-01T10:03:00Z", "Cracking day with Imran Hussain in #Leeds today, so much done"),
+    p("mastodon", "m2", "2026-01-01T10:05:00Z", "Something completely different about trains and timetables"),
+    p("bluesky", "b2", "2026-01-01T12:00:00Z", "Cracking day with @imhuyorks.bsky.social in #Leeds today"),
+  ]);
+  assert.equal(items.length, 3);
+  const leeds = items.find((i) => i.on.length === 2);
+  assert.deepEqual(leeds.on.map((o) => o.platform), ["bluesky", "mastodon"]);
+  assert.match(leeds.text, /so much done/, "uses the longest version");
+});
+
+test("the archive never includes private Mastodon posts", () => {
+  const posts = JSON.parse(fs.readFileSync("archive-data/mastodon.json", "utf8"));
+  const source = fs.readFileSync("scripts/archive/fetch-mastodon.js", "utf8");
+  assert.match(source, /visibility !== "public" && s\.visibility !== "unlisted"/);
+  assert.ok(posts.length > 0);
+});

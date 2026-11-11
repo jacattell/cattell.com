@@ -73,6 +73,26 @@ export default function (eleventyConfig) {
   eleventyConfig.addFilter("absoluteUrls", (html, base) =>
     String(html).replace(/(href|src)="\//g, `$1="${base}/`)
   );
+  // Social media archive: post text as safe HTML, with links and line breaks.
+  const escapeHtml = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  eleventyConfig.addFilter("postHtml", (text) => {
+    const address = /\bhttps?:\/\/[^\s<>"]+/g;
+    let html = "";
+    let last = 0;
+    for (const m of text.matchAll(address)) {
+      let url = m[0];
+      while (/[.,;:!?'")\]]$/.test(url) && !(url.endsWith(")") && url.includes("("))) url = url.slice(0, -1);
+      html += escapeHtml(text.slice(last, m.index)) + `<a href="${escapeHtml(url)}">${escapeHtml(url)}</a>`;
+      last = m.index + url.length;
+    }
+    html += escapeHtml(text.slice(last));
+    return html.replace(/\n/g, "<br>");
+  });
+  eleventyConfig.addFilter("number", (n) => Number(n).toLocaleString("en-GB"));
+  eleventyConfig.addFilter("archiveDate", (iso) =>
+    new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" })
+  );
+
   eleventyConfig.addFilter("stripTags", (html) =>
     String(html).replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/&quot;/g, "\"").replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/\s+/g, " ").trim()
   );

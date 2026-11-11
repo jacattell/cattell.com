@@ -128,3 +128,16 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .share-status { margin: 0.25rem 0 0; font-size: 0.85rem; color: var(--muted); }
 .share-status:empty { display: none; }
 @media print { .share { display: none; } }
+
+/* Social media archive */
+.archive-search { margin: 1.5rem 0 0.5rem; }
+.archive-search > label { display: block; font-weight: 700; margin-bottom: 0.25rem; }
+.archive-search input[type="search"] { width: 100%; font: inherit; padding: 0.5rem; border: 2px solid var(--text); background: var(--bg); color: var(--text); }
+.archive-search fieldset { border: 0; margin: 0.5rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; }
+.archive-search fieldset label { white-space: nowrap; }
+.years-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; }
+.post { border-top: 1px solid var(--border); padding: 0.75rem 0; }
+.post-meta, .post-on, .post-media { color: var(--muted); font-size: 0.9rem; margin: 0 0 0.25rem; }
+.post-text { margin: 0 0 0.5rem; }
+.post-on { margin-top: 0.5rem; }
+#archive-more { margin-top: 1rem; }

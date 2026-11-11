@@ -1,0 +1,15 @@
+{#- One archive item. Keep in step with render() in src/assets/js/archive.js. -#}
+<article class="post">
+  <p class="post-meta"><time datetime="{{ item.date }}">{{ item.date | archiveDate }}</time>{% if item.reply %} · Reply{% elif item.thread %} · Thread{% endif %}</p>
+  <div class="post-text">{{ item.text | postHtml | safe }}</div>
+  {%- for img in item.images %}
+  <p class="post-media">{% if img.url %}<a href="{{ img.url }}">{{ "Video" if img.video else "Image" }}</a>{% else %}{{ "Video" if img.video else "Image" }}{% endif %}{% if img.alt %}: {{ img.alt }}{% endif %}</p>
+  {%- endfor %}
+  {%- if item.link and (item.link.url not in item.text) %}
+  <p class="post-media">Link: <a href="{{ item.link.url }}">{{ item.link.title or item.link.url }}</a></p>
+  {%- endif %}
+  {%- if item.quote %}
+  <p class="post-media">Quoting <a href="{{ item.quote }}">another post</a></p>
+  {%- endif %}
+  <p class="post-on">On {% for o in item.on %}<a href="{{ o.url }}">{{ archive.platforms[o.platform] }}</a>{% if not loop.last %} · {% endif %}{% endfor %}</p>
+</article>
