@@ -1,6 +1,19 @@
-// Search for the social media archive (/archive/). Loads all posts once, then
+// Search and image previews for the social media archive (/archive/). Loads all posts once, then
 // filters them as you type. Without JavaScript, the year pages still work.
 (function () {
+  // If an image no longer loads (for example, its post was deleted), show a short note instead.
+  document.addEventListener(
+    "error",
+    (e) => {
+      const img = e.target;
+      if (img.tagName !== "IMG" || !img.closest(".post-images")) return;
+      const link = img.parentElement;
+      link.replaceChildren("Image no longer available" + (img.alt && !img.alt.startsWith("Image without") ? ": " + img.alt : ""));
+      link.classList.add("missing");
+    },
+    true
+  );
+
   const form = document.getElementById("archive-search");
   if (!form) return;
   const input = document.getElementById("archive-q");
@@ -46,9 +59,18 @@
     if (item.reply) meta.append(" · Reply");
     else if (item.thread) meta.append(" · Thread");
     const article = el("article", { class: "post" }, meta, textWithLinks(item.text));
-    for (const img of item.images) {
+    const pictures = item.images.filter((img) => img.thumb);
+    if (pictures.length) {
+      const box = el("div", { class: "post-images" });
+      for (const img of pictures) {
+        const image = el("img", { src: img.thumb, alt: img.alt || "Image without a description", loading: "lazy", decoding: "async", referrerpolicy: "no-referrer" });
+        box.append(el("a", { href: img.url }, image));
+      }
+      article.append(box);
+    }
+    for (const img of item.images.filter((i) => !i.thumb)) {
       const label = img.video ? "Video" : "Image";
-      article.append(el("p", { class: "post-media" }, img.url ? el("a", { href: img.url }, label) : label, img.alt ? ": " + img.alt : ""));
+      article.append(el("p", { class: "post-media" }, el("a", { href: img.url || item.on[0].url }, label), img.alt ? ": " + img.alt : ""));
     }
     if (item.link && !item.text.includes(item.link.url)) {
       article.append(el("p", { class: "post-media" }, "Link: ", el("a", { href: item.link.url }, item.link.title || item.link.url)));
