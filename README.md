@@ -53,12 +53,15 @@ To set a goal for a year, edit `src/_data/goals.json`.
 | What | Where |
 | --- | --- |
 | Saved posts, one file per platform | `archive-data/` |
-| Scripts that download posts | `scripts/archive/` |
+| Saved copies of images | `src/assets/archive/`, listed in `archive-data/media.json` |
+| Scripts that download posts and copy images | `scripts/archive/` |
 | How cross-posts are matched | `lib/archive.js` |
 | Pages | `src/archive/`, `src/_includes/archive-post.njk` |
 | Search | `src/assets/js/archive.js` |
 
-To collect new posts:
+Images are copied into the site, so the archive does not depend on Bluesky or Mastodon keeping them. Each is saved once, as a web-sized picture and a small preview, with hidden data such as location removed. Videos are not copied: they still link to the platform they were posted on.
+
+To collect new posts and copy their images:
 
 ```bash
 npm run archive:fetch

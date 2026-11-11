@@ -170,3 +170,23 @@ test("the archive shows every different image from a cross-post, once", async ()
   // One video each: kept once
   assert.equal(mergeImages([post([{ url: null, alt: "Video", video: true }]), post([{ url: "v.mp4", alt: "", video: true }])]).length, 1);
 });
+
+test("the archive uses its own copies of images where it has them", async () => {
+  const { groupPosts } = await import("../lib/archive.js");
+  const post = { platform: "bluesky", id: "1", url: "https://bsky.app/x", date: "2026-01-01T10:00:00Z", text: "Photo", reply: null, link: null, quote: null,
+    images: [{ url: "https://cdn.bsky.app/img/feed_fullsize/plain/a/b", alt: "Saved" }, { url: "https://cdn.bsky.app/img/feed_fullsize/plain/a/c", alt: "Not saved" }] };
+  const media = { "https://cdn.bsky.app/img/feed_fullsize/plain/a/b": { file: "/assets/archive/b.webp", thumb: "/assets/archive/b-thumb.webp" } };
+  const [item] = groupPosts([post], media);
+  assert.equal(item.images[0].url, "/assets/archive/b.webp");
+  assert.equal(item.images[0].thumb, "/assets/archive/b-thumb.webp");
+  assert.equal(item.images[1].thumb, "https://cdn.bsky.app/img/feed_thumbnail/plain/a/c", "falls back to the platform");
+});
+
+test("every image the archive shows has a saved copy", () => {
+  const items = JSON.parse(fs.readFileSync("_site/archive/posts.json", "utf8"));
+  const remote = items.flatMap((i) => i.images).filter((m) => m.thumb && !m.thumb.startsWith("/assets/archive/"));
+  assert.deepEqual(remote.map((m) => m.thumb), []);
+  for (const m of items.flatMap((i) => i.images).filter((m) => m.thumb)) {
+    assert.ok(fs.existsSync("_site" + m.thumb) && fs.existsSync("_site" + m.url), m.url);
+  }
+});

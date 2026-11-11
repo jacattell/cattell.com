@@ -12,13 +12,14 @@
     "dev": "eleventy --serve",
     "preview": "npm run build && wrangler pages dev",
     "test": "npm run build && node --test \"test/*.test.js\"",
-    "archive:fetch": "node scripts/archive/fetch-bluesky.js && node scripts/archive/fetch-mastodon.js"
+    "archive:fetch": "node scripts/archive/fetch-bluesky.js && node scripts/archive/fetch-mastodon.js && node scripts/archive/fetch-media.js"
   },
   "dependencies": {
     "@11ty/eleventy": "^3.1.8",
     "@anthropic-ai/sdk": "^1.7.0"
   },
   "devDependencies": {
+    "sharp": "^0.35.5",
     "wrangler": "^4.159.0"
   }
 }

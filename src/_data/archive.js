@@ -10,7 +10,9 @@ export default function () {
     const file = path.join(dir, `${key}.json`);
     return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : [];
   });
-  const items = groupPosts(posts);
+  const mediaFile = path.join(dir, "media.json");
+  const media = fs.existsSync(mediaFile) ? JSON.parse(fs.readFileSync(mediaFile, "utf8")) : {};
+  const items = groupPosts(posts, media);
   const years = [...new Set(items.map((i) => i.year))].map((year) => ({
     year,
     items: items.filter((i) => i.year === year),
