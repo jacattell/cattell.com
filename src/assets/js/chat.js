@@ -9,6 +9,46 @@
   let messages = [];
   let busy = false;
 
+  // Turns web and email addresses in a reply into links. Builds the page
+  // elements directly (never as HTML), so a reply cannot add anything else.
+  const ADDRESS = /\bhttps?:\/\/[^\s<>"]+|\bwww\.[^\s<>"]+|[\w.+-]+@[\w-]+(?:\.[\w-]+)+/gi;
+  function trimEnd(address) {
+    // Leave out full stops, commas and closing brackets that end a sentence.
+    let end = address;
+    while (/[.,;:!?'")\]]$/.test(end)) {
+      if (end.endsWith(")") && (end.match(/\(/g) || []).length >= (end.match(/\)/g) || []).length) break;
+      end = end.slice(0, -1);
+    }
+    return end;
+  }
+  function showWithLinks(el, text) {
+    el.replaceChildren();
+    let last = 0;
+    for (const match of text.matchAll(ADDRESS)) {
+      const address = trimEnd(match[0]);
+      if (!address) continue;
+      el.append(text.slice(last, match.index));
+      const link = document.createElement("a");
+      if (address.includes("@") && !/^https?:|^www\./i.test(address)) {
+        link.href = "mailto:" + address;
+      } else {
+        link.href = /^www\./i.test(address) ? "https://" + address : address;
+        link.target = "_blank";
+        link.rel = "noopener";
+      }
+      link.textContent = address;
+      if (link.target) {
+        const note = document.createElement("span");
+        note.className = "visually-hidden";
+        note.textContent = " (opens in a new tab)";
+        link.append(note);
+      }
+      el.append(link);
+      last = match.index + address.length;
+    }
+    el.append(text.slice(last));
+  }
+
   function addMessage(who, text, cls) {
     const p = document.createElement("p");
     p.className = "msg" + (cls ? " " + cls : "");
@@ -59,7 +99,7 @@
           const data = JSON.parse(event.slice(6));
           if (data.text) {
             reply += data.text;
-            out.textContent = reply;
+            showWithLinks(out, reply);
           }
           if (data.error) throw new Error(data.error);
         }
