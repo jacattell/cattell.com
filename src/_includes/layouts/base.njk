@@ -20,7 +20,10 @@
   <a class="skip" href="#main">Skip to main content</a>
   <header class="site-header">
     <div class="wrap">
-      <a class="site-name" href="/">{{ site.title }}</a>
+      <div class="header-top">
+        <a class="site-name" href="/">{{ site.title }}</a>
+        <button type="button" class="theme-toggle" hidden>Dark mode</button>
+      </div>
       <nav aria-label="Main">
         <ul>
           {%- for item in site.nav %}
@@ -28,7 +31,6 @@
           {%- endfor %}
         </ul>
       </nav>
-      <button type="button" class="theme-toggle" hidden>Dark mode</button>
     </div>
   </header>
   <main id="main" class="wrap">
