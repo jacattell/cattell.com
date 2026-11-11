@@ -46,6 +46,14 @@ export default function (eleventyConfig) {
       .sort((a, b) => a.data.bookOrder - b.data.bookOrder)
   );
 
+  // Unconference blog posts: the pages in src/unconference that are not book chapters.
+  eleventyConfig.addCollection("unconferencePosts", (api) =>
+    api
+      .getFilteredByGlob("src/unconference/*.md")
+      .filter((p) => p.data.bookOrder === undefined)
+      .sort((a, b) => a.data.title.localeCompare(b.data.title))
+  );
+
   // Adds a short fingerprint of a file's contents to its address, for example
   // /assets/css/site.css?v=1a2b3c4d. When the file changes, the address changes,
   // so browsers fetch the new version instead of using an old copy they saved.
