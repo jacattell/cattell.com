@@ -7,6 +7,25 @@ exclude = [
   '^https?://(www\.)?(x|twitter)\.com/',
   '^https?://([a-z0-9-]+\.)?medium\.com/',
   '^https?://([a-z0-9-]+\.)?slack\.com/',
+  # These also refuse or fail automated checks, though the links work in a browser.
+  '^https?://webarchive\.nationalarchives\.gov\.uk/',
+  '^https?://www\.registertovote\.service\.gov\.uk/',
+  '^https?://www\.economist\.com/',
+  '^https?://([a-z]+\.)?open\.ac\.uk/',
+  '^https?://flown\.com/',
+  '^https?://richmix\.org\.uk/',
+  '^https?://www\.civil-service-careers\.gov\.uk/',
+  '^https?://bnf\.nice\.org\.uk/',
+  '^https?://www\.kingstrust\.org\.uk/',
+  '^https?://webrecruitment\.stoke\.gov\.uk/',
+  '^https?://www\.crewetowncouncil\.gov\.uk/',
+  '^https?://www\.staffsmoorlands\.gov\.uk/',
+  '^https?://www\.wmjobs\.co\.uk/',
+  '^https?://www\.pensionsdashboardsprogramme\.org\.uk/',
+  # These never answer the checker in time.
+  '^https?://weeknot\.es/',
+  '^https?://www\.davebriggs\.xyz/',
+  '^https?://communityled\.world/',
 ]
 
 # "Too many requests" means the site is busy, not that the link is broken.
