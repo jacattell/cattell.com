@@ -33,5 +33,3 @@ Unconference rules benefit attendees. You can get up and move between discussion
 - [Mastodon](https://mastodon.me.uk/@jacattell/112439251410273686),
 - [Medium](https://jacattell.medium.com/how-an-unconference-is-different-from-a-conference-cde865505545),
 - [X (formerly Twitter)](https://x.com/jaCattell/status/1790346389509017720).
-
-This text © 2024 by [James Arthur Cattell](/) is licensed under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1).

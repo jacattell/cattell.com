@@ -26,5 +26,3 @@ Initially, I used [National Novel Writing Month](https://nanowrimo.org/) (NaNoWr
 The uncompleted text is in a [collaborate document](https://docs.google.com/document/d/1tXNFwCKYfDX3FB8v3Gp7DAXlQDMJ1EdAmfwMBdaV4SE/edit?usp=sharing).
 
 All content is licensed under the Creative Commons.
-
-[Unconference](/unconference/) © 2023 by [James Arthur Cattell](/) is licensed under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1)

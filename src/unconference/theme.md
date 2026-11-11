@@ -36,5 +36,3 @@ The only thing I’d change would be to swap “those” for “people”. But t
 Again, remember to use your theme everywhere. Never miss an opportunity to share. Make sure it's on your webpage or in your social media profiles.
 
 The only way to improve a theme is to marry it with a simple logo. If like me you haven’t yet studied graphic design, ask somebody who has or try a [generative artificial intelligence](https://en.wikipedia.org/wiki/Generative_artificial_intelligence). Here's [Google Bard's suggestions for GovCampCymru](https://g.co/bard/share/7a73de38d916).
-
-[Unconference](/unconference/) © 2023 by [James Arthur Cattell](/) is licensed under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1)

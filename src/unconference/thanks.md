@@ -17,5 +17,3 @@ Special thanks to everyone who let me help run their unconferences. Your faith i
 - [Kit Collingwood](https://x.com/kitterati) and [James Reeve](https://linkedin.com/in/jamesreeve) for co-founding OneTeamGov and letting us try new ways of sourcing unconference discussion topics at scale.
 - [David Heath](https://linkedin.com/in/davidheath) for coming up with those new ways for both in-person and virtual unconferences.
 - [David Buck](https://davidbuckster.medium.com/) (again) for testing those new ways with me at various Civil Service Live events, and for being a lovely human being. Thank you \`(-:\`\`\`\`\`\`\`\`
-
-[Unconference](/unconference/) © 2023 by [James Arthur Cattell](/) is licensed under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1)

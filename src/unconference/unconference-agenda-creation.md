@@ -33,5 +33,3 @@ A full unconference grid
 - [Mastodon](https://mastodon.me.uk/@jacattell/112439892618722725),
 - [Medium](https://jacattell.medium.com/unconference-agenda-creation-a3d3ea720fb5),
 - [X (formerly Twitter)](https://x.com/jaCattell/status/1790387377988370685).
-
-Text and pictures © 2024 by [James Arthur Cattell](/) are licensed under [CC BY 4.0](http://creativecommons.org/licenses/by/4.0/?ref=chooser-v1).
