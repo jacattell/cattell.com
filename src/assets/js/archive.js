@@ -14,6 +14,21 @@
     true
   );
 
+  // YouTube previews: clicking one swaps the thumbnail for YouTube's privacy-enhanced player.
+  document.addEventListener("click", (e) => {
+    const link = e.target.closest("a.yt[data-id]");
+    if (!link || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    e.preventDefault();
+    const frame = document.createElement("iframe");
+    frame.src = `https://www.youtube-nocookie.com/embed/${link.dataset.id}?autoplay=1`;
+    frame.title = "YouTube video";
+    frame.allow = "autoplay; encrypted-media; picture-in-picture; fullscreen";
+    frame.allowFullscreen = true;
+    frame.className = link.className;
+    link.replaceWith(frame);
+    frame.focus();
+  });
+
   const form = document.getElementById("archive-search");
   if (!form) return;
   const input = document.getElementById("archive-q");
@@ -65,6 +80,15 @@
       for (const img of pictures) {
         const image = el("img", { src: img.thumb, alt: img.alt || "Image without a description", loading: "lazy", decoding: "async", referrerpolicy: "no-referrer" });
         box.append(el("a", { href: img.url }, image));
+      }
+      article.append(box);
+    }
+    if (item.videos.length) {
+      const box = el("div", { class: "post-videos" });
+      for (const v of item.videos) {
+        const play = el("span", { class: "yt-play" }, "▶ Play video", el("span", { class: "visually-hidden" }, " from YouTube"));
+        const thumb = el("img", { src: `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`, alt: "", loading: "lazy", decoding: "async", referrerpolicy: "no-referrer" });
+        box.append(el("a", { class: v.short ? "yt yt-short" : "yt", href: `https://www.youtube.com/watch?v=${v.id}`, "data-id": v.id }, thumb, play));
       }
       article.append(box);
     }

@@ -124,3 +124,17 @@ test("the archive never includes private Mastodon posts", () => {
   assert.match(source, /visibility !== "public" && s\.visibility !== "unlisted"/);
   assert.ok(posts.length > 0);
 });
+
+test("the archive finds YouTube videos but not channels or playlists", async () => {
+  const { youtubeVideos } = await import("../lib/archive.js");
+  const v = youtubeVideos(
+    "Watch https://youtube.com/shorts/4s3zwIW8IXs and https://youtu.be/hHxgruAozjo?si=abc",
+    "Also https://www.youtube.com/watch?v=gm0b_ijaYMQ&t=10 and again https://youtu.be/hHxgruAozjo",
+    "My channel https://youtube.com/@jacattell and https://youtube.com/playlist?list=PL123"
+  );
+  assert.deepEqual(v, [
+    { id: "4s3zwIW8IXs", short: true },
+    { id: "hHxgruAozjo", short: false },
+    { id: "gm0b_ijaYMQ", short: false },
+  ]);
+});

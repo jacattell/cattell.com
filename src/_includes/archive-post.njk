@@ -10,6 +10,13 @@
     {%- endfor %}
   </div>
   {%- endif %}
+  {%- if item.videos.length %}
+  <div class="post-videos">
+    {%- for v in item.videos %}
+    <a class="yt{% if v.short %} yt-short{% endif %}" href="https://www.youtube.com/watch?v={{ v.id }}" data-id="{{ v.id }}"><img src="https://i.ytimg.com/vi/{{ v.id }}/hqdefault.jpg" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"><span class="yt-play">▶ Play video<span class="visually-hidden"> from YouTube</span></span></a>
+    {%- endfor %}
+  </div>
+  {%- endif %}
   {%- for img in item.images | rejectattr("thumb") %}
   <p class="post-media">{% if img.url %}<a href="{{ img.url }}">{{ "Video" if img.video else "Image" }}</a>{% else %}<a href="{{ item.on[0].url }}">{{ "Video" if img.video else "Image" }}</a>{% endif %}{% if img.alt %}: {{ img.alt }}{% endif %}</p>
   {%- endfor %}
