@@ -1,0 +1,17 @@
+# Settings for the weekly link check (.github/workflows/links.yml).
+
+# These sites block automated link checkers, so their links always look
+# broken to the checker even when they work in a browser. Check them by hand.
+exclude = [
+  '^https?://([a-z]+\.)?linkedin\.com/',
+  '^https?://(www\.)?(x|twitter)\.com/',
+  '^https?://([a-z0-9-]+\.)?medium\.com/',
+  '^https?://([a-z0-9-]+\.)?slack\.com/',
+]
+
+# "Too many requests" means the site is busy, not that the link is broken.
+accept = ["100..=103", "200..=299", "429"]
+
+max_retries = 2
+timeout = 30
+max_concurrency = 8
