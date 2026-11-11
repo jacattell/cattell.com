@@ -150,3 +150,23 @@ test("the chat can read the social media archive, and caches it", () => {
   assert.deepEqual(system[0].cache_control, { type: "ephemeral" });
   assert.ok(system[0].text.includes("<website>") && system[0].text.includes("SOCIAL MEDIA ARCHIVE"));
 });
+
+test("the archive shows every different image from a cross-post, once", async () => {
+  const { mergeImages } = await import("../lib/archive.js");
+  const post = (images) => ({ images });
+  const img = (alt, url = alt) => ({ url, alt });
+  // Different images on each platform: all are kept
+  assert.equal(mergeImages([post([img("Blue skies and grass"), img("Selfie on the grass")]), post([img("James and Mary pose for a selfie with a book")])]).length, 3);
+  // Same image, worded slightly differently: kept once
+  assert.equal(mergeImages([post([img("Selfie of me with a lovely white horse")]), post([img("Selfie of me with a beautiful white horse")])]).length, 1);
+  // No descriptions, same places in the post: kept once each
+  assert.equal(mergeImages([post([img("", "b1"), img("", "b2")]), post([img("", "m1"), img("", "m2")])]).length, 2);
+  // An image on one platform and the same thing as a video on the other: kept once
+  assert.equal(mergeImages([post([img("People sit round a table in a meeting room")]), post([{ url: "v.mp4", alt: "People sit round a table in a meeting room", video: true }])]).length, 1);
+  assert.equal(mergeImages([post([img("", "snow.jpg")]), post([{ url: "snow.mp4", alt: "", video: true }])]).length, 1);
+  // The same video, described on only one platform: kept once, using the described copy
+  const dalek = mergeImages([post([{ url: null, alt: "Video", video: true }]), post([{ url: "dalek.mp4", alt: "A dancing Dalek", video: true }])]);
+  assert.deepEqual(dalek, [{ url: "dalek.mp4", alt: "A dancing Dalek", video: true }]);
+  // One video each: kept once
+  assert.equal(mergeImages([post([{ url: null, alt: "Video", video: true }]), post([{ url: "v.mp4", alt: "", video: true }])]).length, 1);
+});
