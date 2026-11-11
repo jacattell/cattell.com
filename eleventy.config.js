@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import crypto from "node:crypto";
 
 // Monday of an ISO week, as a UTC date.
 function isoWeekStart(year, week) {
@@ -44,6 +45,16 @@ export default function (eleventyConfig) {
       .filter((p) => p.data.bookOrder !== undefined)
       .sort((a, b) => a.data.bookOrder - b.data.bookOrder)
   );
+
+  // Adds a short fingerprint of a file's contents to its address, for example
+  // /assets/css/site.css?v=1a2b3c4d. When the file changes, the address changes,
+  // so browsers fetch the new version instead of using an old copy they saved.
+  eleventyConfig.addFilter("versioned", (url) => {
+    const file = path.join("src", url);
+    if (!fs.existsSync(file)) return url;
+    const hash = crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex").slice(0, 8);
+    return `${url}?v=${hash}`;
+  });
 
   eleventyConfig.addGlobalData("isoWeekStart", () => isoWeekStart);
 

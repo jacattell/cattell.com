@@ -66,3 +66,11 @@ test("old Google Sites addresses have redirects", () => {
   assert.match(rules, /^\/week-notes\/2024-week-46 \/week-notes\/2024\/46\/ 301$/m);
   assert.match(rules, /^\/james \/ 301$/m);
 });
+
+test("pages load CSS and scripts with a version, so browsers do not use old copies", () => {
+  const home = fs.readFileSync("_site/index.html", "utf8");
+  assert.match(home, /href="\/assets\/css\/site\.css\?v=[0-9a-f]{8}"/);
+  assert.match(home, /src="\/assets\/js\/theme\.js\?v=[0-9a-f]{8}"/);
+  const chat = fs.readFileSync("_site/chat/index.html", "utf8");
+  assert.match(chat, /src="\/assets\/js\/chat\.js\?v=[0-9a-f]{8}"/);
+});
