@@ -40,7 +40,7 @@ To set a goal for a year, edit `src/_data/goals.json`.
 | Text at the bottom of the week notes index | `src/week-notes/index.md` |
 | Unconference book and posts | `src/unconference/` |
 | How-to pages | `src/how-to/` |
-| Images | `src/assets/img/` (see [IMAGES.md](IMAGES.md) for ones still to add) |
+| Images | `src/assets/img/` |
 | Menu, site name | `src/_data/site.json` |
 | Page design | `src/_includes/layouts/` and `src/assets/css/site.css` |
 | Chat page | `src/chat.njk`, `src/assets/js/chat.js`, `lib/chat.js` |

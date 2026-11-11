@@ -114,7 +114,7 @@ export default function (eleventyConfig) {
     return content.replace(/<img\b[^>]*\bsrc="(\/assets\/img\/[^"]+)"[^>]*>/g, (tag, src) => (isMissing(src) ? "" : tag));
   });
   eleventyConfig.on("eleventy.after", () => {
-    if (missing.size) console.warn(`[images] ${missing.size} image(s) not found in src/assets/img (see IMAGES.md)`);
+    if (missing.size) console.warn(`[images] ${missing.size} image(s) not found in src/assets/img: ${[...missing].join(", ")}`);
   });
 
   return {
