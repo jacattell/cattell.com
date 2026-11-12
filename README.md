@@ -59,7 +59,7 @@ To set a goal for a year, edit `src/_data/goals.json`.
 | Pages | `src/archive/`, `src/_includes/archive-post.njk` |
 | Search | `src/assets/js/archive.js` |
 
-Images are copied into the site, so the archive does not depend on Bluesky or Mastodon keeping them. Each is saved once, as a web-sized picture and a small preview, with hidden data such as location removed. Videos are not copied: they still link to the platform they were posted on.
+Images are copied into the site, so the archive does not depend on Bluesky or Mastodon keeping them. Each is saved once, as a web-sized picture and a small preview, with hidden data such as location removed. YouTube video thumbnails are copied too; a video that has been deleted or made private gets no preview. Videos themselves are not copied: they still link to, or play from, the platform they were posted on.
 
 To collect new posts and copy their images:
 

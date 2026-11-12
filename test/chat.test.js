@@ -182,10 +182,11 @@ test("the archive uses its own copies of images where it has them", async () => 
   assert.equal(item.images[1].thumb, "https://cdn.bsky.app/img/feed_thumbnail/plain/a/c", "falls back to the platform");
 });
 
-test("every image the archive shows has a saved copy", () => {
+test("every image and YouTube thumbnail the archive shows has a saved copy", () => {
   const items = JSON.parse(fs.readFileSync("_site/archive/posts.json", "utf8"));
-  const remote = items.flatMap((i) => i.images).filter((m) => m.thumb && !m.thumb.startsWith("/assets/archive/"));
+  const remote = [...items.flatMap((i) => i.images), ...items.flatMap((i) => i.videos)].filter((m) => m.thumb && !m.thumb.startsWith("/assets/archive/"));
   assert.deepEqual(remote.map((m) => m.thumb), []);
+  for (const v of items.flatMap((i) => i.videos)) assert.ok(fs.existsSync("_site" + v.thumb), v.thumb);
   for (const m of items.flatMap((i) => i.images).filter((m) => m.thumb)) {
     assert.ok(fs.existsSync("_site" + m.thumb) && fs.existsSync("_site" + m.url), m.url);
   }

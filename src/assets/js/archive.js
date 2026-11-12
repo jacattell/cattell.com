@@ -87,7 +87,7 @@
       const box = el("div", { class: "post-videos" });
       for (const v of item.videos) {
         const play = el("span", { class: "yt-play" }, "▶ Play video", el("span", { class: "visually-hidden" }, " from YouTube"));
-        const thumb = el("img", { src: `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`, alt: "", loading: "lazy", decoding: "async", referrerpolicy: "no-referrer" });
+        const thumb = el("img", { src: v.thumb, alt: "", loading: "lazy", decoding: "async", referrerpolicy: "no-referrer" });
         box.append(el("a", { class: v.short ? "yt yt-short" : "yt", href: `https://www.youtube.com/watch?v=${v.id}`, "data-id": v.id }, thumb, play));
       }
       article.append(box);

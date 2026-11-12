@@ -13,7 +13,7 @@
   {%- if item.videos.length %}
   <div class="post-videos">
     {%- for v in item.videos %}
-    <a class="yt{% if v.short %} yt-short{% endif %}" href="https://www.youtube.com/watch?v={{ v.id }}" data-id="{{ v.id }}"><img src="https://i.ytimg.com/vi/{{ v.id }}/hqdefault.jpg" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"><span class="yt-play">▶ Play video<span class="visually-hidden"> from YouTube</span></span></a>
+    <a class="yt{% if v.short %} yt-short{% endif %}" href="https://www.youtube.com/watch?v={{ v.id }}" data-id="{{ v.id }}"><img src="{{ v.thumb }}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"><span class="yt-play">▶ Play video<span class="visually-hidden"> from YouTube</span></span></a>
     {%- endfor %}
   </div>
   {%- endif %}
