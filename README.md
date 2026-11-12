@@ -230,6 +230,22 @@ To go back to Google Sites, remove the custom domains and set the `www` record b
 - The browser sends the conversation to `/api/chat`. The function adds a copy of the main pages (`_site/chat-context.txt`, made at build time) and passes it to Claude through the Anthropic API.
 - The function does not store conversations. Anthropic handles them under its own terms.
 - Conversations are limited to 20 messages of up to 2,000 characters each.
+- **Chat logs:** when the `CHAT_LOGS` KV binding is set, each conversation's questions and answers are saved (no IP address or other details), and Cloudflare deletes each one automatically 30 days after its last message. The Chat page tells visitors this. Read them at `/edit/chats/`, signing in with GitHub as for the week notes editor. The code is in `lib/chat.js` (saving), `lib/editor.js` (reading) and `src/assets/js/chat-logs.js`.
+
+### Set up chat logs (once)
+
+1. In Cloudflare, go to **Storage & databases** > **KV** (or **Workers & Pages** > **KV**) and choose **Create** a namespace called `cattell-chat-logs`.
+2. Open the Pages project, then **Settings** > **Bindings** > **Add** > **KV namespace**. Set the variable name to `CHAT_LOGS`, choose `cattell-chat-logs`, and save for Production.
+   - If Cloudflare says bindings are managed in `wrangler.toml`, add this to `wrangler.toml` instead, with the namespace's ID (shown on the KV page):
+
+     ```toml
+     [[kv_namespaces]]
+     binding = "CHAT_LOGS"
+     id = "THE-NAMESPACE-ID"
+     ```
+3. Redeploy. New conversations then appear at `/edit/chats/`.
+
+Without the binding, nothing is saved and the chat works as before.
 
 ## Old addresses
 

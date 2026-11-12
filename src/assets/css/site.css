@@ -178,3 +178,11 @@ a.yt:hover .yt-play { background: #c00; }
 .editor-problem { border-left: 5px solid #d4351c; padding: 0.25rem 1rem; margin: 1rem 0; }
 .editor-saved { border-left: 5px solid #00703c; padding: 0.25rem 1rem; margin: 1rem 0; }
 .editor-preview { border-top: 1px solid var(--border); margin-top: 2rem; padding-top: 1rem; }
+
+/* Chat logs (/edit/chats/) */
+.chat-list { list-style: none; padding: 0; }
+.chat-item { border-top: 1px solid var(--border); padding: 0.75rem 0; margin: 0; }
+.chat-item .post-meta { color: var(--muted); font-size: 0.9rem; margin: 0; }
+.chat-first { margin: 0.25rem 0 0.5rem; font-weight: 700; }
+.chat-item button { padding: 0.25rem 0.75rem; }
+.chat-record { margin-top: 0.75rem; padding-left: 1rem; border-left: 3px solid var(--border); }

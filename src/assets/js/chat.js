@@ -7,6 +7,10 @@
   const reset = document.getElementById("chat-reset");
   const status = document.getElementById("chat-status");
   let messages = [];
+  // Identifies this conversation in the chat logs: the start time counted down
+  // from 10^13 (so the newest list first) and a random part. See lib/chat.js.
+  const newConversation = () => String(1e13 - Date.now()).padStart(13, "0") + "-" + Math.random().toString(36).slice(2, 10).padEnd(8, "0");
+  let conversation = newConversation();
   let busy = false;
 
   // Turns web and email addresses in a reply into links. Builds the page
@@ -79,7 +83,7 @@
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages }),
+        body: JSON.stringify({ messages, conversation }),
       });
       if (!res.ok || !res.body) {
         const data = await res.json().catch(() => ({}));
@@ -135,6 +139,7 @@
   reset.addEventListener("click", () => {
     if (busy) return;
     messages = [];
+    conversation = newConversation();
     log.replaceChildren();
     input.focus();
   });

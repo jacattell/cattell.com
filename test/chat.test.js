@@ -436,3 +436,100 @@ test("the human check is only used when both keys are set, so the page and serve
     assert.match(html, /\/assets\/js\/human-check\.js\?v=/, page);
   }
 });
+
+/** A pretend Cloudflare KV store that records expiry times. */
+function fakeKV() {
+  const store = new Map();
+  return {
+    store,
+    async put(key, value, opts = {}) { store.set(key, { value, opts }); },
+    async get(key, type) { const v = store.get(key)?.value; return v === undefined ? null : type === "json" ? JSON.parse(v) : v; },
+    async list({ prefix, limit = 1000, cursor }) {
+      const keys = [...store.keys()].filter((k) => k.startsWith(prefix)).sort();
+      const start = cursor ? Number(cursor) : 0;
+      const page = keys.slice(start, start + limit);
+      return { keys: page.map((name) => ({ name, metadata: store.get(name).opts.metadata, expiration: 2000000000 })), list_complete: start + limit >= keys.length, cursor: String(start + limit) };
+    },
+  };
+}
+
+test("chat logs: conversations are saved for 30 days, without IP addresses", async () => {
+  const { logConversation, conversationStart, LOG_DAYS } = await import("../lib/chat.js");
+  const now = Date.parse("2026-11-12T12:00:00Z");
+  const id = (t) => String(1e13 - t).padStart(13, "0") + "-abcd1234";
+  assert.equal(conversationStart(id(now - 60e3), now), now - 60e3);
+  assert.equal(conversationStart(id(now - 5 * 86400e3), now), null, "too old to be real");
+  assert.equal(conversationStart("not-an-id", now), null);
+
+  const kv = fakeKV();
+  const messages = [{ role: "user", content: "Who is James?" }, { role: "assistant", content: "A delivery manager." }, { role: "user", content: "What's DeliverCon?" }];
+  assert.equal(await logConversation(kv, id(now - 60e3), messages, "An unconference for delivery managers.", now), true);
+  const [[key, { value, opts }]] = kv.store;
+  assert.equal(key, `conv:${id(now - 60e3)}`);
+  assert.equal(opts.expirationTtl, LOG_DAYS * 86400);
+  assert.equal(LOG_DAYS, 30);
+  assert.deepEqual(JSON.parse(value).turns, [
+    { q: "Who is James?", a: "A delivery manager." },
+    { q: "What's DeliverCon?", a: "An unconference for delivery managers." },
+  ]);
+  assert.deepEqual(opts.metadata, { started: "2026-11-12T11:59:00.000Z", updated: "2026-11-12T12:00:00.000Z", turns: 2, first: "Who is James?" });
+  assert.ok(!/\b\d{1,3}(\.\d{1,3}){3}\b/.test(value), "no IP addresses");
+  assert.equal(await logConversation(kv, "made-up", messages, "x", now), false, "unknown IDs are not saved");
+});
+
+test("chat logs: only the signed-in editor can read them, newest first", async () => {
+  const { handleCallback, handleEdit } = await import("../lib/editor.js");
+  const { logConversation } = await import("../lib/chat.js");
+  const kv = fakeKV();
+  const now = Date.now();
+  const id = (ago) => String(1e13 - (now - ago)).padStart(13, "0") + "-abcd1234";
+  await logConversation(kv, id(3600e3), [{ role: "user", content: "Older question" }], "Answer 1", now);
+  await logConversation(kv, id(60e3), [{ role: "user", content: "Newer question" }], "Answer 2", now);
+  const env = { GITHUB_CLIENT_ID: "id", GITHUB_CLIENT_SECRET: "secret", SESSION_SECRET: "z".repeat(40), CHAT_LOGS: kv };
+  const github = async (url) => new Response(JSON.stringify(url.includes("access_token") ? { access_token: "t" } : { login: "jacattell" }));
+  const signin = await handleCallback(new Request("https://www.cattell.com/api/auth/callback?code=a&state=s", { headers: { Cookie: "edit_state=s" } }), env, github);
+  const Cookie = signin.headers.getSetCookie().find((c) => c.startsWith("edit_session=")).split(";")[0];
+
+  assert.equal((await handleEdit(new Request("https://www.cattell.com/api/edit/chats"), env)).status, 401, "not signed in");
+  const list = await (await handleEdit(new Request("https://www.cattell.com/api/edit/chats", { headers: { Cookie } }), env)).json();
+  assert.deepEqual(list.chats.map((c) => c.first), ["Newer question", "Older question"]);
+  const one = await (await handleEdit(new Request(`https://www.cattell.com/api/edit/chat?id=${id(60e3)}`, { headers: { Cookie } }), env)).json();
+  assert.deepEqual(one.turns, [{ q: "Newer question", a: "Answer 2" }]);
+  assert.equal((await handleEdit(new Request("https://www.cattell.com/api/edit/chat?id=../x", { headers: { Cookie } }), env)).status, 400);
+  // Not set up yet
+  assert.equal((await handleEdit(new Request("https://www.cattell.com/api/edit/chats", { headers: { Cookie } }), { ...env, CHAT_LOGS: undefined })).status, 503);
+});
+
+test("the Chat page tells visitors conversations are kept for 30 days", () => {
+  const html = fs.readFileSync("_site/chat/index.html", "utf8");
+  assert.match(html, /Conversations are kept for 30 days/);
+  assert.match(fs.readFileSync("_site/edit/chats/index.html", "utf8"), /<meta name="robots" content="noindex, nofollow">/);
+});
+
+test("chat logs: a finished chat reply is saved to the log", async () => {
+  const { handleChat } = await import("../lib/chat.js");
+  const sse = (events) => events.map(([event, data]) => `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`).join("");
+  const reply = sse([
+    ["message_start", { type: "message_start", message: { id: "msg_1", type: "message", role: "assistant", model: "claude-haiku-5-5", content: [], stop_reason: null, stop_sequence: null, usage: { input_tokens: 5, output_tokens: 0 } } }],
+    ["content_block_start", { type: "content_block_start", index: 0, content_block: { type: "text", text: "" } }],
+    ["content_block_delta", { type: "content_block_delta", index: 0, delta: { type: "text_delta", text: "James runs " } }],
+    ["content_block_delta", { type: "content_block_delta", index: 0, delta: { type: "text_delta", text: "unconferences." } }],
+    ["content_block_stop", { type: "content_block_stop", index: 0 }],
+    ["message_delta", { type: "message_delta", delta: { stop_reason: "end_turn", stop_sequence: null }, usage: { output_tokens: 4 } }],
+    ["message_stop", { type: "message_stop" }],
+  ]);
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url) => String(url).startsWith("https://api.anthropic.com") ? new Response(reply, { headers: { "Content-Type": "text/event-stream" } }) : realFetch(url);
+  try {
+    const kv = fakeKV();
+    const conversation = String(1e13 - Date.now()).padStart(13, "0") + "-abcd1234";
+    const req = new Request("https://www.cattell.com/api/chat", { method: "POST", headers: { "CF-Connecting-IP": "10.1.1.1" }, body: JSON.stringify({ conversation, messages: [{ role: "user", content: "What does James do?" }] }) });
+    const result = await handleChat(req, { ANTHROPIC_API_KEY: "sk-test", CHAT_LOGS: kv });
+    const streamed = await new Response(result.response.body).text();
+    await result.done;
+    assert.match(streamed, /James runs /);
+    assert.deepEqual((await kv.get(`conv:${conversation}`, "json")).turns, [{ q: "What does James do?", a: "James runs unconferences." }]);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});

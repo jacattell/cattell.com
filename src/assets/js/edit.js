@@ -89,7 +89,7 @@
       el("button", { type: "submit" }, "Start note"));
     const byYear = {};
     notes.forEach((n) => (byYear[n.year] ??= []).push(n));
-    show("Edit week notes", signOutForm(login), newForm,
+    show("Edit week notes", signOutForm(login), el("p", {}, el("a", { href: "/edit/chats/" }, "Read the chat logs")), newForm,
       el("h2", {}, "Your notes"),
       ...Object.keys(byYear).sort((a, b) => b - a).flatMap((y) => [
         el("h3", {}, y),
