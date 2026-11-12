@@ -1,0 +1,32 @@
+---
+title: Feedback
+description: Tell me what I should stop, start or continue to do.
+---
+<p>Thanks for working with me. Your feedback helps me grow.</p>
+<p>Add your name or be anonymous. Your answers are emailed to me; they are not stored on this website.</p>
+
+<form class="site-form" method="post" action="/api/form">
+  <input type="hidden" name="form" value="feedback">
+  <fieldset>
+    <legend>Where did we work together?</legend>
+    {%- for place in ["UKGovCamp", "OneTeamGov", "Transform", "Department for Education"] %}
+    <label class="choice"><input type="radio" name="where" value="{{ place }}" required> {{ place }}</label>
+    {%- endfor %}
+    <label class="choice"><input type="radio" name="where" value="Other"> Somewhere else</label>
+    <label for="where_other" class="sub-label">If somewhere else, where?</label>
+    <input type="text" id="where_other" name="where_other" maxlength="200">
+  </fieldset>
+
+  <label for="feedback">What should I stop, start or continue to do, please?</label>
+  <textarea id="feedback" name="feedback" rows="6" maxlength="5000" required></textarea>
+
+  <label for="name">Your name <span class="hint">(optional)</span></label>
+  <input type="text" id="name" name="name" maxlength="200" autocomplete="name">
+
+  <div class="trap" aria-hidden="true">
+    <label for="website">Leave this empty</label>
+    <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+  </div>
+
+  <button type="submit">Send feedback</button>
+</form>

@@ -14,6 +14,6 @@ I do:
 Please do:
 
 - [contact](/contact/) me,
-- give [feedback](https://forms.gle/GkRpJKoxsyZK7gz19).
+- give [feedback](/feedback/).
 
 <p class="pi"><a href="/how-to/">π<span class="visually-hidden"> (how-to guides)</span></a></p>

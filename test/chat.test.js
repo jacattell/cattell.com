@@ -191,3 +191,42 @@ test("every image and YouTube thumbnail the archive shows has a saved copy", () 
     assert.ok(fs.existsSync("_site" + m.thumb) && fs.existsSync("_site" + m.url), m.url);
   }
 });
+
+test("the forms check answers and email them through Resend", async () => {
+  const { handleForm } = await import("../lib/forms.js");
+  const env = { RESEND_API_KEY: "test-key", FORM_TO: "james@example.com" };
+  const sent = [];
+  const fakeResend = async (url, init) => { sent.push({ url, init: { ...init, body: JSON.parse(init.body) } }); return new Response("{}", { status: 200 }); };
+  const post = (fields, ip = "1.1.1.1") => new Request("https://www.cattell.com/api/form", { method: "POST", body: new URLSearchParams(fields), headers: { "CF-Connecting-IP": ip } });
+
+  let res = await handleForm(post({ form: "contact", message: "Hello James", email: "sam@example.org" }), env, fakeResend);
+  assert.equal(res.status, 303);
+  assert.equal(res.headers.get("Location"), "/contact/thanks/");
+  assert.equal(sent[0].url, "https://api.resend.com/emails");
+  assert.equal(sent[0].init.headers.Authorization, "Bearer test-key");
+  assert.deepEqual(sent[0].init.body.to, ["james@example.com"]);
+  assert.equal(sent[0].init.body.reply_to, "sam@example.org");
+  assert.match(sent[0].init.body.text, /Hello James/);
+
+  res = await handleForm(post({ form: "feedback", where: "Other", where_other: "DeliverCon", feedback: "Keep running unconferences" }, "2.2.2.2"), env, fakeResend);
+  assert.equal(res.headers.get("Location"), "/feedback/thanks/");
+  assert.match(sent[1].init.body.text, /DeliverCon[\s\S]*Keep running unconferences[\s\S]*\(anonymous\)/);
+
+  // Problems: missing answers, a bad email address, "somewhere else" left blank
+  assert.equal((await handleForm(post({ form: "contact", message: "", email: "a@b.co" }, "3.3.3.3"), env, fakeResend)).status, 400);
+  assert.equal((await handleForm(post({ form: "contact", message: "Hi", email: "not-an-email" }, "3.3.3.3"), env, fakeResend)).status, 400);
+  assert.equal((await handleForm(post({ form: "feedback", where: "Other", feedback: "Hi" }, "3.3.3.3"), env, fakeResend)).status, 400);
+  // Spam trap: pretends to work, sends nothing
+  res = await handleForm(post({ form: "contact", message: "Buy now", email: "spam@example.com", website: "http://spam" }, "4.4.4.4"), env, fakeResend);
+  assert.equal(res.status, 303);
+  assert.equal(sent.length, 2);
+  // Resend failing shows a problem page
+  const res500 = await handleForm(post({ form: "contact", message: "Hi", email: "a@b.co" }, "5.5.5.5"), env, async () => new Response("down", { status: 500 }));
+  assert.equal(res500.status, 400);
+  assert.match(await res500.text(), /could not be sent/);
+  // Resend can't be reached at all: still a problem page, not a crash
+  const resDown = await handleForm(post({ form: "contact", message: "Hi", email: "a@b.co" }, "7.7.7.7"), env, async () => { throw new Error("network down"); });
+  assert.equal(resDown.status, 400);
+  // Not set up yet
+  assert.match(await (await handleForm(post({ form: "contact", message: "Hi", email: "a@b.co" }, "6.6.6.6"), {}, fakeResend)).text(), /not working yet/);
+});

@@ -69,6 +69,32 @@ npm run archive:fetch
 
 Add `--all` to a script to download every post again rather than just new ones. Only public Mastodon posts are saved; private posts and direct messages never are.
 
+## Contact and feedback forms
+
+The contact form (on `/contact/`) and the feedback form (`/feedback/`) email each answer to you through [Resend](https://resend.com). Nothing is stored on the website. The forms work without JavaScript, and have a hidden spam trap and a limit of 5 forms per visitor per hour.
+
+| What | Where |
+| --- | --- |
+| Forms | `src/contact.md`, `src/feedback.njk` |
+| Thank-you pages | `src/contact-thanks.njk`, `src/feedback-thanks.njk` |
+| Checking answers and sending them | `lib/forms.js`, `functions/api/form.js` |
+
+### Set up Resend (once)
+
+1. Sign up at [resend.com](https://resend.com). The free plan allows 3,000 emails a month.
+2. Go to **Domains**, choose **Add Domain**, and enter `cattell.com`. Choosing the Ireland (EU) region keeps answers in Europe.
+3. Resend shows a few DNS records (for `send.cattell.com` and `resend._domainkey.cattell.com`). Add them where the cattell.com DNS is managed. They sit alongside your Google Workspace email records: do not change or remove any existing `MX` or `TXT` records for `cattell.com` itself.
+4. Wait for Resend to show the domain as **Verified**.
+5. Go to **API Keys**, choose **Create API Key**, give it **Sending access** for `cattell.com` only, and copy the key.
+6. In Cloudflare, open the Pages project, then **Settings** > **Variables and Secrets**, and add for Production:
+   - `RESEND_API_KEY`: the key, as a **Secret**
+   - `FORM_TO`: the address to send answers to, for example `james@cattell.com`
+7. Redeploy (**Deployments** > latest > **Retry deployment**), then send yourself a test message from each form.
+
+Optional: `FORM_FROM` changes who the emails come from. The default is `cattell.com forms <forms@cattell.com>`.
+
+Until this is set up, the forms show a message asking people to email you instead.
+
 ## Run it on your computer
 
 You need [Node.js](https://nodejs.org/) 20 or newer.
