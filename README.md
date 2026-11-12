@@ -39,7 +39,7 @@ To set a goal for a year, edit `src/_data/goals.json`.
 | Week notes | `src/week-notes/YEAR/WEEK.md` |
 | Text at the bottom of the week notes index | `src/week-notes/index.md` |
 | Unconference book and posts | `src/unconference/` |
-| How-to pages | `src/how-to/` |
+| Hidden stuff page and Bitwarden guide | `src/hidden/` |
 | Images | `src/assets/img/` |
 | Menu, site name | `src/_data/site.json` |
 | Page design | `src/_includes/layouts/` and `src/assets/css/site.css` |

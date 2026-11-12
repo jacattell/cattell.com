@@ -16,4 +16,4 @@ Please do:
 - [contact](/contact/) me,
 - give [feedback](/feedback/).
 
-<p class="pi"><a href="/how-to/">π<span class="visually-hidden"> (how-to guides)</span></a></p>
+<p class="pi"><a href="/hidden/">π<span class="visually-hidden"> (hidden stuff)</span></a></p>
