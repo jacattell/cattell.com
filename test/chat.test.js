@@ -533,3 +533,25 @@ test("chat logs: a finished chat reply is saved to the log", async () => {
     globalThis.fetch = realFetch;
   }
 });
+
+test("chat logs: the list still shows dates and questions when a summary is missing", async () => {
+  const { handleCallback, handleEdit } = await import("../lib/editor.js");
+  const kv = fakeKV();
+  const started = Date.now() - 600e3;
+  const id = String(1e13 - started).padStart(13, "0") + "-abcd1234";
+  // Saved without the summary that normally goes with the key
+  await kv.put(`conv:${id}`, JSON.stringify({ started: new Date(started).toISOString(), turns: [{ q: "Hello?", a: "Hi." }, { q: "Bye", a: "Bye." }] }));
+  const env = { GITHUB_CLIENT_ID: "id", GITHUB_CLIENT_SECRET: "secret", SESSION_SECRET: "w".repeat(40), CHAT_LOGS: kv };
+  const github = async (url) => new Response(JSON.stringify(url.includes("access_token") ? { access_token: "t" } : { login: "jacattell" }));
+  const signin = await handleCallback(new Request("https://www.cattell.com/api/auth/callback?code=a&state=s", { headers: { Cookie: "edit_state=s" } }), env, github);
+  const Cookie = signin.headers.getSetCookie().find((c) => c.startsWith("edit_session=")).split(";")[0];
+  const { chats: [chat] } = await (await handleEdit(new Request("https://www.cattell.com/api/edit/chats", { headers: { Cookie } }), env)).json();
+  assert.equal(chat.started, new Date(started).toISOString());
+  assert.equal(chat.turns, 2);
+  assert.equal(chat.first, "Hello?");
+  // Nothing at all to go on: the start time still comes from the ID
+  kv.store.set(`conv:${id}`, { value: "{}", opts: {} });
+  const { chats: [bare] } = await (await handleEdit(new Request("https://www.cattell.com/api/edit/chats", { headers: { Cookie } }), env)).json();
+  assert.equal(bare.started, new Date(started).toISOString());
+  assert.equal(bare.turns, 0);
+});

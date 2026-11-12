@@ -11,7 +11,11 @@
     e.append(...children);
     return e;
   };
-  const when = (iso) => new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" });
+  const when = (iso) => {
+    const d = iso ? new Date(iso) : null;
+    return !d || isNaN(d) ? "Unknown time" : d.toLocaleString("en-GB", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" });
+  };
+  const count = (n) => (n > 0 ? ` · ${n} ${n === 1 ? "question" : "questions"}` : "");
   async function api(path) {
     const res = await fetch("/api/edit/" + path, { credentials: "same-origin" });
     const data = await res.json().catch(() => ({}));
@@ -44,8 +48,8 @@
       button.textContent = "Hide conversation";
     } }, "Show conversation");
     return el("li", { class: "chat-item" },
-      el("p", { class: "post-meta" }, el("time", { datetime: chat.started }, when(chat.started)), ` · ${chat.turns} ${chat.turns === 1 ? "question" : "questions"}`),
-      el("p", { class: "chat-first" }, chat.first || ""),
+      el("p", { class: "post-meta" }, el("time", { datetime: chat.started || "" }, when(chat.started)), count(chat.turns)),
+      ...(chat.first ? [el("p", { class: "chat-first" }, chat.first)] : []),
       button, body);
   }
 
