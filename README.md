@@ -232,18 +232,9 @@ To go back to Google Sites, remove the custom domains and set the `www` record b
 - Conversations are limited to 20 messages of up to 2,000 characters each.
 - **Chat logs:** when the `CHAT_LOGS` KV binding is set, each conversation's questions and answers are saved (no IP address or other details), and Cloudflare deletes each one automatically 30 days after its last message. The Chat page tells visitors this. Read them at `/edit/chats/`, signing in with GitHub as for the week notes editor. The code is in `lib/chat.js` (saving), `lib/editor.js` (reading) and `src/assets/js/chat-logs.js`.
 
-### Set up chat logs (once)
+### Chat logs storage
 
-1. In Cloudflare, go to **Storage & databases** > **KV** (or **Workers & Pages** > **KV**) and choose **Create** a namespace called `cattell-chat-logs`.
-2. Open the Pages project, then **Settings** > **Bindings** > **Add** > **KV namespace**. Set the variable name to `CHAT_LOGS`, choose `cattell-chat-logs`, and save for Production.
-   - If Cloudflare says bindings are managed in `wrangler.toml`, add this to `wrangler.toml` instead, with the namespace's ID (shown on the KV page):
-
-     ```toml
-     [[kv_namespaces]]
-     binding = "CHAT_LOGS"
-     id = "THE-NAMESPACE-ID"
-     ```
-3. Redeploy. New conversations then appear at `/edit/chats/`.
+Conversations are kept in the Cloudflare KV namespace `cattell-chat-logs`, connected as `CHAT_LOGS` in `wrangler.toml`. To use a different namespace, change its `id` there.
 
 Without the binding, nothing is saved and the chat works as before.
 

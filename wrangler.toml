@@ -2,3 +2,8 @@
 name = "cattell-com"
 pages_build_output_dir = "_site"
 compatibility_date = "2026-11-01"
+
+# Chat logs: conversations are kept here for 30 days (see "Chat logs" in the README).
+[[kv_namespaces]]
+binding = "CHAT_LOGS"
+id = "460882b27420480cbe556d48ac0e1224"
