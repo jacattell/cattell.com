@@ -259,7 +259,7 @@ test("the hidden GOV.UK version has a copy of every page, kept out of search eng
 test("the How-to page has moved to Hidden stuff, and its old addresses redirect", () => {
   const html = fs.readFileSync("_site/hidden/index.html", "utf8");
   assert.match(html, /<h1>Hidden stuff<\/h1>/);
-  for (const link of ["/hidden/bitwarden-desktop-upgrade/", "/archive/", "/govuk/"]) assert.ok(html.includes(`href="${link}"`), link);
+  for (const link of ["/hidden/bitwarden-desktop-upgrade/", "/govuk/", "https://multi-post.cattell.com/", "/archive/"]) assert.ok(html.includes(`href="${link}"`), link);
   assert.ok(!html.includes("multi-boot"));
   assert.ok(fs.existsSync("_site/hidden/bitwarden-desktop-upgrade/index.html"));
   const rules = fs.readFileSync("_site/_redirects", "utf8");
