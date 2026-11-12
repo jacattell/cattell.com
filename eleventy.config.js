@@ -63,7 +63,7 @@ export default function (eleventyConfig) {
       .replace(/<(textarea)(\s[^>]*)?>/g, (m, t, a = "") => addClass(t, a, "govuk-textarea"))
       .replace(/<(input)(\s[^>]*type="(?:text|email|search)"[^>]*)>/g, (m, t, a) => addClass(t, a, "govuk-input"))
       .replace(/<(button)(\s[^>]*)>/g, (m, t, a) => (/class="[^"]*secondary/.test(a) ? addClass(t, a.replace(/class="secondary"/, 'class="govuk-button govuk-button--secondary"'), "") : addClass(t, a, "govuk-button")))
-      .replace(/(href|action)="\/(?!govuk\/|assets\/|api\/|favicon|[^"]*\.(?:xml|json|txt|svg|webp|jpg|png)")([^"]*)"/g, '$1="/govuk/$2"');
+      .replace(/(href|action)="\/(?!govuk\/|assets\/|api\/|edit\/|favicon|[^"]*\.(?:xml|json|txt|svg|webp|jpg|png)")([^"]*)"/g, '$1="/govuk/$2"');
   eleventyConfig.addTransform("govuk-version", function (content) {
     if (!(this.page.outputPath || "").endsWith(".html") || !this.page.url.startsWith("/govuk/")) return content;
     return content.replace(/(<main\b[^>]*>)([\s\S]*?)(<\/main>)/, (m, open, inner, close) => open + govukise(inner) + close);

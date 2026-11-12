@@ -380,3 +380,8 @@ test("the editor page is hidden from search engines and the GOV.UK copy", () => 
   assert.ok(!fs.existsSync("_site/govuk/edit/index.html"));
   assert.match(fs.readFileSync("_site/_headers", "utf8"), /\/edit\/\*\s+X-Robots-Tag: noindex, nofollow/);
 });
+
+test("Hidden stuff links to the editor, in both versions of the site", () => {
+  assert.match(fs.readFileSync("_site/hidden/index.html", "utf8"), /<a href="\/edit\/">Edit Week notes<\/a>/);
+  assert.match(fs.readFileSync("_site/govuk/hidden/index.html", "utf8"), /href="\/edit\/">Edit Week notes<\/a>/, "the GOV.UK version links to the real editor");
+});
