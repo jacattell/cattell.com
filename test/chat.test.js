@@ -555,3 +555,8 @@ test("chat logs: the list still shows dates and questions when a summary is miss
   assert.equal(bare.started, new Date(started).toISOString());
   assert.equal(bare.turns, 0);
 });
+
+test("Hidden stuff links to the chat logs, in both versions of the site", () => {
+  assert.match(fs.readFileSync("_site/hidden/index.html", "utf8"), /<a href="\/edit\/chats\/">Chat logs<\/a>/);
+  assert.match(fs.readFileSync("_site/govuk/hidden/index.html", "utf8"), /href="\/edit\/chats\/">Chat logs<\/a>/);
+});
