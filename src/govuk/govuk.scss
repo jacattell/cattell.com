@@ -1,0 +1,57 @@
+// Styles for the hidden GOV.UK Design System version of the site (/govuk/).
+// The GOV.UK crown, logo and GDS Transport font may only be used on GOV.UK
+// services, so this uses GOV.UK Frontend's styles with an ordinary font and
+// none of those brand assets.
+@use "govuk-frontend/dist/govuk" as * with (
+  $govuk-font-family: ("Helvetica Neue", arial, sans-serif),
+  $govuk-include-default-font-face: false,
+  $govuk-assets-path: "/govuk/assets/"
+);
+
+// Parts of this site that GOV.UK Frontend has no component for.
+.visually-hidden { @include govuk-visually-hidden; }
+.hint, .goal, .crumb { color: $govuk-secondary-text-colour; }
+.pi { text-align: right; }
+.video { position: relative; aspect-ratio: 16 / 9; margin-bottom: govuk-spacing(4); }
+.video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.govuk-main-wrapper img { max-width: 100%; height: auto; }
+.govuk-main-wrapper { overflow-wrap: anywhere; }
+
+// Week notes lists
+.note-list { list-style: none; padding: 0; @include govuk-font($size: 19); }
+.note-list li { display: grid; grid-template-columns: 6rem 1fr; gap: govuk-spacing(3); padding: govuk-spacing(2) 0; border-top: 1px solid $govuk-border-colour; }
+.note-list .summary { color: $govuk-secondary-text-colour; }
+.years-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: govuk-spacing(1) govuk-spacing(4); }
+
+// Chat
+.chat-log { border: 1px solid $govuk-border-colour; padding: govuk-spacing(3); min-height: 12rem; margin-bottom: govuk-spacing(4); @include govuk-font($size: 19); }
+.chat-log:empty::before { content: "Your conversation will appear here."; color: $govuk-secondary-text-colour; }
+.msg { margin: 0 0 govuk-spacing(3); white-space: pre-wrap; }
+.msg .who { display: block; font-weight: $govuk-font-weight-bold; color: $govuk-secondary-text-colour; @include govuk-font($size: 16, $weight: bold); }
+.msg.error { color: $govuk-error-colour; }
+.chat-form .row { display: flex; flex-wrap: wrap; gap: govuk-spacing(3); align-items: center; }
+.chat-form .row .govuk-button { margin-bottom: 0; }
+
+// Social media archive
+.archive-search fieldset { border: 0; margin: govuk-spacing(2) 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: govuk-spacing(1) govuk-spacing(4); @include govuk-font($size: 19); }
+.archive-search fieldset label { white-space: nowrap; }
+.post { border-top: 1px solid $govuk-border-colour; padding: govuk-spacing(3) 0; }
+.post-meta, .post-on, .post-media { color: $govuk-secondary-text-colour; margin: 0 0 govuk-spacing(1); @include govuk-font($size: 16); }
+.post-text { margin: 0 0 govuk-spacing(2); @include govuk-font($size: 19); }
+.post-images { display: grid; grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr)); gap: govuk-spacing(2); margin: 0 0 govuk-spacing(2); }
+.post-images a { display: block; }
+.post-images img { display: block; width: 100%; height: 10rem; object-fit: cover; }
+.post-images a.missing { color: $govuk-secondary-text-colour; @include govuk-font($size: 16); }
+.post-videos { display: flex; flex-wrap: wrap; gap: govuk-spacing(2); margin: 0 0 govuk-spacing(2); }
+.yt { position: relative; display: block; width: 100%; max-width: 28rem; aspect-ratio: 16 / 9; border: 0; overflow: hidden; background: $govuk-text-colour; }
+.yt.yt-short { width: 12rem; aspect-ratio: 9 / 16; }
+.yt img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.yt-play { position: absolute; left: govuk-spacing(2); bottom: govuk-spacing(2); padding: govuk-spacing(1) govuk-spacing(2); background: $govuk-text-colour; color: govuk-colour("white"); @include govuk-font($size: 16, $weight: bold); }
+
+// Forms
+.site-form fieldset { border: 0; margin: 0 0 govuk-spacing(4); padding: 0; }
+.site-form label.choice { display: block; margin: govuk-spacing(1) 0; @include govuk-font($size: 19); }
+.site-form label.sub-label { display: block; margin: govuk-spacing(3) 0 govuk-spacing(1); @include govuk-font($size: 19); }
+.site-form input[type="radio"] { width: 1.2rem; height: 1.2rem; margin-right: govuk-spacing(2); vertical-align: -0.15rem; }
+.site-form .govuk-input, .site-form .govuk-textarea { margin-bottom: govuk-spacing(4); }
+.site-form .trap { position: absolute; left: -999rem; }

@@ -1,0 +1,20 @@
+---
+# GOV.UK version of the week notes year pages (the main site's are in src/week-notes/year.njk).
+pagination:
+  data: collections.noteYears
+  size: 1
+  alias: y
+permalink: "/govuk/week-notes/{{ y.year }}/"
+layout: layouts/govuk.njk
+eleventyExcludeFromCollections: true
+eleventyComputed:
+  p:
+    url: "/week-notes/{{ y.year }}/"
+    data:
+      title: "Week notes {{ y.year }}"
+---
+<p class="crumb"><a href="/week-notes/">Week notes</a></p>
+<h1>Week notes {{ y.year }}</h1>
+{%- if goals[y.year] %}<p class="goal">Goal: {{ goals[y.year] }}</p>{% endif %}
+{%- set notes = y.notes %}
+{% include "note-list.njk" %}

@@ -1,0 +1,11 @@
+---
+# A GOV.UK Design System copy of every page of the main site, at /govuk/…
+# Hidden: not linked from the main site, and marked "noindex" for search engines.
+pagination:
+  data: collections.govukPages
+  size: 1
+  alias: p
+permalink: "/govuk{{ p.url }}"
+layout: layouts/govuk.njk
+eleventyExcludeFromCollections: true
+---

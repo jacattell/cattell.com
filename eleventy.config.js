@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import * as sass from "sass";
 
 // Monday of an ISO week, as a UTC date.
 function isoWeekStart(year, week) {
@@ -13,6 +14,58 @@ function isoWeekStart(year, week) {
 
 export default function (eleventyConfig) {
   eleventyConfig.addPassthroughCopy("src/assets");
+
+  // Hidden GOV.UK Design System version (/govuk/): GOV.UK Frontend's JavaScript,
+  // and its styles compiled with an ordinary font (see src/govuk/govuk.scss).
+  eleventyConfig.addPassthroughCopy({ "node_modules/govuk-frontend/dist/govuk/govuk-frontend.min.js": "govuk/assets/govuk-frontend.min.js" });
+  eleventyConfig.addWatchTarget("src/govuk/govuk.scss");
+  eleventyConfig.on("eleventy.before", ({ directories }) => {
+    const css = sass.compile("src/govuk/govuk.scss", { loadPaths: ["node_modules"], style: "compressed", quietDeps: true, silenceDeprecations: ["import"] }).css;
+    const out = path.join(directories.output, "govuk", "assets", "govuk.css");
+    fs.mkdirSync(path.dirname(out), { recursive: true });
+    fs.writeFileSync(out, css);
+  });
+  eleventyConfig.addFilter("govukCssVersion", () => {
+    const file = "src/govuk/govuk.scss";
+    return crypto.createHash("sha256").update(fs.readFileSync(file)).update(fs.readFileSync("node_modules/govuk-frontend/package.json")).digest("hex").slice(0, 8);
+  });
+
+  // Every page of the main site, for the GOV.UK version to copy.
+  eleventyConfig.addCollection("govukPages", (api) =>
+    api
+      .getAll()
+      .filter((p) => (p.outputPath || "").endsWith(".html") && p.url !== "/404.html" && !p.url.startsWith("/govuk/"))
+      // Year pages have their own GOV.UK templates (src/govuk/*-years.njk).
+      .filter((p) => !/^\/(archive|week-notes)\/\d{4}\/$/.test(p.url))
+  );
+
+  // In the GOV.UK version, give each page's own content GOV.UK's styles, and keep
+  // its links inside the GOV.UK version.
+  const addClass = (tag, attrs, cls) => {
+    if (/\bclass="/.test(attrs)) return attrs.includes("govuk-") ? `<${tag}${attrs}>` : `<${tag}${attrs.replace(/\bclass="/, `class="${cls} `)}>`;
+    return `<${tag} class="${cls}"${attrs}>`;
+  };
+  const govukise = (html) =>
+    html
+      .replace(/<(h1)(\s[^>]*)?>/g, (m, t, a = "") => addClass(t, a, "govuk-heading-xl"))
+      .replace(/<(h2)(\s[^>]*)?>/g, (m, t, a = "") => addClass(t, a, "govuk-heading-l"))
+      .replace(/<(h3)(\s[^>]*)?>/g, (m, t, a = "") => addClass(t, a, "govuk-heading-m"))
+      .replace(/<(h4)(\s[^>]*)?>/g, (m, t, a = "") => addClass(t, a, "govuk-heading-s"))
+      .replace(/<(p)(\s[^>]*)?>/g, (m, t, a = "") => addClass(t, a, "govuk-body"))
+      .replace(/<(ul)(\s[^>]*)?>/g, (m, t, a = "") => (a.includes("class=") ? m : addClass(t, a, "govuk-list govuk-list--bullet")))
+      .replace(/<(ol)(\s[^>]*)?>/g, (m, t, a = "") => (a.includes("class=") ? m : addClass(t, a, "govuk-list govuk-list--number")))
+      .replace(/<(a)(\s[^>]*)>/g, (m, t, a) => (a.includes("class=") ? m : addClass(t, a, "govuk-link")))
+      .replace(/<(table)(\s[^>]*)?>/g, (m, t, a = "") => addClass(t, a, "govuk-table"))
+      .replace(/<(label)(\s[^>]*)?>/g, (m, t, a = "") => (a.includes("class=") ? m : addClass(t, a, "govuk-label govuk-label--s")))
+      .replace(/<(legend)(\s[^>]*)?>/g, (m, t, a = "") => addClass(t, a, "govuk-fieldset__legend govuk-fieldset__legend--s"))
+      .replace(/<(textarea)(\s[^>]*)?>/g, (m, t, a = "") => addClass(t, a, "govuk-textarea"))
+      .replace(/<(input)(\s[^>]*type="(?:text|email|search)"[^>]*)>/g, (m, t, a) => addClass(t, a, "govuk-input"))
+      .replace(/<(button)(\s[^>]*)>/g, (m, t, a) => (/class="[^"]*secondary/.test(a) ? addClass(t, a.replace(/class="secondary"/, 'class="govuk-button govuk-button--secondary"'), "") : addClass(t, a, "govuk-button")))
+      .replace(/(href|action)="\/(?!govuk\/|assets\/|api\/|favicon|[^"]*\.(?:xml|json|txt|svg|webp|jpg|png)")([^"]*)"/g, '$1="/govuk/$2"');
+  eleventyConfig.addTransform("govuk-version", function (content) {
+    if (!(this.page.outputPath || "").endsWith(".html") || !this.page.url.startsWith("/govuk/")) return content;
+    return content.replace(/(<main\b[^>]*>)([\s\S]*?)(<\/main>)/, (m, open, inner, close) => open + govukise(inner) + close);
+  });
   eleventyConfig.addPassthroughCopy({ "src/assets/favicon.svg": "favicon.svg" });
 
   // Week notes, oldest first. Year and week come from the file path:

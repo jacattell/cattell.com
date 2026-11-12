@@ -1,0 +1,158 @@
+{#- Layout for the hidden GOV.UK Design System version of the site (/govuk/).
+    `p` is the main-site page being shown (url, data and, usually, templateContent).
+    Content is restyled by the "govuk-version" transform in eleventy.config.js. -#}
+{%- set pageTitle = p.data.noteTitle or p.data.title or site.title -%}
+{#- Most pages copy a main-site page's content; the year pages bring their own. -#}
+{%- set body = p.templateContent if p.templateContent else content -%}
+{%- set g = "/govuk" -%}
+<!doctype html>
+<html lang="en-GB" class="govuk-template">
+<head>
+  <meta charset="utf-8">
+  <title>{% if pageTitle != site.title %}{{ pageTitle }} - {% endif %}{{ site.title }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#0b0c0c">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/govuk/assets/govuk.css?v={{ '' | govukCssVersion }}">
+</head>
+<body class="govuk-template__body">
+  <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
+  <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link">Skip to main content</a>
+
+  <header class="govuk-template__header">
+    <section aria-label="Site information" class="govuk-service-navigation" data-module="govuk-service-navigation">
+      <div class="govuk-width-container">
+        <div class="govuk-service-navigation__container">
+          <span class="govuk-service-navigation__service-name">
+            <a href="{{ g }}/" class="govuk-service-navigation__link">{{ site.title }}</a>
+          </span>
+          <nav aria-label="Menu" class="govuk-service-navigation__wrapper">
+            <button type="button" class="govuk-service-navigation__toggle govuk-js-service-navigation-toggle" aria-controls="navigation" hidden aria-hidden="true">Menu</button>
+            <ul class="govuk-service-navigation__list" id="navigation">
+              {%- for item in site.nav %}
+              {%- set active = p.url.startsWith(item.url) %}
+              <li class="govuk-service-navigation__item{% if active %} govuk-service-navigation__item--active{% endif %}">
+                <a class="govuk-service-navigation__link" href="{{ g }}{{ item.url }}"{% if active %} aria-current="{{ 'page' if p.url == item.url else 'true' }}"{% endif %}>
+                  {%- if active %}<strong class="govuk-service-navigation__active-fallback">{{ item.text }}</strong>{% else %}{{ item.text }}{% endif -%}
+                </a>
+              </li>
+              {%- endfor %}
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </section>
+  </header>
+
+  <div class="govuk-width-container">
+    <div class="govuk-phase-banner">
+      <p class="govuk-phase-banner__content">
+        <strong class="govuk-tag govuk-phase-banner__content__tag">Preview</strong>
+        <span class="govuk-phase-banner__text">This is a hidden version of this website using the GOV.UK Design System. <a class="govuk-link" href="{{ p.url }}">View this page on the main website</a>.</span>
+      </p>
+    </div>
+
+    {%- if p.data.noteTitle %}
+    <nav class="govuk-breadcrumbs" aria-label="Breadcrumb">
+      <ol class="govuk-breadcrumbs__list">
+        <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{{ g }}/week-notes/">Week notes</a></li>
+        <li class="govuk-breadcrumbs__list-item"><a class="govuk-breadcrumbs__link" href="{{ g }}/week-notes/{{ p.data.year }}/">{{ p.data.year }}</a></li>
+      </ol>
+    </nav>
+    {%- endif %}
+
+    <main class="govuk-main-wrapper" id="main-content">
+      <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+          {%- if '<h1' not in body %}
+          <h1 class="{{ 'govuk-visually-hidden' if p.url == '/' else 'govuk-heading-xl' }}">{{ pageTitle }}</h1>
+          {%- endif %}
+
+          {{ body | safe }}
+
+          {#- Parts the main site's layouts add around a page's content. #}
+          {%- if p.url == "/" %}
+            {%- set latest = collections.weekNotes | last %}
+            <h2>Latest week note</h2>
+            <p><a href="{{ latest.url }}">{{ latest.data.noteTitle }}</a>{% if latest.data.summary %} - {{ latest.data.summary }}{% endif %}</p>
+          {%- endif %}
+
+          {%- if p.url == "/week-notes/" %}
+            {%- for y in collections.noteYears %}
+            <h2 id="y{{ y.year }}"><a href="/week-notes/{{ y.year }}/">{{ y.year }}</a></h2>
+            {%- if goals[y.year] %}<p class="goal">Goal: {{ goals[y.year] }}</p>{% endif %}
+            {%- set notes = y.notes %}
+            {% include "note-list.njk" %}
+            {%- endfor %}
+          {%- endif %}
+
+          {%- if p.url == "/unconference/" %}
+            <h2>Chapters</h2>
+            <ol>
+              {%- for ch in collections.unconferenceBook %}{% if ch.url != "/unconference/" %}<li><a href="{{ ch.url }}">{{ ch.data.title }}</a></li>{% endif %}{% endfor %}
+            </ol>
+            {%- if collections.unconferencePosts.length %}
+            <h2>Blog posts</h2>
+            <ul>
+              {%- for post in collections.unconferencePosts %}<li><a href="{{ post.url }}">{{ post.data.title }}</a></li>{% endfor %}
+            </ul>
+            {%- endif %}
+          {%- endif %}
+
+          {#- Previous and next links: week notes and unconference chapters. #}
+          {%- set series = collections.weekNotes if p.data.noteTitle else (collections.unconferenceBook if (p.data.bookOrder !== undefined) else false) %}
+          {%- if series %}
+            {%- set prev = series | getPreviousCollectionItem(p.data.page) %}
+            {%- set next = series | getNextCollectionItem(p.data.page) %}
+            {%- if prev or next %}
+            <nav class="govuk-pagination govuk-pagination--block" aria-label="{{ 'Week notes' if p.data.noteTitle else 'Chapters' }}">
+              {%- if prev %}
+              <div class="govuk-pagination__prev">
+                <a class="govuk-link govuk-pagination__link" href="{{ g }}{{ prev.url }}" rel="prev">
+                  <svg class="govuk-pagination__icon govuk-pagination__icon--prev" xmlns="http://www.w3.org/2000/svg" height="13" width="15" aria-hidden="true" focusable="false" viewBox="0 0 15 13"><path d="m6.5938-0.0078125-6.7266 6.7266 6.7441 6.4062 1.377-1.449-4.1856-3.9768h12.896v-2h-12.984l4.2931-4.293-1.414-1.414z"></path></svg>
+                  <span class="govuk-pagination__link-title govuk-pagination__link-title--decorated">{{ "Older" if p.data.noteTitle else "Previous" }}<span class="govuk-visually-hidden">:</span></span>
+                  <span class="govuk-visually-hidden">:</span>
+                  <span class="govuk-pagination__link-label">{{ prev.data.noteTitle or prev.data.title }}</span>
+                </a>
+              </div>
+              {%- endif %}
+              {%- if next %}
+              <div class="govuk-pagination__next">
+                <a class="govuk-link govuk-pagination__link" href="{{ g }}{{ next.url }}" rel="next">
+                  <svg class="govuk-pagination__icon govuk-pagination__icon--next" xmlns="http://www.w3.org/2000/svg" height="13" width="15" aria-hidden="true" focusable="false" viewBox="0 0 15 13"><path d="m8.107-0.0078125-1.4136 1.414 4.2926 4.293h-12.986v2h12.896l-4.1855 3.9766 1.377 1.4492 6.7441-6.4062-6.7246-6.7266z"></path></svg>
+                  <span class="govuk-pagination__link-title govuk-pagination__link-title--decorated">{{ "Newer" if p.data.noteTitle else "Next" }}<span class="govuk-visually-hidden">:</span></span>
+                  <span class="govuk-visually-hidden">:</span>
+                  <span class="govuk-pagination__link-label">{{ next.data.noteTitle or next.data.title }}</span>
+                </a>
+              </div>
+              {%- endif %}
+            </nav>
+            {%- endif %}
+          {%- endif %}
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer class="govuk-footer">
+    <div class="govuk-width-container">
+      <div class="govuk-footer__meta">
+        <div class="govuk-footer__meta-item govuk-footer__meta-item--grow">
+          <h2 class="govuk-visually-hidden">Links</h2>
+          <ul class="govuk-footer__inline-list">
+            <li class="govuk-footer__inline-list-item"><a class="govuk-footer__link" href="{{ g }}/contact/">Contact me</a></li>
+            <li class="govuk-footer__inline-list-item"><a class="govuk-footer__link" href="/week-notes/feed.xml">Week notes feed</a></li>
+            <li class="govuk-footer__inline-list-item"><a class="govuk-footer__link" href="https://github.com/jacattell/cattell.com">Source on GitHub</a></li>
+          </ul>
+          <span class="govuk-footer__licence-description">© {{ site.author }}. All content is available under the <a class="govuk-footer__link" href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license">Creative Commons BY-SA 4.0</a> licence, except where otherwise stated</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <script type="module">
+    import { initAll } from "/govuk/assets/govuk-frontend.min.js";
+    initAll();
+  </script>
+</body>
+</html>

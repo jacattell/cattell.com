@@ -239,3 +239,16 @@ test("the feedback form lists the places the site accepts", async () => {
   assert.deepEqual(shown, [...WORKED_ON, "Other"]);
   assert.deepEqual(WORKED_ON, ["UKGovCamp", "OneTeamGov"]);
 });
+
+test("the hidden GOV.UK version has a copy of every page, kept out of search engines", () => {
+  const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(`${d}/${e.name}`) : e.name === "index.html" ? [`${d}/`] : []));
+  const main = walk("_site").filter((p) => !p.startsWith("_site/govuk/")).map((p) => p.slice(5)).sort();
+  const govuk = walk("_site/govuk").map((p) => p.slice(11)).sort();
+  assert.deepEqual(govuk, main);
+  const html = fs.readFileSync("_site/govuk/week-notes/2026/14/index.html", "utf8");
+  assert.match(html, /<meta name="robots" content="noindex, nofollow">/);
+  assert.match(html, /class="govuk-heading-xl">Week 14, 2026</);
+  assert.ok(!/govuk-header__logo|GDS Transport/.test(html + fs.readFileSync("_site/govuk/assets/govuk.css", "utf8")), "no GOV.UK brand assets");
+  assert.match(fs.readFileSync("_site/_headers", "utf8"), /\/govuk\/\*\s+X-Robots-Tag: noindex, nofollow/);
+  assert.ok(!fs.readFileSync("_site/index.html", "utf8").includes("/govuk/"), "the main site does not link to it");
+});

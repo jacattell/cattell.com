@@ -95,6 +95,21 @@ Optional: `FORM_FROM` changes who the emails come from. The default is `cattell.
 
 Until this is set up, the forms show a message asking people to email you instead.
 
+## Hidden GOV.UK Design System version
+
+Every page also has a copy at `/govuk/…` (for example `/govuk/week-notes/`) styled with [GOV.UK Frontend](https://frontend.design-system.service.gov.uk/). Nothing on the main site links to it, and it tells search engines not to list it.
+
+- The copies are built from the same pages, so editing a page updates both versions.
+- The GOV.UK crown, logo and GDS Transport font may only be used on GOV.UK services, so the copy uses GOV.UK Frontend's styles with an ordinary font and none of those brand assets.
+- Forms in the copy send answers the same way, but their thank-you pages are the main site's.
+
+| What | Where |
+| --- | --- |
+| Page layout | `src/_includes/layouts/govuk.njk` |
+| Copies of the pages | `src/govuk/pages.njk`, `src/govuk/*-years.njk` |
+| Styles | `src/govuk/govuk.scss` |
+| Restyling each page's content | the `govuk-version` transform in `eleventy.config.js` |
+
 ## Run it on your computer
 
 You need [Node.js](https://nodejs.org/) 20 or newer.
