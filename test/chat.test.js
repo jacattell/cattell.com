@@ -206,6 +206,7 @@ test("the forms check answers and email them through Resend", async () => {
   assert.equal(sent[0].init.headers.Authorization, "Bearer test-key");
   assert.deepEqual(sent[0].init.body.to, ["james@example.com"]);
   assert.equal(sent[0].init.body.reply_to, "sam@example.org");
+  assert.equal(sent[0].init.body.from, "cattell.com forms <forms@updates.cattell.com>", "sends from the domain verified in Resend");
   assert.match(sent[0].init.body.text, /Hello James/);
 
   res = await handleForm(post({ form: "feedback", where: "Other", where_other: "DeliverCon", feedback: "Keep running unconferences" }, "2.2.2.2"), env, fakeResend);

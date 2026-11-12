@@ -82,16 +82,16 @@ The contact form (on `/contact/`) and the feedback form (`/feedback/`) email eac
 ### Set up Resend (once)
 
 1. Sign up at [resend.com](https://resend.com). The free plan allows 3,000 emails a month.
-2. Go to **Domains**, choose **Add Domain**, and enter `cattell.com`. Choosing the Ireland (EU) region keeps answers in Europe.
-3. Resend shows a few DNS records (for `send.cattell.com` and `resend._domainkey.cattell.com`). Add them where the cattell.com DNS is managed. They sit alongside your Google Workspace email records: do not change or remove any existing `MX` or `TXT` records for `cattell.com` itself.
+2. Go to **Domains**, choose **Add Domain**, and enter `updates.cattell.com` (the forms send from `forms@updates.cattell.com`). Choosing the Ireland (EU) region keeps answers in Europe.
+3. Resend shows a few DNS records for `updates.cattell.com`. Add them where the cattell.com DNS is managed. They sit alongside your Google Workspace email records: do not change or remove any existing `MX` or `TXT` records for `cattell.com` itself.
 4. Wait for Resend to show the domain as **Verified**.
-5. Go to **API Keys**, choose **Create API Key**, give it **Sending access** for `cattell.com` only, and copy the key.
+5. Go to **API Keys**, choose **Create API Key**, give it **Sending access** for `updates.cattell.com` only, and copy the key.
 6. In Cloudflare, open the Pages project, then **Settings** > **Variables and Secrets**, and add for Production:
    - `RESEND_API_KEY`: the key, as a **Secret**
    - `FORM_TO`: the address to send answers to, for example `james@cattell.com`
 7. Redeploy (**Deployments** > latest > **Retry deployment**), then send yourself a test message from each form.
 
-Optional: `FORM_FROM` changes who the emails come from. The default is `cattell.com forms <forms@cattell.com>`.
+Optional: `FORM_FROM` changes who the emails come from. The default is `cattell.com forms <forms@updates.cattell.com>`; any other address must be on a domain verified in Resend.
 
 Until this is set up, the forms show a message asking people to email you instead.
 
