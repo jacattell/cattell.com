@@ -1,5 +1,7 @@
 ---
 title: "Contact me"
+# Lets this page include the "are you human" check.
+templateEngineOverride: njk,md
 ---
 
 Contact me via:
@@ -25,5 +27,6 @@ Your message is emailed to me; it is not stored on this website.
     <label for="website">Leave this empty</label>
     <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
   </div>
+  {% include "human-check.njk" %}
   <button type="submit">Send message</button>
 </form>

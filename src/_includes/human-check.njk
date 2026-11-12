@@ -1,0 +1,7 @@
+{%- if turnstile.siteKey %}
+<div class="human-check">
+  <div class="cf-turnstile" data-sitekey="{{ turnstile.siteKey }}" data-theme="auto" data-language="en-gb"></div>
+  <noscript><p class="hint">The "are you human" check needs JavaScript. If you can't use it, please email me instead.</p></noscript>
+</div>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+{%- endif %}

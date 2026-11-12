@@ -71,7 +71,7 @@ Add `--all` to a script to download every post again rather than just new ones. 
 
 ## Contact and feedback forms
 
-The contact form (on `/contact/`) and the feedback form (`/feedback/`) email each answer to you through [Resend](https://resend.com). Nothing is stored on the website. The forms work without JavaScript, and have a hidden spam trap and a limit of 5 forms per visitor per hour.
+The contact form (on `/contact/`) and the feedback form (`/feedback/`) email each answer to you through [Resend](https://resend.com). Nothing is stored on the website. Spam protection: an "are you human" check ([Cloudflare Turnstile](https://www.cloudflare.com/application-services/products/turnstile/)), a hidden spam trap, and a limit of 5 forms per visitor per hour.
 
 | What | Where |
 | --- | --- |
@@ -94,6 +94,18 @@ The contact form (on `/contact/`) and the feedback form (`/feedback/`) email eac
 Optional: `FORM_FROM` changes who the emails come from. The default is `cattell.com forms <forms@updates.cattell.com>`; any other address must be on a domain verified in Resend.
 
 Until this is set up, the forms show a message asking people to email you instead.
+
+### Set up the "are you human" check (once)
+
+1. In Cloudflare, go to **Turnstile** and choose **Add widget**.
+2. Name it `cattell.com forms`, add the hostname `www.cattell.com`, and choose **Managed** mode. Most people then just see a box that ticks itself.
+3. Copy the **site key** and the **secret key**.
+4. In the Pages project, go to **Settings** > **Variables and Secrets**, and add for Production:
+   - `TURNSTILE_SITE_KEY`: the site key (it's public, so it doesn't need to be a secret)
+   - `TURNSTILE_SECRET_KEY`: the secret key, as a **Secret**
+5. Redeploy. The check appears above the Send button on both forms.
+
+Until both are set, the forms work without the check. The check needs JavaScript; people who can't use it are asked to email you instead.
 
 ## Hidden GOV.UK Design System version
 

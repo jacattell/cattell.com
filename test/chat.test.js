@@ -385,3 +385,42 @@ test("Hidden stuff links to the editor, in both versions of the site", () => {
   assert.match(fs.readFileSync("_site/hidden/index.html", "utf8"), /<a href="\/edit\/">Edit Week notes<\/a>/);
   assert.match(fs.readFileSync("_site/govuk/hidden/index.html", "utf8"), /href="\/edit\/">Edit Week notes<\/a>/, "the GOV.UK version links to the real editor");
 });
+
+test("the forms check visitors are human, once Turnstile is set up", async () => {
+  const { handleForm } = await import("../lib/forms.js");
+  const env = { RESEND_API_KEY: "test-key", FORM_TO: "james@example.com", TURNSTILE_SECRET_KEY: "turnstile-secret" };
+  const sent = [];
+  const net = (human) => async (url, init) => {
+    if (url.startsWith("https://challenges.cloudflare.com/")) {
+      sent.push({ check: Object.fromEntries(new URLSearchParams(init.body)) });
+      return new Response(JSON.stringify({ success: human }));
+    }
+    sent.push({ email: JSON.parse(init.body) });
+    return new Response("{}");
+  };
+  const post = (fields, ip) => new Request("https://www.cattell.com/api/form", { method: "POST", body: new URLSearchParams({ form: "contact", message: "Hello", email: "sam@example.org", ...fields }), headers: { "CF-Connecting-IP": ip } });
+
+  // No check done: refused, nothing sent
+  let res = await handleForm(post({}, "10.0.0.1"), env, net(true));
+  assert.equal(res.status, 400);
+  assert.match(await res.text(), /are you human/);
+  // Check failed: refused, nothing emailed
+  res = await handleForm(post({ "cf-turnstile-response": "bad" }, "10.0.0.2"), env, net(false));
+  assert.equal(res.status, 400);
+  assert.ok(!sent.some((s) => s.email));
+  // Check passed: emailed, and Cloudflare was asked with the secret, token and visitor address
+  res = await handleForm(post({ "cf-turnstile-response": "good" }, "10.0.0.3"), env, net(true));
+  assert.equal(res.headers.get("Location"), "/contact/thanks/");
+  assert.deepEqual(sent.at(-2).check, { secret: "turnstile-secret", response: "good", remoteip: "10.0.0.3" });
+  assert.ok(sent.at(-1).email);
+  // Cloudflare can't be reached: refused rather than let through
+  res = await handleForm(post({ "cf-turnstile-response": "good" }, "10.0.0.4"), env, async (url) => { if (url.includes("challenges")) throw new Error("down"); return new Response("{}"); });
+  assert.equal(res.status, 400);
+});
+
+test("the human check only appears on the forms once its site key is set", () => {
+  // Built without TURNSTILE_SITE_KEY here, so no check and no Cloudflare script.
+  for (const page of ["_site/contact/index.html", "_site/feedback/index.html"]) {
+    assert.ok(!fs.readFileSync(page, "utf8").includes("challenges.cloudflare.com"), page);
+  }
+});
