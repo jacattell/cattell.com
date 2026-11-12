@@ -248,7 +248,10 @@ test("the hidden GOV.UK version has a copy of every page, kept out of search eng
   const html = fs.readFileSync("_site/govuk/week-notes/2026/14/index.html", "utf8");
   assert.match(html, /<meta name="robots" content="noindex, nofollow">/);
   assert.match(html, /class="govuk-heading-xl">Week 14, 2026</);
-  assert.ok(!/govuk-header__logo|GDS Transport/.test(html + fs.readFileSync("_site/govuk/assets/govuk.css", "utf8")), "no GOV.UK brand assets");
+  // No GOV.UK brand assets: the pages don't use GOV.UK's header, crown or logo, and the styles load no GDS Transport font.
+  assert.ok(!/govuk-header|govuk-footer__crown|govuk-logo|<svg[^>]*crown/i.test(html), "no GOV.UK header, crown or logo on the page");
+  const css = fs.readFileSync("_site/govuk/assets/govuk.css", "utf8");
+  assert.ok(!/GDS Transport|@font-face/.test(css), "no GOV.UK font");
   assert.match(fs.readFileSync("_site/_headers", "utf8"), /\/govuk\/\*\s+X-Robots-Tag: noindex, nofollow/);
   assert.ok(!fs.readFileSync("_site/index.html", "utf8").includes("/govuk/"), "the main site does not link to it");
 });
