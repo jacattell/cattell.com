@@ -388,7 +388,7 @@ test("Hidden stuff links to the editor, in both versions of the site", () => {
 
 test("the forms check visitors are human, once Turnstile is set up", async () => {
   const { handleForm } = await import("../lib/forms.js");
-  const env = { RESEND_API_KEY: "test-key", FORM_TO: "james@example.com", TURNSTILE_SECRET_KEY: "turnstile-secret" };
+  const env = { RESEND_API_KEY: "test-key", FORM_TO: "james@example.com", TURNSTILE_SITE_KEY: "0x-site", TURNSTILE_SECRET_KEY: "turnstile-secret" };
   const sent = [];
   const net = (human) => async (url, init) => {
     if (url.startsWith("https://challenges.cloudflare.com/")) {
@@ -418,9 +418,21 @@ test("the forms check visitors are human, once Turnstile is set up", async () =>
   assert.equal(res.status, 400);
 });
 
-test("the human check only appears on the forms once its site key is set", () => {
-  // Built without TURNSTILE_SITE_KEY here, so no check and no Cloudflare script.
+test("the human check is only used when both keys are set, so the page and server agree", async () => {
+  const { handleForm, handleFormConfig } = await import("../lib/forms.js");
+  const key = async (env) => (await handleFormConfig(env).json()).turnstileSiteKey;
+  assert.equal(await key({}), null);
+  assert.equal(await key({ TURNSTILE_SECRET_KEY: "s" }), null, "secret alone: no check shown");
+  assert.equal(await key({ TURNSTILE_SITE_KEY: "0x-site" }), null, "site key alone: no check shown");
+  assert.equal(await key({ TURNSTILE_SITE_KEY: "0x-site", TURNSTILE_SECRET_KEY: "s" }), "0x-site");
+  // With only the secret set, forms still send (the check is off), rather than refusing everything.
+  const res = await handleForm(new Request("https://www.cattell.com/api/form", { method: "POST", body: new URLSearchParams({ form: "contact", message: "Hi", email: "a@b.co" }), headers: { "CF-Connecting-IP": "10.9.9.9" } }),
+    { RESEND_API_KEY: "k", FORM_TO: "j@example.com", TURNSTILE_SECRET_KEY: "s" }, async () => new Response("{}"));
+  assert.equal(res.headers.get("Location"), "/contact/thanks/");
+  // Both forms load the check's script
   for (const page of ["_site/contact/index.html", "_site/feedback/index.html"]) {
-    assert.ok(!fs.readFileSync(page, "utf8").includes("challenges.cloudflare.com"), page);
+    const html = fs.readFileSync(page, "utf8");
+    assert.match(html, /<div class="human-check" data-human-check hidden><\/div>/, page);
+    assert.match(html, /\/assets\/js\/human-check\.js\?v=/, page);
   }
 });

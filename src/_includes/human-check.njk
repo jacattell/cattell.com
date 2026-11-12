@@ -1,7 +1,5 @@
-{%- if turnstile.siteKey %}
-<div class="human-check">
-  <div class="cf-turnstile" data-sitekey="{{ turnstile.siteKey }}" data-theme="auto" data-language="en-gb"></div>
-  <noscript><p class="hint">The "are you human" check needs JavaScript. If you can't use it, please email me instead.</p></noscript>
-</div>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-{%- endif %}
+{#- "Are you human" check (Cloudflare Turnstile). The site key is fetched from the
+    server when the page loads (see lib/forms.js), so it only needs setting in
+    Cloudflare, like the secret key. Without keys, nothing appears. -#}
+<div class="human-check" data-human-check hidden></div>
+<script src="{{ '/assets/js/human-check.js' | versioned }}" defer></script>

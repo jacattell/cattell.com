@@ -101,11 +101,11 @@ Until this is set up, the forms show a message asking people to email you instea
 2. Name it `cattell.com forms`, add the hostname `www.cattell.com`, and choose **Managed** mode. Most people then just see a box that ticks itself.
 3. Copy the **site key** and the **secret key**.
 4. In the Pages project, go to **Settings** > **Variables and Secrets**, and add for Production:
-   - `TURNSTILE_SITE_KEY`: the site key (it's public, so it doesn't need to be a secret)
+   - `TURNSTILE_SITE_KEY`: the site key (it's public, so it can be a plain variable or a secret)
    - `TURNSTILE_SECRET_KEY`: the secret key, as a **Secret**
 5. Redeploy. The check appears above the Send button on both forms.
 
-Until both are set, the forms work without the check. The check needs JavaScript; people who can't use it are asked to email you instead.
+The check is only used when both keys are set; with one missing, the forms work without it. The check needs JavaScript; people who can't use it are asked to email you instead.
 
 ## Hidden GOV.UK Design System version
 
