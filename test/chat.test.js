@@ -267,3 +267,18 @@ test("the How-to page has moved to Hidden stuff, and its old addresses redirect"
   assert.match(rules, /^\/how-to\/bitwarden-desktop-upgrade \/hidden\/bitwarden-desktop-upgrade\/ 301$/m);
   assert.match(fs.readFileSync("_site/index.html", "utf8"), /href="\/hidden\/">π/);
 });
+
+test("each page's Source on GitHub link goes to that page's own file", () => {
+  const link = (file) => fs.readFileSync(file, "utf8").match(/href="([^"]+)">Source on GitHub/)[1];
+  const base = "https://github.com/jacattell/cattell.com/blob/main/";
+  assert.equal(link("_site/week-notes/2026/14/index.html"), base + "src/week-notes/2026/14.md");
+  assert.equal(link("_site/index.html"), base + "src/index.md");
+  assert.equal(link("_site/archive/2024/index.html"), base + "src/archive/year.njk");
+  assert.equal(link("_site/govuk/week-notes/2026/14/index.html"), base + "src/week-notes/2026/14.md", "GOV.UK copies link to the page they copy");
+  // Every link points at a file that exists in the repo
+  const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(`${d}/${e.name}`) : e.name.endsWith(".html") ? [`${d}/${e.name}`] : []));
+  for (const file of walk("_site")) {
+    const m = fs.readFileSync(file, "utf8").match(/href="https:\/\/github\.com\/jacattell\/cattell\.com\/blob\/main\/([^"]+)">Source on GitHub/);
+    if (m) assert.ok(fs.existsSync(m[1]), `${file}: ${m[1]}`);
+  }
+});

@@ -146,6 +146,11 @@ export default function (eleventyConfig) {
     new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" })
   );
 
+  // The page's own source file on GitHub, for the footer's "Source on GitHub" link.
+  eleventyConfig.addFilter("githubSource", (inputPath) =>
+    `https://github.com/jacattell/cattell.com/blob/main/${String(inputPath).replace(/^\.\//, "")}`
+  );
+
   eleventyConfig.addFilter("oneLine", (text) => String(text).replace(/\s+/g, " ").trim());
 
   eleventyConfig.addFilter("stripTags", (html) =>

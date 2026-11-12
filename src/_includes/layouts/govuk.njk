@@ -143,7 +143,7 @@
           <ul class="govuk-footer__inline-list">
             <li class="govuk-footer__inline-list-item"><a class="govuk-footer__link" href="{{ g }}/contact/">Contact me</a></li>
             <li class="govuk-footer__inline-list-item"><a class="govuk-footer__link" href="/week-notes/feed.xml">Week notes feed</a></li>
-            <li class="govuk-footer__inline-list-item"><a class="govuk-footer__link" href="https://github.com/jacattell/cattell.com">Source on GitHub</a></li>
+            <li class="govuk-footer__inline-list-item"><a class="govuk-footer__link" href="{{ (p.inputPath or page.inputPath) | githubSource }}">Source on GitHub</a></li>
           </ul>
           <span class="govuk-footer__licence-description">© {{ site.author }}. All content is available under the <a class="govuk-footer__link" href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license">Creative Commons BY-SA 4.0</a> licence, except where otherwise stated</span>
         </div>
