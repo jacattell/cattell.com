@@ -230,3 +230,11 @@ test("the forms check answers and email them through Resend", async () => {
   // Not set up yet
   assert.match(await (await handleForm(post({ form: "contact", message: "Hi", email: "a@b.co" }, "6.6.6.6"), {}, fakeResend)).text(), /not working yet/);
 });
+
+test("the feedback form lists the places the site accepts", async () => {
+  const { WORKED_ON } = await import("../lib/forms.js");
+  const html = fs.readFileSync("_site/feedback/index.html", "utf8");
+  const shown = [...html.matchAll(/name="where" value="([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(shown, [...WORKED_ON, "Other"]);
+  assert.deepEqual(WORKED_ON, ["UKGovCamp", "OneTeamGov"]);
+});

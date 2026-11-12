@@ -9,7 +9,7 @@ description: Tell me what I should stop, start or continue to do.
   <input type="hidden" name="form" value="feedback">
   <fieldset>
     <legend>Where did we work together?</legend>
-    {%- for place in ["UKGovCamp", "OneTeamGov", "Transform", "Department for Education"] %}
+    {%- for place in workedOn %}
     <label class="choice"><input type="radio" name="where" value="{{ place }}" required> {{ place }}</label>
     {%- endfor %}
     <label class="choice"><input type="radio" name="where" value="Other"> Somewhere else</label>
