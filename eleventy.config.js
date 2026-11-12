@@ -37,6 +37,8 @@ export default function (eleventyConfig) {
       .filter((p) => (p.outputPath || "").endsWith(".html") && p.url !== "/404.html" && !p.url.startsWith("/govuk/"))
       // Year pages have their own GOV.UK templates (src/govuk/*-years.njk).
       .filter((p) => !/^\/(archive|week-notes)\/\d{4}\/$/.test(p.url))
+      // The editor is not copied.
+      .filter((p) => !p.url.startsWith("/edit/"))
   );
 
   // In the GOV.UK version, give each page's own content GOV.UK's styles, and keep

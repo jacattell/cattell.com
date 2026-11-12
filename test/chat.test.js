@@ -240,9 +240,9 @@ test("the feedback form lists the places the site accepts", async () => {
   assert.deepEqual(WORKED_ON, ["UKGovCamp", "OneTeamGov"]);
 });
 
-test("the hidden GOV.UK version has a copy of every page, kept out of search engines", () => {
+test("the hidden GOV.UK version has a copy of every page (except the editor), kept out of search engines", () => {
   const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(`${d}/${e.name}`) : e.name === "index.html" ? [`${d}/`] : []));
-  const main = walk("_site").filter((p) => !p.startsWith("_site/govuk/")).map((p) => p.slice(5)).sort();
+  const main = walk("_site").filter((p) => !p.startsWith("_site/govuk/") && !p.startsWith("_site/edit/")).map((p) => p.slice(5)).sort();
   const govuk = walk("_site/govuk").map((p) => p.slice(11)).sort();
   assert.deepEqual(govuk, main);
   const html = fs.readFileSync("_site/govuk/week-notes/2026/14/index.html", "utf8");
@@ -281,4 +281,102 @@ test("each page's Source on GitHub link goes to that page's own file", () => {
     const m = fs.readFileSync(file, "utf8").match(/href="https:\/\/github\.com\/jacattell\/cattell\.com\/blob\/main\/([^"]+)">Source on GitHub/);
     if (m) assert.ok(fs.existsSync(m[1]), `${file}: ${m[1]}`);
   }
+});
+
+test("week notes editor: notes are read and written in the same format", async () => {
+  const { parseNote, buildNote, utf8ToBase64, base64ToUtf8 } = await import("../lib/editor.js");
+  const file = fs.readFileSync("src/week-notes/2026/14.md", "utf8");
+  const note = parseNote(file);
+  assert.equal(note.summary, "The Pensions Regulator");
+  assert.equal(buildNote(note), file, "reading and saving an unchanged note changes nothing");
+  assert.equal(buildNote({ summary: 'Say "hi"', body: "Text\n" }), '---\nsummary: "Say \\"hi\\""\n---\n\nText\n');
+  assert.equal(base64ToUtf8(utf8ToBase64("Café ✅ 💚")), "Café ✅ 💚");
+});
+
+test("week notes editor: sign-in only lets allowed GitHub accounts in", async () => {
+  const { handleLogin, handleCallback, handleEdit } = await import("../lib/editor.js");
+  const env = { GITHUB_CLIENT_ID: "id", GITHUB_CLIENT_SECRET: "secret", SESSION_SECRET: "x".repeat(40) };
+  // Not set up: says so
+  assert.equal((await handleLogin(new Request("https://www.cattell.com/api/auth/login"), {})).headers.get("Location"), "/edit/?problem=setup");
+  // Sign in: goes to GitHub with a state that must come back
+  const login = await handleLogin(new Request("https://www.cattell.com/api/auth/login"), env);
+  const to = new URL(login.headers.get("Location"));
+  assert.equal(to.origin + to.pathname, "https://github.com/login/oauth/authorize");
+  assert.equal(to.searchParams.get("redirect_uri"), "https://www.cattell.com/api/auth/callback");
+  const state = to.searchParams.get("state");
+  assert.match(login.headers.get("Set-Cookie"), new RegExp(`edit_state=${state};.*HttpOnly; Secure; SameSite=Lax`));
+
+  const fakeGitHub = (user) => async (url) =>
+    url.includes("access_token") ? new Response(JSON.stringify({ access_token: "gho_test" })) : new Response(JSON.stringify({ login: user }));
+  const back = (s, cookieState = state) => new Request(`https://www.cattell.com/api/auth/callback?code=abc&state=${s}`, { headers: { Cookie: `edit_state=${cookieState}` } });
+  // Wrong state: refused
+  assert.equal((await handleCallback(back("forged"), env, fakeGitHub("jacattell"))).headers.get("Location"), "/edit/?problem=signin");
+  // Someone else's account: refused
+  assert.equal((await handleCallback(back(state), env, fakeGitHub("someone-else"))).headers.get("Location"), "/edit/?problem=notallowed");
+  // James: signed in with an encrypted session cookie
+  const ok = await handleCallback(back(state), env, fakeGitHub("jacattell"));
+  assert.equal(ok.headers.get("Location"), "/edit/");
+  const session = ok.headers.getSetCookie().find((c) => c.startsWith("edit_session="));
+  assert.match(session, /HttpOnly; Secure; SameSite=Strict/);
+  assert.ok(!session.includes("gho_test"), "the GitHub token is not readable in the cookie");
+
+  const value = session.split(";")[0];
+  const me = await handleEdit(new Request("https://www.cattell.com/api/edit/me", { headers: { Cookie: value } }), env);
+  assert.deepEqual(await me.json(), { login: "jacattell" });
+  // A tampered cookie is not accepted
+  const bad = await handleEdit(new Request("https://www.cattell.com/api/edit/me", { headers: { Cookie: value.slice(0, -4) + "AAAA" } }), env);
+  assert.equal(bad.status, 401);
+});
+
+test("week notes editor: lists, opens and saves notes in the repo", async () => {
+  const { handleCallback, handleEdit, utf8ToBase64, base64ToUtf8 } = await import("../lib/editor.js");
+  const env = { GITHUB_CLIENT_ID: "id", GITHUB_CLIENT_SECRET: "secret", SESSION_SECRET: "y".repeat(40) };
+  const calls = [];
+  const github = async (url, init = {}) => {
+    calls.push({ url, init });
+    if (url.includes("access_token")) return new Response(JSON.stringify({ access_token: "gho_test" }));
+    if (url.endsWith("/user")) return new Response(JSON.stringify({ login: "jacattell" }));
+    if (url.includes("/git/trees/")) return new Response(JSON.stringify({ tree: [{ path: "src/week-notes/2025/49.md" }, { path: "src/week-notes/2026/07.md" }, { path: "src/index.md" }] }));
+    if (url.includes("/contents/") && (!init.method || init.method === "GET")) return new Response(JSON.stringify({ sha: "abc", content: utf8ToBase64('---\nsummary: "Old"\n---\n\nHello\n') }));
+    if (url.includes("/contents/") && init.method === "PUT") return new Response(JSON.stringify({ content: { sha: "def" }, commit: { html_url: "https://github.com/c/1" } }));
+    return new Response("{}", { status: 404 });
+  };
+  const signin = await handleCallback(new Request("https://www.cattell.com/api/auth/callback?code=a&state=s", { headers: { Cookie: "edit_state=s" } }), env, github);
+  const Cookie = signin.headers.getSetCookie().find((c) => c.startsWith("edit_session=")).split(";")[0];
+  const req = (path, init = {}) => new Request(`https://www.cattell.com/api/edit/${path}`, { ...init, headers: { Cookie, "X-Editor": "1", ...(init.headers || {}) } });
+
+  const list = await (await handleEdit(req("notes"), env, github)).json();
+  assert.deepEqual(list.notes.map((n) => n.path), ["2026/07", "2025/49"]);
+  const note = await (await handleEdit(req("note?path=2026/07"), env, github)).json();
+  assert.equal(note.summary, "Old");
+  assert.equal(note.body, "Hello\n");
+
+  const res = await handleEdit(req("note", { method: "PUT", body: JSON.stringify({ path: "2026/07", summary: "New", body: "Hello again", sha: "abc" }) }), env, github);
+  assert.equal(res.status, 200);
+  assert.equal((await res.json()).url, "/week-notes/2026/07/");
+  const put = calls.find((c) => c.init.method === "PUT");
+  assert.ok(put.url.endsWith("/repos/jacattell/cattell.com/contents/src/week-notes/2026/07.md"));
+  const sent = JSON.parse(put.init.body);
+  assert.equal(base64ToUtf8(sent.content), '---\nsummary: "New"\n---\n\nHello again\n');
+  assert.equal(sent.sha, "abc");
+  assert.equal(sent.branch, "main");
+  assert.equal(sent.message, "Update week note: week 7, 2026");
+
+  // Only week note files can be changed
+  assert.equal((await handleEdit(req("note", { method: "PUT", body: JSON.stringify({ path: "../../eleventy.config", body: "x" }) }), env, github)).status, 400);
+  assert.equal((await handleEdit(req("note?path=../index"), env, github)).status, 400);
+  // Changes need the editor's own header
+  const noHeader = new Request("https://www.cattell.com/api/edit/note", { method: "PUT", headers: { Cookie }, body: JSON.stringify({ path: "2026/07", body: "x" }) });
+  assert.equal((await handleEdit(noHeader, env, github)).status, 403);
+  // Not signed in
+  assert.equal((await handleEdit(new Request("https://www.cattell.com/api/edit/notes"), env, github)).status, 401);
+  // Preview
+  assert.match((await (await handleEdit(req("preview", { method: "POST", body: JSON.stringify({ body: "## Hi" }) }), env, github)).json()).html, /<h2>Hi<\/h2>/);
+});
+
+test("the editor page is hidden from search engines and the GOV.UK copy", () => {
+  const html = fs.readFileSync("_site/edit/index.html", "utf8");
+  assert.match(html, /<meta name="robots" content="noindex, nofollow">/);
+  assert.ok(!fs.existsSync("_site/govuk/edit/index.html"));
+  assert.match(fs.readFileSync("_site/_headers", "utf8"), /\/edit\/\*\s+X-Robots-Tag: noindex, nofollow/);
 });

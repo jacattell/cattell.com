@@ -110,6 +110,33 @@ Every page also has a copy at `/govuk/…` (for example `/govuk/week-notes/`) st
 | Styles | `src/govuk/govuk.scss` |
 | Restyling each page's content | the `govuk-version` transform in `eleventy.config.js` |
 
+## Week notes editor
+
+`/edit/` is a page for writing and editing week notes in your browser. Sign in with GitHub; only the accounts in `EDITORS` (default: `jacattell`) are let in. "Save and publish" saves the note to the `main` branch on GitHub, and Cloudflare publishes it in about a minute. The page is not linked from the site and is hidden from search engines.
+
+Only week note files (`src/week-notes/YEAR/WEEK.md`) can be changed. Your GitHub sign-in is kept in an encrypted cookie that page scripts cannot read, and lasts 8 hours.
+
+| What | Where |
+| --- | --- |
+| Page and script | `src/edit/index.njk`, `src/assets/js/edit.js` |
+| Sign-in, reading and saving notes | `lib/editor.js`, `functions/api/auth/`, `functions/api/edit/` |
+
+### Set up GitHub sign-in (once)
+
+1. On GitHub, go to **Settings** > **Developer settings** > **OAuth Apps** > **New OAuth App**.
+2. Fill in:
+   - Application name: `cattell.com editor`
+   - Homepage URL: `https://www.cattell.com`
+   - Authorization callback URL: `https://www.cattell.com/api/auth/callback`
+3. Choose **Register application**, then **Generate a new client secret**. Copy the client ID and the secret.
+4. In Cloudflare, open the Pages project, then **Settings** > **Variables and Secrets**, and add for Production:
+   - `GITHUB_CLIENT_ID`: the client ID
+   - `GITHUB_CLIENT_SECRET`: the client secret, as a **Secret**
+   - `SESSION_SECRET`: a long random string (at least 32 characters), as a **Secret**. A password manager can generate one.
+5. Redeploy (**Deployments** > latest > **Retry deployment**), then go to `/edit/` and sign in.
+
+The first time you sign in, GitHub asks you to allow access to your public repositories. The editor only ever changes week notes in this repository.
+
 ## Run it on your computer
 
 You need [Node.js](https://nodejs.org/) 20 or newer.
