@@ -48,7 +48,7 @@ To set a goal for a year, edit `src/_data/goals.json`.
 
 ## Social media archive
 
-`/archive/` is a searchable archive of posts from Bluesky, Mastodon and X (Twitter). Posts shared on more than one platform within 20 minutes, with mostly the same words, are shown once with a link to each platform.
+`/archive/` is a searchable archive of posts from Bluesky, LinkedIn, Mastodon and X (Twitter). Posts shared on more than one platform within 20 minutes, with mostly the same words, are shown once with a link to each platform.
 
 | What | Where |
 | --- | --- |
@@ -88,6 +88,22 @@ Because there are so many posts:
 - year pages show 200 posts each, with links to newer and older pages
 - the search page only downloads the posts (about 2.5 MB) once someone starts to search
 - the chat leaves out posts that are only on X, so its input stays under 100,000 tokens
+
+### LinkedIn
+
+LinkedIn has no way to download posts except its data export (LinkedIn: **Settings** > **Data privacy** > **Get a copy of your data** > the larger archive). Only `Shares.csv` (posts) and `Rich_Media.csv` (their photos) are used; the rest of the export, such as messages and connections, is never read. Keep the export out of this repo.
+
+```bash
+node scripts/archive/import-linkedin.js path/to/Shares.csv path/to/Rich_Media.csv
+```
+
+```bash
+node scripts/archive/fetch-media.js
+```
+
+Run the second straight after the first: the photo links in the export stop working after about a week.
+
+The export doesn't say who could see each post, so the import opens each one on LinkedIn without signing in. Posts that ask you to sign in (connections-only posts, group posts and some very old posts) are left out. Posts already saved are not checked again. lnkd.in short links are replaced with where they go. LinkedIn videos are not copied.
 
 ## Contact and feedback forms
 

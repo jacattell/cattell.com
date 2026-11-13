@@ -34,9 +34,10 @@ export default function () {
       items: all.slice(i * PAGE_SIZE, (i + 1) * PAGE_SIZE),
     }));
   });
-  // The chat reads posts from Bluesky and Mastodon (and anything also posted on X).
-  // Posts only on X are left out: there are too many for every chat message.
-  const chatItems = items.filter((i) => i.on.some((o) => o.platform !== "x"));
+  // The chat reads posts from Bluesky, LinkedIn and Mastodon (and anything also posted on X).
+  // Posts only on X, and replies to other people, are left out, to keep every chat
+  // message under 100,000 tokens.
+  const chatItems = items.filter((i) => !i.reply && i.on.some((o) => o.platform !== "x"));
   // What the search page downloads: only what it shows, as it's large.
   const searchItems = items.map(({ id, year, ...item }) => ({ ...item, images: item.images.map(({ source, ...img }) => img) }));
   const counts = Object.fromEntries(

@@ -144,7 +144,7 @@ test("the chat can read the social media archive, and caches it", () => {
   const context = fs.readFileSync("_site/chat-context.txt", "utf8");
   assert.match(context, /SOCIAL MEDIA ARCHIVE \(https:\/\/www\.cattell\.com\/archive\/\)/);
   const items = JSON.parse(fs.readFileSync("_site/archive/posts.json", "utf8"));
-  const forChat = items.filter((i) => i.on.some((o) => o.platform !== "x"));
+  const forChat = items.filter((i) => !i.reply && i.on.some((o) => o.platform !== "x"));
   assert.ok(context.includes(forChat[0].on[0].url), "includes the newest post");
   assert.ok(context.includes(forChat.at(-1).on[0].url), "includes the oldest post");
   const xOnly = items.filter((i) => i.on.every((o) => o.platform === "x"));
@@ -682,4 +682,37 @@ test("the archive shows a cross-post's images once when one copy is from X", asy
   assert.deepEqual(mergeImages([bsky, x]).map((i) => i.url), ["b1", "b2"]);
   const more = { platform: "x", images: [...x.images, { url: "x3", alt: "" }] };
   assert.deepEqual(mergeImages([bsky, more]).map((i) => i.url), ["b1", "b2", "x3"], "an extra image on X is added");
+});
+
+test("LinkedIn import: reads the export's posts, line breaks and photos", async () => {
+  const { parseCsv, cleanText, richMediaTime, fromExport, postAddress } = await import("../scripts/archive/import-linkedin.js");
+  const shares = parseCsv('Date,ShareLink,ShareCommentary,SharedUrl,MediaUrl,Visibility\n2026-11-11 23:45:38,https://www.linkedin.com/feed/update/urn%3Ali%3Ashare%3A123,"First line. ""\n""""\n""Say ""hi"", please","","",MEMBER_NETWORK\n2025-01-02 09:00:00,https://www.linkedin.com/feed/update/urn%3Ali%3AugcPost%3A456,"",https://example.com/,"",MEMBER_NETWORK\n');
+  assert.equal(shares.length, 2);
+  assert.equal(cleanText(shares[0].ShareCommentary), 'First line.\n\nSay "hi", please');
+  assert.deepEqual(postAddress(shares[0].ShareLink), { urn: "urn:li:share:123", id: "123", url: "https://www.linkedin.com/feed/update/urn:li:share:123/" });
+  assert.equal(richMediaTime("You uploaded a feed photo on November 6, 2026 at 9:05 PM (GMT)"), "2026-11-06T21:05");
+  assert.equal(richMediaTime("You uploaded a feed photo on March 1, 2025 at 12:30 AM (GMT)"), "2025-03-01T00:30");
+
+  const media = parseCsv([
+    "Date/Time,Media Description,Media Link",
+    '"You uploaded a feed photo on November 11, 2026 at 11:44 PM (GMT)",-,https://dms.licdn.com/photo1',
+    '"You uploaded a profile photo on November 11, 2026 at 11:45 PM (GMT)",-,https://dms.licdn.com/me',
+    '"You uploaded a feed photo on January 2, 2025 at 9:00 AM (GMT)",-,https://dms.licdn.com/photo2',
+    '"You uploaded a video on January 2, 2025 at 9:00 AM (GMT)",-,https://dms.licdn.com/playlist/vid/abc',
+  ].join("\n"));
+  const [first, second] = fromExport(shares, media);
+  assert.equal(first.date, "2026-11-11T23:45:38.000Z");
+  assert.deepEqual(first.images, [{ url: "https://dms.licdn.com/photo1", alt: "" }], "profile photos are not post photos");
+  assert.deepEqual(second.images, [{ url: "https://dms.licdn.com/photo2", alt: "" }, { url: null, alt: "Video", video: true }]);
+  assert.deepEqual(second.link, { url: "https://example.com/", title: null });
+});
+
+test("LinkedIn import only keeps posts anyone can see", () => {
+  const source = fs.readFileSync("scripts/archive/import-linkedin.js", "utf8");
+  assert.match(source, /groupPost/);
+  assert.match(source, /signup\|authwall\|login/);
+  if (fs.existsSync("archive-data/linkedin.json")) {
+    const posts = JSON.parse(fs.readFileSync("archive-data/linkedin.json", "utf8"));
+    assert.ok(posts.every((p) => !p.url.includes("groupPost")), "no group posts");
+  }
 });

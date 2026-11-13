@@ -1,9 +1,9 @@
 ---
 title: Social media archive
-description: Search everything I've posted on Bluesky, Mastodon and X (Twitter).
+description: Search everything I've posted on Bluesky, LinkedIn, Mastodon and X (Twitter).
 ---
 <p>Everything I've posted on social media, in one place. Posts I shared on more than one platform appear once, with links to each.</p>
-<p class="hint">{{ archive.items.length | number }} posts, from {% for s in archive.sources %}{{ s.count | number }} on {{ s.name }}{% if loop.revindex == 2 %} and {% elif not loop.last %}, {% endif %}{% endfor %}. LinkedIn is coming soon.</p>
+<p class="hint">{{ archive.items.length | number }} posts, from {% for s in archive.sources %}{{ s.count | number }} on {{ s.name }}{% if loop.revindex == 2 %} and {% elif not loop.last %}, {% endif %}{% endfor %}.</p>
 
 <form id="archive-search" class="archive-search" role="search" hidden>
   <label for="archive-q">Search posts</label>
