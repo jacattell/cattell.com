@@ -721,3 +721,21 @@ test("LinkedIn import only keeps posts anyone can see", () => {
     assert.ok(posts.every((p) => !p.url.includes("groupPost")), "no group posts");
   }
 });
+
+test("week notes editor: session key comes from HKDF, and old-style cookies are refused", async () => {
+  const { sealSession, openSession } = await import("../lib/editor.js");
+  const secret = "s".repeat(40);
+  const sealed = await sealSession({ token: "gho_x", login: "jacattell" }, secret);
+  assert.equal((await openSession(sealed, secret)).login, "jacattell");
+  assert.equal(await openSession(sealed, "t".repeat(40)), null, "a different secret can't open it");
+
+  // A cookie made the old way (key = SHA-256 of the secret) no longer opens.
+  const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(secret));
+  const oldKey = await crypto.subtle.importKey("raw", hash, "AES-GCM", false, ["encrypt"]);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const body = new TextEncoder().encode(JSON.stringify({ token: "gho_x", login: "jacattell", exp: Date.now() + 3600e3 }));
+  const bytes = new Uint8Array([...iv, ...new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, oldKey, body))]);
+  const old = Buffer.from(bytes).toString("base64url");
+  assert.equal(await openSession(old, secret), null);
+});
+

@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import * as sass from "sass";
+import MarkdownIt from "markdown-it";
 
 // Monday of an ISO week, as a UTC date.
 function isoWeekStart(year, week) {
@@ -13,6 +14,10 @@ function isoWeekStart(year, week) {
 }
 
 export default function (eleventyConfig) {
+  // Markdown: this project's markdown-it, with Eleventy's usual settings, so the week
+  // notes editor's preview (lib/editor.js) renders exactly like the site.
+  eleventyConfig.setLibrary("md", new MarkdownIt({ html: true }));
+
   eleventyConfig.addPassthroughCopy("src/assets");
 
   // Hidden GOV.UK Design System version (/govuk/): GOV.UK Frontend's JavaScript,
