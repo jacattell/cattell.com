@@ -25,6 +25,8 @@ export default function (eleventyConfig) {
     fs.mkdirSync(path.dirname(out), { recursive: true });
     fs.writeFileSync(out, css);
   });
+  // A Content-Security-Policy hash for an inline script, e.g. sha256-… (wrap it in single quotes).
+  eleventyConfig.addFilter("cspHash", (text) => `sha256-${crypto.createHash("sha256").update(String(text)).digest("base64")}`);
   eleventyConfig.addFilter("govukCssVersion", () => {
     const file = "src/govuk/govuk.scss";
     return crypto.createHash("sha256").update(fs.readFileSync(file)).update(fs.readFileSync("node_modules/govuk-frontend/package.json")).digest("hex").slice(0, 8);

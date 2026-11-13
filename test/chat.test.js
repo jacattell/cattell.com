@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import crypto from "node:crypto";
 import { validateMessages, RateLimiter, handleChat, buildSystem } from "../lib/chat.js";
 
 test("accepts a normal conversation", () => {
@@ -559,4 +560,67 @@ test("chat logs: the list still shows dates and questions when a summary is miss
 test("Hidden stuff links to the chat logs, in both versions of the site", () => {
   assert.match(fs.readFileSync("_site/hidden/index.html", "utf8"), /<a href="\/edit\/chats\/">Chat logs<\/a>/);
   assert.match(fs.readFileSync("_site/govuk/hidden/index.html", "utf8"), /href="\/edit\/chats\/">Chat logs<\/a>/);
+});
+
+test("week notes editor: saved settings can't break out of the front matter", async () => {
+  const { handleCallback, handleEdit, safeFrontMatterLine } = await import("../lib/editor.js");
+  assert.ok(safeFrontMatterLine("layout: layouts/note.njk"));
+  assert.ok(safeFrontMatterLine("  - indented: yaml"));
+  for (const bad of ["a: b\npermalink: /index.html", "---", " --- ", "x\r", 5]) assert.ok(!safeFrontMatterLine(bad), JSON.stringify(bad));
+
+  const env = { GITHUB_CLIENT_ID: "id", GITHUB_CLIENT_SECRET: "secret", SESSION_SECRET: "z".repeat(40) };
+  const puts = [];
+  const github = async (url, init = {}) => {
+    if (url.includes("access_token")) return new Response(JSON.stringify({ access_token: "gho_test" }));
+    if (url.endsWith("/user")) return new Response(JSON.stringify({ login: "jacattell" }));
+    if (init.method === "PUT") { puts.push(init); return new Response(JSON.stringify({ content: { sha: "new" } })); }
+    return new Response("{}", { status: 404 });
+  };
+  const login = new Request("https://www.cattell.com/api/auth/callback?code=c&state=s", { headers: { Cookie: "edit_state=s" } });
+  const cookie = (await handleCallback(login, env, github)).headers.getSetCookie().find((c) => c.startsWith("edit_session=")).split(";")[0];
+  const save = (other) => handleEdit(new Request("https://www.cattell.com/api/edit/note", {
+    method: "PUT", headers: { Cookie: cookie, "X-Editor": "1" }, body: JSON.stringify({ path: "2026/20", body: "Hi\n", other }),
+  }), env, github);
+  assert.equal((await save(["title: x\n---\npermalink: /index.html"])).status, 400);
+  assert.equal((await save(["---"])).status, 400);
+  assert.equal((await save("layout: x")).status, 400);
+  assert.equal(puts.length, 0, "nothing was saved");
+});
+
+test("week notes editor: sign-out only from this site, and cancels the GitHub key", async () => {
+  const { handleCallback, handleLogout } = await import("../lib/editor.js");
+  const env = { GITHUB_CLIENT_ID: "id", GITHUB_CLIENT_SECRET: "secret", SESSION_SECRET: "w".repeat(40) };
+  const calls = [];
+  const github = async (url, init = {}) => {
+    calls.push({ url, init });
+    if (url.includes("access_token")) return new Response(JSON.stringify({ access_token: "gho_test" }));
+    if (url.endsWith("/user")) return new Response(JSON.stringify({ login: "jacattell" }));
+    return new Response(null, { status: 204 });
+  };
+  const login = new Request("https://www.cattell.com/api/auth/callback?code=c&state=s", { headers: { Cookie: "edit_state=s" } });
+  const cookie = (await handleCallback(login, env, github)).headers.getSetCookie().find((c) => c.startsWith("edit_session=")).split(";")[0];
+  const out = (origin) => handleLogout(new Request("https://www.cattell.com/api/auth/logout", { method: "POST", headers: { Cookie: cookie, ...(origin ? { Origin: origin } : {}) } }), env, github);
+
+  for (const origin of ["https://evil.example", null]) {
+    const res = await out(origin);
+    assert.ok(!res.headers.getSetCookie().length, `${origin}: still signed in`);
+  }
+  assert.equal(calls.filter((c) => c.init.method === "DELETE").length, 0);
+
+  const res = await out("https://www.cattell.com");
+  assert.match(res.headers.getSetCookie()[0], /^edit_session=;.*Max-Age=0/);
+  const cancel = calls.find((c) => c.init.method === "DELETE");
+  assert.equal(cancel.url, "https://api.github.com/applications/id/token");
+  assert.equal(cancel.init.headers.Authorization, `Basic ${btoa("id:secret")}`);
+  assert.deepEqual(JSON.parse(cancel.init.body), { access_token: "gho_test" });
+});
+
+test("security headers: no framing, and the editor's policy allows its inline script", () => {
+  const headers = fs.readFileSync("_site/_headers", "utf8");
+  assert.match(headers, /^\/\*\n(?:  .*\n)*  X-Frame-Options: DENY\n(?:  .*\n)*  Content-Security-Policy: frame-ancestors 'none'/m);
+  const policy = headers.match(/^\/edit\/\*\n(?:  .*\n)*?  Content-Security-Policy: (.*)$/m)[1];
+  const inline = fs.readFileSync("_site/edit/index.html", "utf8").match(/<script>([\s\S]*?)<\/script>/)[1];
+  const hash = crypto.createHash("sha256").update(inline).digest("base64");
+  assert.ok(policy.includes(`script-src 'self' 'sha256-${hash}'`), policy);
+  assert.ok(!/unsafe-inline|unsafe-eval/.test(policy));
 });

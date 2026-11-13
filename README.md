@@ -135,19 +135,32 @@ Only week note files (`src/week-notes/YEAR/WEEK.md`) can be changed. Your GitHub
 
 ### Set up GitHub sign-in (once)
 
-1. On GitHub, go to **Settings** > **Developer settings** > **OAuth Apps** > **New OAuth App**.
+Use a GitHub App, so a sign-in can only ever change this repository.
+
+1. On GitHub, go to **Settings** > **Developer settings** > **GitHub Apps** > **New GitHub App**.
 2. Fill in:
-   - Application name: `cattell.com editor`
+   - GitHub App name: `cattell-com-editor` (it must be unique on GitHub)
    - Homepage URL: `https://www.cattell.com`
-   - Authorization callback URL: `https://www.cattell.com/api/auth/callback`
-3. Choose **Register application**, then **Generate a new client secret**. Copy the client ID and the secret.
-4. In Cloudflare, open the Pages project, then **Settings** > **Variables and Secrets**, and add for Production:
+   - Callback URL: `https://www.cattell.com/api/auth/callback`
+   - Leave **Expire user authorization tokens** ticked.
+   - Webhook: untick **Active**.
+   - Repository permissions: **Contents: Read and write**. Leave everything else as "No access".
+   - Where can this GitHub App be installed: **Only on this account**.
+3. Choose **Create GitHub App**, then **Generate a new client secret**. Copy the **Client ID** and the secret.
+4. Choose **Install App** (left menu) > **Install**, pick **Only select repositories** > `jacattell/cattell.com`, and choose **Install**.
+5. In Cloudflare, open the Pages project, then **Settings** > **Variables and Secrets**, and add for Production:
    - `GITHUB_CLIENT_ID`: the client ID
    - `GITHUB_CLIENT_SECRET`: the client secret, as a **Secret**
    - `SESSION_SECRET`: a long random string (at least 32 characters), as a **Secret**. A password manager can generate one.
-5. Redeploy (**Deployments** > latest > **Retry deployment**), then go to `/edit/` and sign in.
+6. Redeploy (**Deployments** > latest > **Retry deployment**), then go to `/edit/` and sign in.
 
-The first time you sign in, GitHub asks you to allow access to your public repositories. The editor only ever changes week notes in this repository.
+An older OAuth App also works, but its sign-in can change all your public repositories.
+
+Signing out cancels the GitHub key straight away. Sign-out only works from the editor's own button, so other sites can't sign you out.
+
+## Security headers
+
+`src/_headers.njk` makes the `_headers` file Cloudflare uses. Every page tells browsers not to show it inside another site's frame. The editor pages (`/edit/`) also have a strict Content-Security-Policy: only this site's own scripts and the small light/dark script in `src/_includes/theme-inline.js` (allowed by its hash, worked out at build time) can run there.
 
 ## Run it on your computer
 

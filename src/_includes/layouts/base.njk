@@ -6,10 +6,8 @@
   {%- set pageTitle = noteTitle or title %}
   <title>{% if pageTitle and pageTitle != site.title %}{{ pageTitle }} - {% endif %}{{ site.title }}</title>
   <meta name="description" content="{{ summary or description or site.description }}">
-  <script>
-    // Apply a saved light/dark choice before the page is drawn, so it does not flash.
-    try { var t = localStorage.getItem("theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}
-  </script>
+  {#- The editor's Content-Security-Policy allows this script by its hash (see _headers.njk). #}
+  <script>{% include "theme-inline.js" %}</script>
   <link rel="stylesheet" href="{{ '/assets/css/site.css' | versioned }}">
   <script src="{{ '/assets/js/theme.js' | versioned }}" defer></script>
   <script src="{{ '/assets/js/share.js' | versioned }}" defer></script>
