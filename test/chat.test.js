@@ -606,6 +606,8 @@ test("week notes editor: sign-out only from this site, and cancels the GitHub ke
   const cookie = (await handleCallback(login, env, github)).headers.getSetCookie().find((c) => c.startsWith("edit_session=")).split(";")[0];
   const out = (origin) => handleLogout(new Request("https://www.cattell.com/api/auth/logout", { method: "POST", headers: { Cookie: cookie, ...(origin ? { Origin: origin } : {}) } }), env, github);
 
+  const fetchSite = await handleLogout(new Request("https://www.cattell.com/api/auth/logout", { method: "POST", headers: { Cookie: cookie, "Sec-Fetch-Site": "cross-site" } }), env, github);
+  assert.ok(!fetchSite.headers.getSetCookie().length, "cross-site without Origin: still signed in");
   for (const origin of ["https://evil.example", null]) {
     const res = await out(origin);
     assert.ok(!res.headers.getSetCookie().length, `${origin}: still signed in`);
@@ -618,6 +620,9 @@ test("week notes editor: sign-out only from this site, and cancels the GitHub ke
   assert.equal(cancel.url, "https://api.github.com/applications/id/token");
   assert.equal(cancel.init.headers.Authorization, `Basic ${btoa("id:secret")}`);
   assert.deepEqual(JSON.parse(cancel.init.body), { access_token: "gho_test" });
+  // No Origin (some privacy tools remove it), but the browser says it's from this site
+  const noOrigin = await handleLogout(new Request("https://www.cattell.com/api/auth/logout", { method: "POST", headers: { Cookie: cookie, "Sec-Fetch-Site": "same-origin" } }), env, github);
+  assert.match(noOrigin.headers.getSetCookie()[0], /^edit_session=;.*Max-Age=0/);
 });
 
 test("security headers: no framing, and the editor's policy allows its inline script", () => {

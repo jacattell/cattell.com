@@ -19,6 +19,29 @@
     return e;
   };
 
+  // The preview shows the note's HTML, so it keeps only ordinary formatting: no scripts,
+  // forms, frames or styles, no event attributes, and only web, email and page links.
+  const ALLOWED = new Set("a abbr b blockquote br caption code dd del details div dl dt em figcaption figure h1 h2 h3 h4 h5 h6 hr i img ins kbd li mark ol p pre q s small span strong sub summary sup table tbody td tfoot th thead tr u ul".split(" "));
+  const ATTRIBUTES = new Set(["href", "src", "alt", "title", "width", "height", "colspan", "rowspan", "class", "id", "lang", "cite", "datetime", "open"]);
+  const DROP = new Set(["SCRIPT", "STYLE", "TEMPLATE", "IFRAME", "OBJECT", "EMBED", "FORM", "INPUT", "BUTTON", "SELECT", "TEXTAREA", "META", "LINK", "BASE", "SVG", "MATH"]);
+  const safeUrl = (value) => /^(https?:|mailto:|\/|#|\.)/i.test(value.trim()) || !/^[a-z][a-z0-9+.-]*:/i.test(value.trim());
+  function safeHtml(html) {
+    const doc = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html"); // nothing runs in this copy
+    const clean = (node) => {
+      for (const child of [...node.children]) {
+        if (DROP.has(child.tagName)) { child.remove(); continue; }
+        clean(child);
+        if (!ALLOWED.has(child.tagName.toLowerCase())) { child.replaceWith(...child.childNodes); continue; }
+        for (const { name, value } of [...child.attributes]) {
+          if (!ATTRIBUTES.has(name) || ((name === "href" || name === "src" || name === "cite") && !safeUrl(value))) child.removeAttribute(name);
+        }
+      }
+    };
+    const root = doc.body.firstChild;
+    clean(root);
+    return [...root.childNodes];
+  }
+
   async function api(path, options = {}) {
     const res = await fetch("/api/edit/" + path, {
       ...options,
@@ -121,7 +144,7 @@
         el("button", { type: "button", class: "secondary", onclick: async () => {
           try {
             const { html } = await api("preview", { method: "POST", body: JSON.stringify({ body: form.body.value }) });
-            preview.innerHTML = `<h2 class="hint">Preview</h2><h1>${title(path)}</h1>` + html;
+            preview.replaceChildren(el("h2", { class: "hint" }, "Preview"), el("h1", {}, title(path)), ...safeHtml(html));
             preview.hidden = false;
             preview.scrollIntoView({ behavior: "smooth", block: "start" });
           } catch (err) { status.replaceChildren(problem(err.message)); }
