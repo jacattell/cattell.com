@@ -38,7 +38,7 @@ export default function (eleventyConfig) {
       .getAll()
       .filter((p) => (p.outputPath || "").endsWith(".html") && p.url !== "/404.html" && !p.url.startsWith("/govuk/"))
       // Year pages have their own GOV.UK templates (src/govuk/*-years.njk).
-      .filter((p) => !/^\/(archive|week-notes)\/\d{4}\/$/.test(p.url))
+      .filter((p) => !/^\/(archive|week-notes)\/\d{4}\/(page-\d+\/)?$/.test(p.url))
       // The editor is not copied.
       .filter((p) => !p.url.startsWith("/edit/"))
   );
@@ -146,9 +146,9 @@ export default function (eleventyConfig) {
     return html.replace(/\n/g, "<br>");
   });
   eleventyConfig.addFilter("number", (n) => Number(n).toLocaleString("en-GB"));
-  eleventyConfig.addFilter("archiveDate", (iso) =>
-    new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" })
-  );
+  // One shared date format: making a new one for each of the archive's many posts is slow.
+  const archiveDateFormat = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" });
+  eleventyConfig.addFilter("archiveDate", (iso) => archiveDateFormat.format(new Date(iso)));
 
   // The page's own source file on GitHub, for the footer's "Source on GitHub" link.
   eleventyConfig.addFilter("githubSource", (inputPath) =>

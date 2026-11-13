@@ -1,5 +1,5 @@
-// Search and image previews for the social media archive (/archive/). Loads all posts once, then
-// filters them as you type. Without JavaScript, the year pages still work.
+// Search and image previews for the social media archive (/archive/). Loads all posts when you
+// start to search, then filters them as you type. Without JavaScript, the year pages still work.
 (function () {
   // If an image no longer loads (for example, its post was deleted), show a short note instead.
   document.addEventListener(
@@ -142,31 +142,46 @@
     showMore();
   }
 
+  const run = () => (ready ? search() : load());
   let timer;
   form.addEventListener("input", () => {
     clearTimeout(timer);
-    timer = setTimeout(search, 200);
+    timer = setTimeout(run, 200);
   });
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    search();
+    run();
   });
   more.addEventListener("click", showMore);
 
-  status.textContent = "Loading posts…";
-  fetch("/archive/posts.json")
-    .then((r) => r.json())
-    .then((data) => {
-      items = data.map((i) => ({
-        ...i,
-        search: (i.text + " " + i.images.map((m) => m.alt).join(" ") + " " + (i.link?.title || "")).toLowerCase(),
-      }));
-      form.hidden = false;
-      status.textContent = "";
-      input.value = new URL(location.href).searchParams.get("q") || "";
-      if (input.value) search();
-    })
-    .catch(() => {
-      status.textContent = "Search isn't available right now. You can still browse by year.";
-    });
+  // All the posts are a large download, so they are only loaded once someone starts to search.
+  let loading = null;
+  let ready = false;
+  function load() {
+    if (loading) return loading;
+    status.textContent = "Loading posts…";
+    loading = fetch("/archive/posts.json")
+      .then((r) => {
+        if (!r.ok) throw new Error(r.status);
+        return r.json();
+      })
+      .then((data) => {
+        items = data.map((i) => ({
+          ...i,
+          search: (i.text + " " + i.images.map((m) => m.alt).join(" ") + " " + (i.link?.title || "")).toLowerCase(),
+        }));
+        status.textContent = "";
+        ready = true;
+        search();
+      })
+      .catch(() => {
+        loading = null;
+        status.textContent = "Search isn't available right now. You can still browse by year.";
+      });
+    return loading;
+  }
+  form.hidden = false;
+  input.addEventListener("focus", load);
+  input.value = new URL(location.href).searchParams.get("q") || "";
+  if (input.value) load();
 })();

@@ -33,8 +33,8 @@ LATEST WEEK NOTE IN FULL
 {{ latest.data.noteTitle }}: {{ latest.templateContent | stripTags | safe }}
 
 SOCIAL MEDIA ARCHIVE ({{ site.url }}/archive/)
-{{ site.author }}'s own social media posts, newest first. Posts shared on several platforms appear once. Each post starts with: date and time (UK) | platforms | link. "reply" marks a reply to someone else, shown without the other side of the conversation.
-{%- for item in archive.items %}
+{{ site.author }}'s own social media posts, newest first. Posts shared on several platforms appear once. Each post starts with: date and time (UK) | platforms | link. "reply" marks a reply to someone else, shown without the other side of the conversation. Posts only on X (Twitter) are not listed here: there are over 40,000 of them, from 2010 to 2026. Visitors can search them on the archive page.
+{%- for item in archive.chatItems %}
 
 {{ item.date | archiveDate }} | {% for o in item.on %}{{ archive.platforms[o.platform] }}{% if not loop.last %}, {% endif %}{% endfor %} | {{ item.on[0].url }}{% if item.reply %} | reply{% endif %}
 {{ item.text | oneLine | safe }}{% for img in item.images %} [{{ "Video" if img.video else "Image" }}{% if img.alt %}: {{ img.alt | oneLine | truncate(150) | safe }}{% endif %}]{% endfor %}{% for v in item.videos %} [YouTube video: https://www.youtube.com/watch?v={{ v.id }}]{% endfor %}

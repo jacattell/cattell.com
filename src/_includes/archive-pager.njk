@@ -1,0 +1,7 @@
+{#- Links between the pages of a year in the social media archive. Pages go newest first. -#}
+{%- if y.pages > 1 %}
+<nav class="pager" aria-label="Pages of {{ y.year }}">
+  {%- if y.newer %}<a href="{{ y.newer }}" rel="prev"><span>Newer posts</span> Page {{ y.page - 1 }} of {{ y.pages }}</a>{% endif %}
+  {%- if y.older %}<a class="next" href="{{ y.older }}" rel="next"><span>Older posts</span> Page {{ y.page + 1 }} of {{ y.pages }}</a>{% endif %}
+</nav>
+{%- endif %}

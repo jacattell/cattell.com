@@ -144,8 +144,13 @@ test("the chat can read the social media archive, and caches it", () => {
   const context = fs.readFileSync("_site/chat-context.txt", "utf8");
   assert.match(context, /SOCIAL MEDIA ARCHIVE \(https:\/\/www\.cattell\.com\/archive\/\)/);
   const items = JSON.parse(fs.readFileSync("_site/archive/posts.json", "utf8"));
-  assert.ok(context.includes(items[0].on[0].url), "includes the newest post");
-  assert.ok(context.includes(items.at(-1).on[0].url), "includes the oldest post");
+  const forChat = items.filter((i) => i.on.some((o) => o.platform !== "x"));
+  assert.ok(context.includes(forChat[0].on[0].url), "includes the newest post");
+  assert.ok(context.includes(forChat.at(-1).on[0].url), "includes the oldest post");
+  const xOnly = items.filter((i) => i.on.every((o) => o.platform === "x"));
+  assert.ok(xOnly.length > 1000 && !xOnly.slice(0, 50).some((i) => context.includes(i.on[0].url)), "posts only on X are left out");
+  // Keep the chat's input under 100,000 tokens (about 4 characters each), where the price per token goes up.
+  assert.ok(buildSystem(context)[0].text.length < 360_000, `chat context is ${context.length} characters`);
   const system = buildSystem(context);
   assert.equal(system.length, 1);
   assert.deepEqual(system[0].cache_control, { type: "ephemeral" });
@@ -623,4 +628,58 @@ test("security headers: no framing, and the editor's policy allows its inline sc
   const hash = crypto.createHash("sha256").update(inline).digest("base64");
   assert.ok(policy.includes(`script-src 'self' 'sha256-${hash}'`), policy);
   assert.ok(!/unsafe-inline|unsafe-eval/.test(policy));
+});
+
+test("X archive import: own tweets and replies, without retweets, with real links", async () => {
+  const { fromTweet } = await import("../scripts/archive/import-x.js");
+  const base = { id_str: "1200000000000000000", created_at: "Sat Nov 30 12:00:00 +0000 2019", entities: { urls: [] } };
+  assert.equal(fromTweet({ ...base, full_text: "RT @someone: their words" }), null, "retweets are left out");
+
+  const post = fromTweet({
+    ...base,
+    full_text: "Q&amp;A at https://t.co/abc &lt;3 https://t.co/pic",
+    entities: { urls: [{ url: "https://t.co/abc", expanded_url: "https://www.cattell.com/" }] },
+    extended_entities: { media: [{ url: "https://t.co/pic", type: "photo", media_url_https: "https://pbs.twimg.com/media/X.jpg" }] },
+  });
+  assert.equal(post.text, "Q&A at https://www.cattell.com/ <3");
+  assert.deepEqual(post.images, [{ url: "https://pbs.twimg.com/media/X.jpg", alt: "" }]);
+  assert.equal(post.url, "https://x.com/jaCattell/status/1200000000000000000");
+  assert.equal(post.date, new Date(Number(1200000000000000000n >> 22n) + 1288834974657).toISOString(), "the date comes from the tweet ID");
+
+  const reply = fromTweet({ ...base, full_text: "@a @b Thanks!", in_reply_to_status_id_str: "5", in_reply_to_screen_name: "a", in_reply_to_user_id_str: "9" });
+  assert.equal(reply.text, "Thanks!");
+  assert.deepEqual(reply.reply, { url: "https://x.com/a/status/5", self: false });
+  const thread = fromTweet({ ...base, full_text: "@jaCattell And another thing", in_reply_to_status_id_str: "5", in_reply_to_screen_name: "jaCattell", in_reply_to_user_id_str: "118012929" });
+  assert.equal(thread.reply.self, true);
+
+  const quote = fromTweet({ ...base, full_text: "So true https://t.co/q", entities: { urls: [{ url: "https://t.co/q", expanded_url: "https://twitter.com/other/status/42" }] } });
+  assert.equal(quote.text, "So true");
+  assert.equal(quote.quote, "https://twitter.com/other/status/42");
+
+  // An old tweet whose date in the archive is wrong (1997): the date comes from its ID.
+  const old = fromTweet({ id_str: "146331678426660865", created_at: "Tue Sep 02 22:03:52 +0000 1997", full_text: "Apps are 10p", entities: { urls: [] } });
+  assert.equal(old.date.slice(0, 7), "2011-12");
+});
+
+test("the archive splits busy years into pages, and images X no longer has are marked", async () => {
+  const { groupPosts } = await import("../lib/archive.js");
+  const [item] = groupPosts([{ platform: "x", id: "1", url: "https://x.com/jaCattell/status/1", date: "2012-01-01T00:00:00Z", text: "Hi", reply: null, images: [{ url: "https://pbs.twimg.com/media/gone.jpg", alt: "" }], link: null, quote: null }], { "https://pbs.twimg.com/media/gone.jpg": { unavailable: true } });
+  assert.deepEqual([item.images[0].url, item.images[0].thumb, item.images[0].alt], [null, null, "no longer available"]);
+
+  const page1 = fs.readFileSync("_site/archive/2012/index.html", "utf8");
+  assert.equal((page1.match(/<article class="post">/g) || []).length, 200);
+  assert.match(page1, /<a class="next" href="\/archive\/2012\/page-2\/" rel="next"><span>Older posts<\/span>/);
+  const page2 = fs.readFileSync("_site/archive/2012/page-2/index.html", "utf8");
+  assert.match(page2, /<a href="\/archive\/2012\/" rel="prev"><span>Newer posts<\/span>/);
+  assert.ok(fs.existsSync("_site/govuk/archive/2012/page-2/index.html"));
+});
+
+test("the archive shows a cross-post's images once when one copy is from X", async () => {
+  const { mergeImages } = await import("../lib/archive.js");
+  const bsky = { platform: "bluesky", images: [{ url: "b1", alt: "A map of Manchester" }, { url: "b2", alt: "A venue" }] };
+  const x = { platform: "x", images: [{ url: "x1", alt: "" }, { url: "x2", alt: "" }] };
+  assert.deepEqual(mergeImages([x, bsky]).map((i) => i.url), ["b1", "b2"], "the described copies are kept");
+  assert.deepEqual(mergeImages([bsky, x]).map((i) => i.url), ["b1", "b2"]);
+  const more = { platform: "x", images: [...x.images, { url: "x3", alt: "" }] };
+  assert.deepEqual(mergeImages([bsky, more]).map((i) => i.url), ["b1", "b2", "x3"], "an extra image on X is added");
 });

@@ -48,7 +48,7 @@ To set a goal for a year, edit `src/_data/goals.json`.
 
 ## Social media archive
 
-`/archive/` is a searchable archive of posts from Bluesky and Mastodon. Posts shared on more than one platform within 20 minutes, with mostly the same words, are shown once with a link to each platform.
+`/archive/` is a searchable archive of posts from Bluesky, Mastodon and X (Twitter). Posts shared on more than one platform within 20 minutes, with mostly the same words, are shown once with a link to each platform.
 
 | What | Where |
 | --- | --- |
@@ -68,6 +68,26 @@ npm run archive:fetch
 ```
 
 Add `--all` to a script to download every post again rather than just new ones. Only public Mastodon posts are saved; private posts and direct messages never are.
+
+### X (Twitter)
+
+X has no free way to download posts, so they come from an archive download instead (X: **Settings** > **Your account** > **Download an archive of your data**). Only `data/tweets.js` from the download is needed; keep it out of this repo, as it's over 100 MB.
+
+```bash
+node scripts/archive/import-x.js path/to/tweets.js
+```
+
+```bash
+node scripts/archive/fetch-media.js
+```
+
+Retweets are left out; your own tweets, threads and replies are kept. The archive has no image descriptions. Images X no longer has are shown as "Image: no longer available", with a link to the tweet.
+
+Because there are so many posts:
+
+- year pages show 200 posts each, with links to newer and older pages
+- the search page only downloads the posts (about 2.5 MB) once someone starts to search
+- the chat leaves out posts that are only on X, so its input stays under 100,000 tokens
 
 ## Contact and feedback forms
 

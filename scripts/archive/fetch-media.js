@@ -25,18 +25,24 @@ const wanted = [
 
 fs.mkdirSync(OUT_DIR, { recursive: true });
 let added = 0, failed = 0;
-for (const img of wanted) {
+async function copy(img) {
   const name = crypto.createHash("sha1").update(img.source).digest("hex").slice(0, 16);
   const file = `/assets/archive/${name}.webp`, thumb = `/assets/archive/${name}-thumb.webp`;
   const saved = media[img.source];
-  if (saved && (saved.unavailable || fs.existsSync(path.join(DATA_DIR, "..", "src", saved.thumb)))) continue;
+  if (saved && (saved.unavailable || fs.existsSync(path.join(DATA_DIR, "..", "src", saved.thumb)))) return;
   try {
     const res = await fetch(img.source, { headers: { "User-Agent": "cattell.com archive" } });
     if (res.status === 404 && img.previewOnly) {
       // The YouTube video has been deleted or made private: the archive shows no preview.
       media[img.source] = { unavailable: true };
       console.warn(`YouTube video no longer available: ${img.source}`);
-      continue;
+      return;
+    }
+    if ((res.status === 403 || res.status === 404) && img.source.startsWith("https://pbs.twimg.com/")) {
+      // X no longer has this image: the archive says so and links to the post instead.
+      media[img.source] = { unavailable: true };
+      console.warn(`Image no longer available: ${img.source}`);
+      return;
     }
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     const input = Buffer.from(await res.arrayBuffer());
@@ -55,6 +61,15 @@ for (const img of wanted) {
     console.warn(`Could not copy ${img.source}: ${err.message}`);
   }
 }
+
+// Copy several at once: the X archive alone has thousands of images.
+const queue = [...wanted];
+await Promise.all(Array.from({ length: 8 }, async () => {
+  while (queue.length) {
+    await copy(queue.shift());
+    if ((added + failed) % 250 === 0 && added + failed) console.log(`${added + failed} of ${wanted.length}…`);
+  }
+}));
 
 const sorted = Object.fromEntries(Object.entries(media).sort(([a], [b]) => a.localeCompare(b)));
 fs.writeFileSync(MEDIA_FILE, JSON.stringify(sorted, null, 1) + "\n");

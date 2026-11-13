@@ -1,22 +1,23 @@
 ---
 # GOV.UK version of the social media archive's year pages (the main site's are in src/archive/year.njk).
 pagination:
-  data: archive.years
+  data: archive.yearPages
   size: 1
   alias: y
-permalink: "/govuk/archive/{{ y.year }}/"
+permalink: "/govuk{{ y.url }}"
 layout: layouts/govuk.njk
 eleventyExcludeFromCollections: true
 eleventyComputed:
   p:
-    url: "/archive/{{ y.year }}/"
+    url: "{{ y.url }}"
     data:
-      title: "Social media archive: {{ y.year }}"
+      title: "Social media archive: {{ y.year }}{% if y.pages > 1 %} (page {{ y.page }} of {{ y.pages }}){% endif %}"
 ---
 <p class="crumb"><a href="/archive/">Social media archive</a></p>
-<h1>{{ y.year }}</h1>
-<p class="hint">{{ y.items.length }} posts, newest first.</p>
+<h1>{{ y.year }}{% if y.pages > 1 %} <span class="hint">(page {{ y.page }} of {{ y.pages }})</span>{% endif %}</h1>
+<p class="hint">{{ y.count | number }} posts, newest first.</p>
 {%- for item in y.items %}
 {% include "archive-post.njk" %}
 {%- endfor %}
+{% include "archive-pager.njk" %}
 <script src="{{ '/assets/js/archive.js' | versioned }}" defer></script>
