@@ -7,3 +7,11 @@ compatibility_date = "2026-11-01"
 [[kv_namespaces]]
 binding = "CHAT_LOGS"
 id = "460882b27420480cbe556d48ac0e1224"
+
+# Claude sessions archive: prompts and answers are kept in this D1 database
+# (see "Claude sessions archive" in the README). Until the database is made and
+# its ID is put here, the archive answers "not set up yet" and saves nothing.
+# [[d1_databases]]
+# binding = "SESSIONS"
+# database_name = "cattell-sessions"
+# database_id = "PUT-THE-DATABASE-ID-HERE"
