@@ -320,7 +320,7 @@ Without the binding, nothing is saved and the chat works as before.
 ### Set it up (once)
 
 1. In Cloudflare, go to **Storage & Databases** > **D1 SQL Database** and create a database called `cattell-sessions`. Copy its **Database ID**.
-2. In `wrangler.toml`, remove the `#` from the four `d1_databases` lines and put the ID in `database_id`. Commit and push. The tables are made the first time the archive is used.
+2. In `wrangler.toml`, put the ID in `database_id` under `d1_databases`. Commit and push. The tables are made the first time the archive is used.
 3. Make a long random key, for example with `openssl rand -hex 32`.
 4. In Cloudflare, open the Pages project, then **Settings** > **Variables and Secrets**. Add `ARCHIVE_KEY` as a **Secret**, for Production, with that key as the value. Redeploy.
 5. On each computer that will send sessions, save the same key in the file `~/.config/cattell-archive/key`. Never put the key in this repository.
