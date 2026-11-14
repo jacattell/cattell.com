@@ -201,6 +201,7 @@ Signing out cancels the GitHub key straight away. Sign-out only works from the e
 Every page has a Content-Security-Policy that only lets the browser run this site's own scripts and styles, plus:
 
 - Cloudflare's human check (Turnstile) on the forms
+- Cloudflare Web Analytics, which Cloudflare adds to the live site (not when running it on your computer)
 - YouTube's privacy-enhanced player (`youtube-nocookie.com`), in the archive and week notes
 - images from any secure (`https:`) address
 
