@@ -24,7 +24,9 @@
   const ALLOWED = new Set("a abbr b blockquote br caption code dd del details div dl dt em figcaption figure h1 h2 h3 h4 h5 h6 hr i img ins kbd li mark ol p pre q s small span strong sub summary sup table tbody td tfoot th thead tr u ul".split(" "));
   const ATTRIBUTES = new Set(["href", "src", "alt", "title", "width", "height", "colspan", "rowspan", "class", "id", "lang", "cite", "datetime", "open"]);
   const DROP = new Set(["SCRIPT", "STYLE", "TEMPLATE", "IFRAME", "OBJECT", "EMBED", "FORM", "INPUT", "BUTTON", "SELECT", "TEXTAREA", "META", "LINK", "BASE", "SVG", "MATH"]);
-  const safeUrl = (value) => /^(https?:|mailto:|\/|#|\.)/i.test(value.trim()) || !/^[a-z][a-z0-9+.-]*:/i.test(value.trim());
+  // The browser's own address reader says what kind of link this is, so a "javascript:" link
+  // disguised with a tab or a hidden character is caught too.
+  const safeUrl = (value, base = location.href) => { try { return ["http:", "https:", "mailto:"].includes(new URL(value, base).protocol); } catch { return false; } };
   function safeHtml(html) {
     const doc = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html"); // nothing runs in this copy
     const clean = (node) => {
