@@ -794,8 +794,8 @@ const aSession = {
   source: "code", id: "f6e5815a-23ef-5fd4-a5b8-ec54ad0ef319", title: "Week note", project: "cattell.com",
   started: "2026-11-14T19:24:00Z", updated: "2026-11-14T20:17:00Z",
   messages: [
-    { role: "user", at: "2026-11-14T19:24:00Z", text: "Please build me a week note" },
-    { role: "assistant", at: "2026-11-14T19:30:00Z", text: "Here is the draft. Started swimming again." },
+    { kind: "prompt", at: "2026-11-14T19:24:00Z", text: "Please build me a week note" },
+    { kind: "answer", at: "2026-11-14T19:30:00Z", text: "Here is the draft. Started swimming again." },
   ],
 };
 /** Signs in as the editor and returns a function that calls /api/edit/* with the cookie. */
@@ -816,7 +816,7 @@ test("sessions archive: uploads need the archive key, and a set-up database", as
   assert.equal((await handleUpload(new Request("https://www.cattell.com/api/sessions"), env)).status, 405);
   assert.equal((await handleUpload(sendSession({ ...aSession, source: "other" }), env)).status, 400);
   assert.equal((await handleUpload(sendSession({ ...aSession, id: "../x" }), env)).status, 400);
-  assert.equal((await handleUpload(sendSession({ ...aSession, messages: [{ role: "system", text: "x" }] }), env)).status, 400);
+  assert.equal((await handleUpload(sendSession({ ...aSession, messages: [{ kind: "system", text: "x" }] }), env)).status, 400);
   assert.equal((await handleUpload(sendSession(aSession), env)).status, 200);
   assert.equal(env.SESSIONS.sqlite.prepare("SELECT COUNT(*) AS n FROM sessions").get().n, 1, "only the good upload was saved");
 });
@@ -826,7 +826,7 @@ test("sessions archive: only the signed-in editor can list, search and read sess
   const { handleEdit } = await import("../lib/editor.js");
   const env = await archiveEnv();
   await handleUpload(sendSession(aSession), env);
-  await handleUpload(sendSession({ ...aSession, source: "chat", id: "93a0d0f5-e0d0-4181-a321-c2e9d53de95f", title: "Sewing box badge", project: "", updated: "2026-11-14T18:31:00Z", messages: [{ role: "user", at: "2026-11-14T18:00:00Z", text: "What is this badge?" }] }), env);
+  await handleUpload(sendSession({ ...aSession, source: "chat", id: "93a0d0f5-e0d0-4181-a321-c2e9d53de95f", title: "Sewing box badge", project: "", updated: "2026-11-14T18:31:00Z", messages: [{ kind: "prompt", at: "2026-11-14T18:00:00Z", text: "What is this badge?" }] }), env);
 
   for (const path of ["sessions", "sessions?q=badge", "session?id=code:" + aSession.id]) {
     assert.equal((await handleEdit(new Request(`https://www.cattell.com/api/edit/${path}`), env)).status, 401, `${path} when not signed in`);
@@ -849,7 +849,7 @@ test("sessions archive: only the signed-in editor can list, search and read sess
 
   const one = await (await edit("session?id=code:" + aSession.id)).json();
   assert.equal(one.session.title, "Week note");
-  assert.deepEqual(one.messages.map((m) => [m.n, m.role]), [[0, "user"], [1, "assistant"]]);
+  assert.deepEqual(one.messages.map((m) => [m.n, m.kind]), [[0, "prompt"], [1, "answer"]]);
   assert.equal((await edit("session?id=code:../x")).status, 400);
   assert.equal((await edit("session?id=code:00000000-0000")).status, 404);
   assert.equal((await edit("sessions", {})).status, 200);
@@ -863,7 +863,7 @@ test("sessions archive: sending a session again replaces it, and long ones arriv
   const edit = await editorFor(env);
   await handleUpload(sendSession(aSession), env);
   env.SESSIONS.sqlite.prepare("UPDATE sessions SET public = 1").run();
-  const longer = { ...aSession, title: "Week note 46", messages: [...aSession.messages, { role: "user", text: "How do we set it up?" }] };
+  const longer = { ...aSession, title: "Week note 46", messages: [...aSession.messages, { kind: "prompt", text: "How do we set it up?" }] };
   assert.deepEqual(await (await handleUpload(sendSession(longer), env)).json(), { saved: "code:" + aSession.id, messages: 3 });
   const list = await (await edit("sessions")).json();
   assert.equal(list.sessions.length, 1);
@@ -872,7 +872,7 @@ test("sessions archive: sending a session again replaces it, and long ones arriv
   assert.equal(list.sessions[0].public, true, "sending again does not change who can see a session");
   assert.equal((await (await edit("sessions?q=draft")).json()).results.length, 1, "the search has one copy, not two");
 
-  const big = { ...aSession, id: "big-session-0001", messages: Array.from({ length: 30 }, (_, i) => ({ role: i % 2 ? "assistant" : "user", text: `message ${i} ` + "x".repeat(50_000) })) };
+  const big = { ...aSession, id: "big-session-0001", messages: Array.from({ length: 30 }, (_, i) => ({ kind: i % 2 ? "answer" : "prompt", text: `message ${i} ` + "x".repeat(50_000) })) };
   const parts = uploadParts(big);
   assert.ok(parts.length > 1 && parts.every((p) => JSON.stringify(p).length < 900_000));
   assert.deepEqual(parts.map((p) => p.offset), parts.map((_, i) => parts.slice(0, i).reduce((n, p) => n + p.messages.length, 0)));
@@ -897,26 +897,33 @@ test("sessions archive: a session can be deleted, only from the archive page", a
   assert.equal((await (await edit("sessions?q=swimming")).json()).results.length, 0, "deleted from the search too");
 });
 
-test("sessions archive: reads Claude Code transcripts, keeping only prompts and answers", async () => {
+test("sessions archive: reads Claude Code transcripts, with thinking, tool calls and tool results", async () => {
   const { parseClaudeCode } = await import("../lib/session-formats.js");
   const lines = [
     { type: "mode", mode: "default", sessionId: "abc12345-0000" },
     { type: "user", sessionId: "abc12345-0000", cwd: "/home/james/cattell.com", timestamp: "2026-11-14T19:24:00.000Z", message: { role: "user", content: [{ type: "text", text: "<system-reminder>\nhidden note\n</system-reminder>" }, { type: "text", text: "Build me a week note" }] } },
-    { type: "assistant", timestamp: "2026-11-14T19:24:05.000Z", message: { role: "assistant", content: [{ type: "thinking", thinking: "private" }, { type: "text", text: "I'll read your notes." }, { type: "tool_use", id: "t1", name: "Bash", input: { command: "cat secret" } }] } },
-    { type: "user", timestamp: "2026-11-14T19:24:06.000Z", message: { role: "user", content: [{ type: "tool_result", tool_use_id: "t1", content: "the secret" }] } },
+    { type: "assistant", timestamp: "2026-11-14T19:24:05.000Z", message: { role: "assistant", content: [{ type: "thinking", thinking: "Read the notes first.", signature: "sig" }, { type: "thinking", thinking: "", signature: "sig" }, { type: "text", text: "I'll read your notes." }, { type: "tool_use", id: "t1", name: "Bash", input: { command: "ls notes" } }] } },
+    { type: "user", timestamp: "2026-11-14T19:24:06.000Z", message: { role: "user", content: [{ type: "tool_result", tool_use_id: "t1", content: "46.md" }] } },
     { type: "assistant", timestamp: "2026-11-14T19:25:00.000Z", message: { role: "assistant", content: [{ type: "text", text: "Here is the draft." }] } },
+    { type: "assistant", timestamp: "2026-11-14T19:25:01.000Z", message: { role: "assistant", content: [{ type: "text", text: "It is 337 words." }] } },
     { type: "assistant", isSidechain: true, timestamp: "2026-11-14T19:25:30.000Z", message: { role: "assistant", content: [{ type: "text", text: "A subagent talking." }] } },
     { type: "user", timestamp: "2026-11-14T20:10:00.000Z", message: { role: "user", content: "How do we set it up?" } },
     { type: "custom-title", customTitle: "Week 46" },
   ];
   const s = parseClaudeCode(lines.map((l) => JSON.stringify(l)).join("\n") + "\nnot json\n");
   assert.deepEqual(s.messages, [
-    { role: "user", at: "2026-11-14T19:24:00.000Z", text: "Build me a week note" },
-    { role: "assistant", at: "2026-11-14T19:24:05.000Z", text: "I'll read your notes.\n\nHere is the draft." },
-    { role: "user", at: "2026-11-14T20:10:00.000Z", text: "How do we set it up?" },
+    { kind: "prompt", at: "2026-11-14T19:24:00.000Z", text: "Build me a week note" },
+    { kind: "thinking", at: "2026-11-14T19:24:05.000Z", text: "Read the notes first." },
+    { kind: "answer", at: "2026-11-14T19:24:05.000Z", text: "I'll read your notes." },
+    { kind: "tool", tool: "Bash", at: "2026-11-14T19:24:05.000Z", text: '{\n  "command": "ls notes"\n}' },
+    { kind: "result", tool: "Bash", at: "2026-11-14T19:24:06.000Z", text: "46.md" },
+    { kind: "answer", at: "2026-11-14T19:25:00.000Z", text: "Here is the draft.\n\nIt is 337 words." },
+    { kind: "prompt", at: "2026-11-14T20:10:00.000Z", text: "How do we set it up?" },
   ]);
   assert.deepEqual([s.source, s.id, s.title, s.project, s.started, s.updated], ["code", "abc12345-0000", "Week 46", "cattell.com", "2026-11-14T19:24:00.000Z", "2026-11-14T20:10:00.000Z"]);
-  assert.ok(!JSON.stringify(s).includes("secret") && !JSON.stringify(s).includes("private") && !JSON.stringify(s).includes("hidden note"));
+  assert.ok(!JSON.stringify(s).includes("hidden note") && !JSON.stringify(s).includes("subagent") && !JSON.stringify(s).includes("sig"));
+  const long = parseClaudeCode(JSON.stringify({ type: "user", message: { content: [{ type: "tool_result", tool_use_id: "x", content: [{ type: "text", text: "y".repeat(300_000) }, { type: "image" }] }] } }));
+  assert.equal(long.messages[0].text.length <= 200_000 && long.messages[0].text.endsWith("[The rest was too long to save.]"), true, "very long results are cut short, with a note");
   const untitled = parseClaudeCode(JSON.stringify(lines[1]), "from-the-file-name");
   assert.deepEqual([untitled.id, untitled.title], ["abc12345-0000", "Build me a week note"]);
   assert.equal(parseClaudeCode("", "from-the-file-name").id, "from-the-file-name");
@@ -927,14 +934,14 @@ test("sessions archive: reads chats from a claude.ai data export", async () => {
   const chats = parseClaudeExport([
     { uuid: "93a0d0f5-e0d0-4181-a321-c2e9d53de95f", name: "Mother's sewing box find", created_at: "2026-11-14T18:00:00Z", updated_at: "2026-11-14T18:31:00Z", chat_messages: [
       { sender: "human", text: "What is this?", content: [{ type: "text", text: "What is this?" }], created_at: "2026-11-14T18:00:00Z" },
-      { sender: "assistant", text: "", content: [{ type: "tool_use", name: "web_search" }, { type: "text", text: "A pin badge." }], created_at: "2026-11-14T18:01:00Z" },
+      { sender: "assistant", text: "", content: [{ type: "tool_use", id: "w1", name: "web_search", input: { query: "badge" } }, { type: "tool_result", tool_use_id: "w1", content: [{ type: "text", text: "Sutton Hoo" }] }, { type: "text", text: "A pin badge." }], created_at: "2026-11-14T18:01:00Z" },
       { sender: "human", text: "Older exports only have this field", created_at: "2026-11-14T18:02:00Z" },
     ] },
     { uuid: "empty-chat-0001", name: "Empty", chat_messages: [] },
   ]);
   assert.equal(chats.length, 1, "empty chats are left out");
   assert.deepEqual([chats[0].source, chats[0].id, chats[0].title, chats[0].updated], ["chat", "93a0d0f5-e0d0-4181-a321-c2e9d53de95f", "Mother's sewing box find", "2026-11-14T18:31:00Z"]);
-  assert.deepEqual(chats[0].messages.map((m) => [m.role, m.text]), [["user", "What is this?"], ["assistant", "A pin badge."], ["user", "Older exports only have this field"]]);
+  assert.deepEqual(chats[0].messages.map((m) => [m.kind, m.tool || "", m.text]), [["prompt", "", "What is this?"], ["tool", "web_search", '{\n  "query": "badge"\n}'], ["result", "web_search", "Sutton Hoo"], ["answer", "", "A pin badge."], ["prompt", "", "Older exports only have this field"]]);
   assert.deepEqual(parseClaudeExport({ not: "a list" }), []);
 });
 
@@ -957,4 +964,38 @@ test("the sessions archive page is hidden, linked from Hidden stuff, and its hoo
   const hooks = JSON.parse(fs.readFileSync(".claude/settings.json", "utf8")).hooks;
   assert.deepEqual(Object.keys(hooks), ["SessionEnd"]);
   assert.match(hooks.SessionEnd[0].hooks[0].command, /^node "\$\{CLAUDE_PROJECT_DIR\}\/scripts\/sessions\/upload-claude-code\.js" --hook$/);
+});
+
+test("sessions archive: thinking, tool calls and results are saved, searchable, and sent in full only on request", async () => {
+  const { handleUpload } = await import("../lib/sessions.js");
+  const env = await archiveEnv();
+  const edit = await editorFor(env);
+  const id = "code:" + aSession.id;
+  await handleUpload(sendSession({ ...aSession, messages: [
+    aSession.messages[0],
+    { kind: "thinking", text: "Read the existing notes first." },
+    { kind: "tool", tool: "Bash", text: '{ "command": "cat 46.md" }' },
+    { kind: "result", tool: "Bash", text: "glorious sunshine " + "z".repeat(5000) + " the very end" },
+    aSession.messages[1],
+  ] }), env);
+
+  const list = await (await edit("sessions")).json();
+  assert.equal(list.sessions[0].messages, 2, "the count is prompts and answers");
+  assert.deepEqual(list.total, { sessions: 1, messages: 2 });
+
+  const read = await (await edit("session?id=" + id)).json();
+  assert.deepEqual(read.messages.map((m) => [m.kind, m.tool]), [["prompt", ""], ["thinking", ""], ["tool", "Bash"], ["result", "Bash"], ["answer", ""]]);
+  assert.equal(read.messages[3].text.length, 2000, "only the start of a long result is sent with the session");
+  assert.ok(read.messages[3].length > 5000);
+  assert.equal(read.messages[4].text, aSession.messages[1].text, "answers are sent whole");
+  const whole = await (await edit(`message?id=${id}&n=3`)).json();
+  assert.match(whole.text, /the very end$/);
+  assert.equal((await edit(`message?id=${id}&n=99`)).status, 404);
+  assert.equal((await edit(`message?id=${id}&n=x`)).status, 400);
+
+  const found = await (await edit("sessions?q=sunshine")).json();
+  assert.deepEqual(found.results.map((r) => [r.kind, r.tool, r.n]), [["result", "Bash", 3]]);
+  assert.equal((await (await edit("sessions?q=sunshine&only=talk")).json()).results.length, 0, "the search can leave out everything but prompts and answers");
+  assert.equal((await (await edit("sessions?q=existing+notes")).json()).results[0].kind, "thinking");
+  assert.equal((await (await edit("sessions?q=swimming&only=talk")).json()).results.length, 1);
 });

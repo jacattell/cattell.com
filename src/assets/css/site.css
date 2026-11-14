@@ -186,3 +186,7 @@ a.yt:hover .yt-play { background: #c00; }
 .chat-first { margin: 0.25rem 0 0.5rem; font-weight: 700; }
 .chat-item button { padding: 0.25rem 0.75rem; }
 .chat-record { margin-top: 0.75rem; padding-left: 1rem; border-left: 3px solid var(--border); }
+/* Claude sessions archive: thinking, tool calls and tool results, folded up */
+.session-extra { margin: 0 0 1rem; color: var(--muted); font-size: 0.9rem; }
+.session-extra summary { cursor: pointer; font-weight: 700; }
+.session-extra-text { margin: 0.5rem 0 0; padding: 0.5rem; border: 1px solid var(--border); color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 30rem; overflow: auto; font-size: 0.85rem; }

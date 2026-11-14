@@ -1,8 +1,11 @@
-// Claude sessions archive (/edit/sessions/): search and read saved prompts and answers.
+// Claude sessions archive (/edit/sessions/): search and read saved prompts and answers,
+// with Claude's thinking, tool calls and tool results folded up beside them.
 // Uses the week notes editor's GitHub sign-in. See lib/sessions.js.
 (function () {
   const app = document.getElementById("sessions");
   const SOURCES = { code: "Claude Code", chat: "Claude chat" };
+  /** Who or what a message is from, for example "Tool result: Bash". */
+  const label = (m) => ({ prompt: "James", answer: "Claude", thinking: "Claude's thinking", tool: "Tool call", result: "Tool result" }[m.kind] || "Message") + (m.tool ? `: ${m.tool}` : "");
   const el = (tag, attrs = {}, ...children) => {
     const e = document.createElement(tag);
     for (const [k, v] of Object.entries(attrs)) {
@@ -38,6 +41,30 @@
   }
 
   // ---------- one session ----------
+  /**
+   * Prompts and answers are shown in full. Thinking, tool calls and tool results are
+   * folded up; a long one is fetched in full the first time it is opened.
+   */
+  function messageView(id, m) {
+    if (m.kind === "prompt" || m.kind === "answer") {
+      return el("p", { class: "msg", id: `m${m.n}`, tabindex: "-1" }, el("span", { class: "who" }, label(m)), el("span", {}, m.text));
+    }
+    const text = el("pre", { class: "session-extra-text" }, m.text + (m.length > m.text.length ? "…" : ""));
+    const details = el("details", { class: "session-extra", id: `m${m.n}` }, el("summary", {}, label(m)), text);
+    let whole = m.length <= m.text.length;
+    details.addEventListener("toggle", async () => {
+      if (!details.open || whole) return;
+      whole = true;
+      try {
+        text.textContent = (await api(`message?id=${encodeURIComponent(id)}&n=${m.n}`)).text;
+      } catch (err) {
+        whole = false;
+        text.textContent = m.text + "…\n\n" + err.message;
+      }
+    });
+    return details;
+  }
+
   async function showSession(id, jumpTo) {
     const list = el("div", { class: "chat-record" });
     const more = el("button", { type: "button", class: "secondary", hidden: true }, "Show more of this session");
@@ -52,9 +79,7 @@
         const data = await api(`session?id=${encodeURIComponent(id)}&from=${next}`);
         heading.textContent = data.session.title || "Untitled session";
         about.textContent = [SOURCES[data.session.source], data.session.project, when(data.session.started), plural(data.session.messages, "message")].filter(Boolean).join(" · ");
-        for (const m of data.messages) {
-          list.append(el("p", { class: "msg", id: `m${m.n}`, tabindex: "-1" }, el("span", { class: "who" }, m.role === "user" ? "James" : "Claude"), el("span", {}, m.text)));
-        }
+        for (const m of data.messages) list.append(messageView(id, m));
         next = data.next;
         more.hidden = next === null;
       } catch (err) {
@@ -86,7 +111,11 @@
     // Load on until the message from the search result is on the page, then go to it.
     while (jumpTo != null && next !== null && next <= jumpTo) await page();
     const target = jumpTo != null && document.getElementById(`m${jumpTo}`);
-    if (target) { target.scrollIntoView(); target.focus(); }
+    if (target) {
+      if (target.tagName === "DETAILS") target.open = true;
+      target.scrollIntoView();
+      (target.querySelector("summary") || target).focus();
+    }
   }
 
   // ---------- the list and search ----------
@@ -97,6 +126,7 @@
       el("label", { for: "sessions-q" }, "Search prompts and answers"), q,
       el("fieldset", {}, el("legend", { class: "visually-hidden" }, "Where from"),
         el("label", {}, el("input", { type: "radio", name: "source", value: "", checked: true }), " Everything"), ...sources),
+      el("fieldset", {}, el("label", {}, el("input", { type: "checkbox", name: "talk" }), " Only search prompts and answers")),
       el("p", {}, el("button", { type: "submit" }, "Search")));
     const summary = el("p", { class: "hint" });
     const list = el("ol", { class: "chat-list" });
@@ -109,7 +139,7 @@
       el("p", { class: "post-meta" }, [SOURCES[s.source], s.project, when(s.updated || s.started), plural(s.messages, "message")].filter(Boolean).join(" · ")),
       el("p", { class: "chat-first" }, el("a", { href: link(s.id) }, s.title || "Untitled session")));
     const resultItem = (r) => el("li", { class: "chat-item" },
-      el("p", { class: "post-meta" }, [SOURCES[r.source], when(r.at), r.role === "user" ? "James" : "Claude"].filter(Boolean).join(" · ")),
+      el("p", { class: "post-meta" }, [SOURCES[r.source], when(r.at), label(r)].filter(Boolean).join(" · ")),
       el("p", { class: "chat-first" }, el("a", { href: link(r.id, r.n) }, r.title || "Untitled session")),
       el("p", {}, highlighted(r.snippet)));
 
@@ -121,6 +151,7 @@
       const params = new URLSearchParams({ from: String(next) });
       if (q.value.trim()) params.set("q", q.value.trim());
       if (source) params.set("source", source);
+      if (form.elements.talk.checked) params.set("only", "talk");
       try {
         const data = await api("sessions?" + params);
         if (data.results) {
@@ -140,11 +171,11 @@
       more.disabled = false;
     }
     form.addEventListener("submit", (e) => { e.preventDefault(); page(true); });
-    form.addEventListener("change", (e) => { if (e.target.name === "source") page(true); });
+    form.addEventListener("change", (e) => { if (e.target.name === "source" || e.target.name === "talk") page(true); });
     more.addEventListener("click", () => page(false));
 
     app.replaceChildren(
-      el("p", {}, "Your prompts and Claude's answers, from Claude Code and Claude chats. Only you can see this page."),
+      el("p", {}, "Your prompts and Claude's answers, with Claude's thinking, tool calls and tool results, from Claude Code and Claude chats. Only you can see this page."),
       el("p", {}, el("a", { href: "/edit/" }, "Back to the week notes editor")),
       form, summary, status, list, more);
     await page(true);

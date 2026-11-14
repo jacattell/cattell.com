@@ -300,9 +300,11 @@ Without the binding, nothing is saved and the chat works as before.
 
 ## Claude sessions archive
 
-`/edit/sessions/` is a private, searchable archive of James's prompts and Claude's answers, from Claude Code and from Claude chats. Only the signed-in editor can read it, as for the week notes editor. It is not part of the public site and is not in this repository.
+`/edit/sessions/` is a private, searchable archive of James's prompts and Claude's answers, with Claude's thinking, tool calls and tool results, from Claude Code and from Claude chats. Only the signed-in editor can read it, as for the week notes editor. It is not part of the public site and is not in this repository.
 
-- Only prompts and answers are saved: no tool calls, tool results or thinking.
+- Thinking, tool calls and tool results are shown folded up, and the search can leave them out. Claude Code saves only a short summary of the thinking, and sometimes none.
+- Tool results hold file contents and command output, so they can hold secrets. Check a session before making it public.
+- One message can hold up to 200,000 characters. Anything longer is cut short, with a note.
 - Every session has a `public` setting, which is off. Nothing reads it yet. It is there so single sessions could be published later.
 - A session can be deleted from its page in the archive.
 
