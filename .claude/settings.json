@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR}/scripts/sessions/upload-claude-code.js\" --hook",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

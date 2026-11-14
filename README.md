@@ -288,7 +288,7 @@ To go back to Google Sites, remove the custom domains and set the `www` record b
 ## The chat page
 
 - The browser sends the conversation to `/api/chat`. The function adds a copy of the main pages (`_site/chat-context.txt`, made at build time) and passes it to Claude through the Anthropic API.
-- The function does not store conversations. Anthropic handles them under its own terms.
+- Anthropic handles conversations under its own terms.
 - Conversations are limited to 20 messages of up to 2,000 characters each.
 - **Chat logs:** when the `CHAT_LOGS` KV binding is set, each conversation's questions and answers are saved (no IP address or other details), and Cloudflare deletes each one automatically 30 days after its last message. The Chat page tells visitors this. Read them at `/edit/chats/`, signing in with GitHub as for the week notes editor. The code is in `lib/chat.js` (saving), `lib/editor.js` (reading) and `src/assets/js/chat-logs.js`.
 
@@ -297,6 +297,67 @@ To go back to Google Sites, remove the custom domains and set the `www` record b
 Conversations are kept in the Cloudflare KV namespace `cattell-chat-logs`, connected as `CHAT_LOGS` in `wrangler.toml`. To use a different namespace, change its `id` there.
 
 Without the binding, nothing is saved and the chat works as before.
+
+## Claude sessions archive
+
+`/edit/sessions/` is a private, searchable archive of James's prompts and Claude's answers, from Claude Code and from Claude chats. Only the signed-in editor can read it, as for the week notes editor. It is not part of the public site and is not in this repository.
+
+- Only prompts and answers are saved: no tool calls, tool results or thinking.
+- Every session has a `public` setting, which is off. Nothing reads it yet. It is there so single sessions could be published later.
+- A session can be deleted from its page in the archive.
+
+| What | Where |
+| --- | --- |
+| Saving, searching and reading | `lib/sessions.js` |
+| Reading Claude Code transcripts and claude.ai exports | `lib/session-formats.js` |
+| Upload address | `functions/api/sessions.js` (`/api/sessions`) |
+| Scripts that send sessions | `scripts/sessions/` |
+| Page | `src/edit/sessions/index.njk`, `src/assets/js/sessions.js` |
+| Automatic sending from Claude Code | `.claude/settings.json` |
+
+### Set it up (once)
+
+1. In Cloudflare, go to **Storage & Databases** > **D1 SQL Database** and create a database called `cattell-sessions`. Copy its **Database ID**.
+2. In `wrangler.toml`, remove the `#` from the four `d1_databases` lines and put the ID in `database_id`. Commit and push. The tables are made the first time the archive is used.
+3. Make a long random key, for example with `openssl rand -hex 32`.
+4. In Cloudflare, open the Pages project, then **Settings** > **Variables and Secrets**. Add `ARCHIVE_KEY` as a **Secret**, for Production, with that key as the value. Redeploy.
+5. On each computer that will send sessions, save the same key in the file `~/.config/cattell-archive/key`. Never put the key in this repository.
+
+### Send sessions
+
+Every script replaces the archive's copy of a session it sends again, so running one twice is safe.
+
+Claude Code sessions saved on this computer (Claude Code keeps them for 30 days):
+
+```
+node scripts/sessions/upload-claude-code.js --all
+```
+
+Claude chats: in Claude, go to **Settings** > **Privacy** and export your data. Unzip the file you are emailed, then:
+
+```
+node scripts/sessions/import-claude-export.js path/to/unzipped-folder
+```
+
+Chats cannot be sent automatically, so repeat the export when you want the archive brought up to date.
+
+### Send Claude Code sessions automatically
+
+`.claude/settings.json` in this repository runs the upload script when a Claude Code session in this repository ends. It does nothing on a computer without the key.
+
+To do the same for every project on a computer, add this to `~/.claude/settings.json` there, with the real path to this repository:
+
+```json
+{
+  "hooks": {
+    "SessionEnd": [
+      { "hooks": [{ "type": "command", "command": "node /path/to/cattell.com/scripts/sessions/upload-claude-code.js --hook", "timeout": 30 }] }
+    ]
+  }
+}
+```
+
+Cloud sessions (claude.ai/code) are only sent if their environment has the key in `ARCHIVE_KEY` and is allowed to reach `www.cattell.com`.
 
 ## Old addresses
 
