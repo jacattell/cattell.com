@@ -627,7 +627,7 @@ test("week notes editor: sign-out only from this site, and cancels the GitHub ke
 
 test("security headers: no framing, and the editor's policy allows its inline script", () => {
   const headers = fs.readFileSync("_site/_headers", "utf8");
-  assert.match(headers, /^\/\*\n(?:  .*\n)*  X-Frame-Options: DENY\n(?:  .*\n)*  Content-Security-Policy: frame-ancestors 'none'/m);
+  assert.match(headers, /^\/\*\n(?:  .*\n)*  X-Frame-Options: DENY\n/m);
   const policy = headers.match(/^\/edit\/\*\n(?:  .*\n)*?  Content-Security-Policy: (.*)$/m)[1];
   const inline = fs.readFileSync("_site/edit/index.html", "utf8").match(/<script>([\s\S]*?)<\/script>/)[1];
   const hash = crypto.createHash("sha256").update(inline).digest("base64");
@@ -737,5 +737,29 @@ test("week notes editor: session key comes from HKDF, and old-style cookies are 
   const bytes = new Uint8Array([...iv, ...new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, oldKey, body))]);
   const old = Buffer.from(bytes).toString("base64url");
   assert.equal(await openSession(old, secret), null);
+});
+
+test("security policy: every page's inline scripts are allowed, and nothing else inline", () => {
+  const headers = fs.readFileSync("_site/_headers", "utf8");
+  const policy = headers.match(/^\/\*\n(?:  .*\n)*?  Content-Security-Policy: (.*)$/m)[1];
+  const directive = (name) => policy.split(";").map((d) => d.trim()).find((d) => d.startsWith(name + " "));
+  assert.equal(directive("default-src"), "default-src 'self'");
+  assert.equal(directive("style-src"), "style-src 'self'");
+  assert.equal(directive("frame-ancestors"), "frame-ancestors 'none'");
+  assert.ok(!/unsafe-inline|unsafe-eval/.test(policy));
+  const scripts = directive("script-src");
+  const walk = (dir) => fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(`${dir}/${e.name}`) : [`${dir}/${e.name}`]));
+  const seen = new Set();
+  for (const file of walk("_site").filter((f) => f.endsWith(".html"))) {
+    const html = fs.readFileSync(file, "utf8");
+    assert.ok(!/ style="|<style|\son[a-z]+="/i.test(html.replace(/<pre[\s\S]*?<\/pre>|<code[\s\S]*?<\/code>/g, "")), `${file}: inline style or event attribute`);
+    for (const m of html.matchAll(/<script(?: type="module")?>([\s\S]*?)<\/script>/g)) {
+      const hash = `'sha256-${crypto.createHash("sha256").update(m[1]).digest("base64")}'`;
+      if (!seen.has(hash)) assert.ok(scripts.includes(hash), `${file}: inline script not allowed by the policy`);
+      seen.add(hash);
+    }
+    for (const m of html.matchAll(/<iframe[^>]*src="([^"]+)"/g)) assert.ok(m[1].startsWith("https://www.youtube-nocookie.com/"), `${file}: frame from ${m[1]} is blocked by the policy`);
+  }
+  assert.ok(seen.size >= 3, "the light/dark and GOV.UK scripts were checked");
 });
 

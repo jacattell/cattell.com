@@ -196,7 +196,17 @@ Signing out cancels the GitHub key straight away. Sign-out only works from the e
 
 ## Security headers
 
-`src/_headers.njk` makes the `_headers` file Cloudflare uses. Every page tells browsers not to show it inside another site's frame. The editor pages (`/edit/`) also have a strict Content-Security-Policy: only this site's own scripts and the small light/dark script in `src/_includes/theme-inline.js` (allowed by its hash, worked out at build time) can run there.
+`src/_headers.njk` makes the `_headers` file Cloudflare uses.
+
+Every page has a Content-Security-Policy that only lets the browser run this site's own scripts and styles, plus:
+
+- Cloudflare's human check (Turnstile) on the forms
+- YouTube's privacy-enhanced player (`youtube-nocookie.com`), in the archive and week notes
+- images from any secure (`https:`) address
+
+The few small inline scripts (the light/dark script, and two on the GOV.UK version) live in `src/_includes/` and are allowed by their hashes, worked out at build time, so editing them is safe. No page may show another site inside it. The editor pages (`/edit/`) have an even stricter policy on top.
+
+A test checks every built page: if a page gets an inline script, style or event attribute, or embeds a frame from anywhere but YouTube's privacy-enhanced player, the tests fail. To embed something else, add its address to `frame-src` (or the right part of the policy) in `src/_headers.njk`.
 
 ## Run it on your computer
 

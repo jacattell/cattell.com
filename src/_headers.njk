@@ -4,11 +4,15 @@ eleventyExcludeFromCollections: true
 layout: false
 ---
 {%- set themeScript %}{% include "theme-inline.js" %}{% endset -%}
+{%- set govukJsEnabled %}{% include "govuk-js-enabled.js" %}{% endset -%}
+{%- set govukInit %}{% include "govuk-init.js" %}{% endset -%}
+{#- Every page: only this site's own scripts and styles, plus Cloudflare's human check (Turnstile)
+    on the forms and YouTube's privacy-enhanced player. Inline scripts are allowed by their hashes. #}
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY
-  Content-Security-Policy: frame-ancestors 'none'; base-uri 'self'; object-src 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' '{{ themeScript | cspHash }}' '{{ govukJsEnabled | cspHash }}' '{{ govukInit | cspHash }}' https://challenges.cloudflare.com; style-src 'self'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; frame-src https://www.youtube-nocookie.com https://challenges.cloudflare.com; media-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'
   Permissions-Policy: camera=(), microphone=(), geolocation=()
 
 /assets/*
