@@ -28,13 +28,17 @@ export function settings() {
   return { url: archiveUrl(process.env.ARCHIVE_URL), key };
 }
 
-/** Sends one session, in parts if it is long. Returns the number of messages saved. */
-export async function upload(session, { url, key }, send = fetch) {
+/**
+ * Sends one session, in parts if it is long. Returns the number of messages saved.
+ * `start` sends only the messages from there on. With no key, the request goes without
+ * one: in a cloud session, the environment's network secret adds it on the way out.
+ */
+export async function upload(session, { url, key }, send = fetch, start = 0) {
   let saved = 0;
-  for (const part of uploadParts(session)) {
+  for (const part of uploadParts(session, undefined, start)) {
     const res = await send(`${url}/api/sessions`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+      headers: { "Content-Type": "application/json", ...(key ? { Authorization: `Bearer ${key}` } : {}) },
       body: JSON.stringify(part),
       signal: AbortSignal.timeout(30_000),
     });
