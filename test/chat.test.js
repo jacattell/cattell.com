@@ -1124,6 +1124,10 @@ test("sessions archive: the hook only sends from James's own cloud environments,
   assert.deepEqual(r.received, [{ auth: null, offset: 0, count: 4 }], "the network secret adds the key outside the session");
   r = await runUploadHook({ env: {}, transcript: transcriptOf(4), home: fs.mkdtempSync(path.join(os.tmpdir(), "hook-")) });
   assert.equal(r.received.length, 0, "on a computer without the key, nothing is sent");
+  // Behind a proxy, as in a cloud session: the script restarts itself so that fetch uses the proxy.
+  r = await runUploadHook({ env: { ...cloud, CATTELL_ARCHIVE: "1", HTTPS_PROXY: "http://127.0.0.1:9", NO_PROXY: "127.0.0.1" }, transcript: transcriptOf(5), home });
+  assert.deepEqual(r.received, [{ auth: null, offset: 3, count: 2 }], "it still sends from behind a proxy");
+  assert.equal(r.output, "", "and still prints nothing, not even Node's warning");
 });
 
 test("sessions archive: the hook sends only what is new since last time", async () => {

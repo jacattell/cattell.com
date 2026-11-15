@@ -22,6 +22,17 @@ import { settings, upload, KEY_FILE } from "./common.js";
 
 const args = process.argv.slice(2);
 const hook = args.includes("--hook");
+
+// Cloud sessions can only reach the internet through a proxy, and Node's fetch ignores
+// proxy settings unless NODE_USE_ENV_PROXY=1. So start again with that set.
+if ((process.env.HTTPS_PROXY || process.env.https_proxy) && process.env.NODE_USE_ENV_PROXY !== "1") {
+  const { spawnSync } = await import("node:child_process");
+  const again = spawnSync(process.execPath, ["--no-warnings", process.argv[1], ...args], {
+    stdio: "inherit",
+    env: { ...process.env, NODE_USE_ENV_PROXY: "1" },
+  });
+  process.exit(hook ? 0 : again.status ?? 1);
+}
 const cloud = process.env.CLAUDE_CODE_REMOTE === "true";
 const STATE_DIR = path.join(os.homedir(), ".cache", "cattell-archive");
 
