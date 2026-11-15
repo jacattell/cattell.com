@@ -999,3 +999,63 @@ test("sessions archive: thinking, tool calls and results are saved, searchable, 
   assert.equal((await (await edit("sessions?q=existing+notes")).json()).results[0].kind, "thinking");
   assert.equal((await (await edit("sessions?q=swimming&only=talk")).json()).results.length, 1);
 });
+
+test("sessions archive: keys, tokens and passwords are removed before a session is sent", async () => {
+  const { redact, parseClaudeCode, parseClaudeExport } = await import("../lib/session-formats.js");
+  const gone = "[secret removed]";
+  const secrets = {
+    anthropic: "sk-ant-api03-" + "a1B2".repeat(12),
+    github: "ghp_" + "x9".repeat(18),
+    resend: "re_Ab12Cd34_" + "q7".repeat(12),
+    aws: "AKIA" + "ABCD1234EFGH5678",
+    jwt: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.abcDEF123456789xyz",
+    plain: "correct-horse-battery",
+  };
+  const env = `ANTHROPIC_API_KEY=${secrets.anthropic}\nARCHIVE_KEY="${secrets.plain}"\nexport DB_PASSWORD='${secrets.plain}'\nSITE_NAME=cattell.com`;
+  assert.equal(redact(env), `ANTHROPIC_API_KEY=${gone}\nARCHIVE_KEY="${gone}"\nexport DB_PASSWORD='${gone}'\nSITE_NAME=cattell.com`);
+  assert.equal(redact(`{"apiKey": "${secrets.plain}", "name": "James"}`), `{"apiKey": "${gone}", "name": "James"}`);
+  assert.equal(redact(`curl -H "Authorization: Bearer ${secrets.plain}-1234" https://james:hunter2@example.com/x`), `curl -H "Authorization: Bearer ${gone}" https://james:${gone}@example.com/x`);
+  for (const s of [secrets.anthropic, secrets.github, secrets.resend, secrets.aws, secrets.jwt]) assert.equal(redact(`found ${s} here`), `found ${gone} here`);
+  assert.equal(redact("-----BEGIN OPENSSH PRIVATE KEY-----\nb3BlbnNzaC1rZXk=\nAAAA\n-----END OPENSSH PRIVATE KEY-----\nnext line"), `${gone}\nnext line`);
+  assert.equal(redact(JSON.stringify({ key: "-----BEGIN PRIVATE KEY-----\nMIIEvQ==\n-----END PRIVATE KEY-----" })), `{"key":"${gone}"}`);
+
+  // Ordinary text and code are left as they were.
+  for (const same of [
+    "Please build me a week note about the token ring network and my password manager.",
+    'const ARCHIVE_KEY = "k".repeat(40);',
+    "headers: { Authorization: `Bearer ${key}` }",
+    "GITHUB_CLIENT_SECRET: env.GITHUB_CLIENT_SECRET, API_KEY=$API_KEY TOKEN=$(cat key)",
+    "https://www.cattell.com:8443/week-notes/ and git@github.com:jacattell/cattell.com.git",
+    "max_tokens: 2048, // short chat replies",
+  ]) assert.equal(redact(same), same);
+  assert.equal(redact(redact(env)), redact(env), "doing it twice changes nothing more");
+
+  // Both readers do it, in every kind of message and in the title.
+  const code = parseClaudeCode([
+    { type: "user", message: { content: `My key is ${secrets.github}` } },
+    { type: "assistant", message: { content: [{ type: "thinking", thinking: `The key ${secrets.github}` }, { type: "text", text: `Saved ${secrets.github}` }, { type: "tool_use", id: "t1", name: "Bash", input: { command: `export RESEND_API_KEY=${secrets.resend}` } }] } },
+    { type: "user", message: { content: [{ type: "tool_result", tool_use_id: "t1", content: env }] } },
+    { type: "custom-title", customTitle: `Key ${secrets.github}` },
+  ].map((l) => JSON.stringify(l)).join("\n"), "session-0001");
+  const chat = parseClaudeExport([{ uuid: "chat-0000-0001", name: `Key ${secrets.github}`, chat_messages: [{ sender: "human", text: `My key is ${secrets.anthropic}` }] }]);
+  assert.equal(code.messages.length, 5);
+  for (const s of Object.values(secrets)) assert.ok(!JSON.stringify([code, chat]).includes(s), "no secret is left in what is sent");
+  assert.equal(code.title, `Key ${gone}`);
+});
+
+test("sessions archive: the upload scripts only send the key to an https address", async () => {
+  const { archiveUrl } = await import("../scripts/sessions/common.js");
+  assert.equal(archiveUrl(undefined), "https://www.cattell.com");
+  assert.equal(archiveUrl("https://www.cattell.com/"), "https://www.cattell.com");
+  assert.equal(archiveUrl("http://localhost:8788"), "http://localhost:8788");
+  assert.equal(archiveUrl("http://127.0.0.1:8788/"), "http://127.0.0.1:8788");
+  for (const bad of ["http://www.cattell.com", "http://attacker.example", "ftp://www.cattell.com", "file:///tmp/x", "www.cattell.com", "http://localhost.attacker.example"]) assert.throws(() => archiveUrl(bad), /ARCHIVE_URL/);
+});
+
+test("the editor's preview only keeps web, email and page links, however a javascript: link is disguised", () => {
+  const source = fs.readFileSync("src/assets/js/edit.js", "utf8");
+  const safeUrl = new Function(`return ${/const safeUrl = (.+);\n/.exec(source)[1]}`)();
+  const ok = (v) => safeUrl(v, "https://www.cattell.com/edit/");
+  for (const good of ["https://example.com/", "http://example.com/", "mailto:james@example.com", "/week-notes/2026/46/", "#top", "../contact/", "page.html", "//example.com/x"]) assert.ok(ok(good), good);
+  for (const bad of ["javascript:alert(1)", " javascript:alert(1)", "JaVaScRiPt:alert(1)", "java\tscript:alert(1)", "java\nscript:alert(1)", "\u0001javascript:alert(1)", "data:text/html,<script>alert(1)</script>", "vbscript:x", "blob:https://www.cattell.com/x", "file:///etc/passwd"]) assert.ok(!ok(bad), JSON.stringify(bad));
+});

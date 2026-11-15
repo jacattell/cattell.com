@@ -7,13 +7,25 @@ import { uploadParts } from "../../lib/session-formats.js";
 
 export const KEY_FILE = path.join(os.homedir(), ".config", "cattell-archive", "key");
 
+/**
+ * The archive's address. The key is sent with every upload, so the address must be an
+ * encrypted one (https://). Plain http:// is only allowed to this computer, for testing.
+ */
+export function archiveUrl(given) {
+  let url;
+  try { url = new URL(given || "https://www.cattell.com"); } catch { throw new Error("ARCHIVE_URL isn't a web address."); }
+  const thisComputer = url.protocol === "http:" && ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
+  if (url.protocol !== "https:" && !thisComputer) throw new Error("ARCHIVE_URL must start with https://, so the archive key is never sent unprotected.");
+  return url.origin;
+}
+
 /** The archive's address and key: from ARCHIVE_URL and ARCHIVE_KEY, or the key file. */
 export function settings() {
   let key = process.env.ARCHIVE_KEY || "";
   if (!key) {
     try { key = fs.readFileSync(KEY_FILE, "utf8").trim(); } catch { /* no key file */ }
   }
-  return { url: (process.env.ARCHIVE_URL || "https://www.cattell.com").replace(/\/+$/, ""), key };
+  return { url: archiveUrl(process.env.ARCHIVE_URL), key };
 }
 
 /** Sends one session, in parts if it is long. Returns the number of messages saved. */
