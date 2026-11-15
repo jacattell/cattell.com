@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import crypto from "node:crypto";
 import { validateMessages, RateLimiter, handleChat, buildSystem } from "../lib/chat.js";
 
@@ -976,8 +978,11 @@ test("the sessions archive page is hidden, linked from Hidden stuff, and its hoo
   assert.match(fs.readFileSync("_site/hidden/index.html", "utf8"), /<a href="\/edit\/sessions\/">Claude sessions archive<\/a>/);
   assert.ok(!fs.readFileSync("_site/chat-context.txt", "utf8").includes("/edit/sessions/"), "the public chat page isn't told about it");
   const hooks = JSON.parse(fs.readFileSync(".claude/settings.json", "utf8")).hooks;
-  assert.deepEqual(Object.keys(hooks), ["SessionEnd"]);
-  assert.match(hooks.SessionEnd[0].hooks[0].command, /^node "\$\{CLAUDE_PROJECT_DIR\}\/scripts\/sessions\/upload-claude-code\.js" --hook$/);
+  assert.deepEqual(Object.keys(hooks), ["Stop", "SessionEnd"]);
+  for (const event of ["Stop", "SessionEnd"]) assert.match(hooks[event][0].hooks[0].command, /^node "\$\{CLAUDE_PROJECT_DIR\}\/scripts\/sessions\/upload-claude-code\.js" --hook$/);
+  assert.equal(hooks.Stop[0].hooks[0].async, true, "sending after each reply doesn't hold Claude up");
+  const other = JSON.parse(fs.readFileSync("scripts/sessions/for-other-repos/settings.json", "utf8")).hooks;
+  assert.deepEqual(Object.keys(other), ["Stop", "SessionEnd"]);
 });
 
 test("sessions archive: thinking, tool calls and results are saved, searchable, and sent in full only on request", async () => {
@@ -1073,4 +1078,64 @@ test("the editor's preview only keeps web, email and page links, however a javas
   const ok = (v) => safeUrl(v, "https://www.cattell.com/edit/");
   for (const good of ["https://example.com/", "http://example.com/", "mailto:james@example.com", "/week-notes/2026/46/", "#top", "../contact/", "page.html", "//example.com/x"]) assert.ok(ok(good), good);
   for (const bad of ["javascript:alert(1)", " javascript:alert(1)", "JaVaScRiPt:alert(1)", "java\tscript:alert(1)", "java\nscript:alert(1)", "\u0001javascript:alert(1)", "data:text/html,<script>alert(1)</script>", "vbscript:x", "blob:https://www.cattell.com/x", "file:///etc/passwd"]) assert.ok(!ok(bad), JSON.stringify(bad));
+});
+
+// ---------- the upload hook, run as Claude Code runs it ----------
+/** Runs the upload script with --hook against a pretend archive, and returns what it received. */
+async function runUploadHook({ env, transcript, event = "SessionEnd", home }) {
+  const http = await import("node:http");
+  const { spawn } = await import("node:child_process");
+  const received = [];
+  const server = http.createServer((req, res) => {
+    let body = "";
+    req.on("data", (c) => (body += c));
+    req.on("end", () => {
+      const part = JSON.parse(body);
+      received.push({ auth: req.headers.authorization || null, offset: part.offset, count: part.messages.length });
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify({ saved: part.id, messages: part.offset + part.messages.length }));
+    });
+  });
+  await new Promise((done) => server.listen(0, "127.0.0.1", done));
+  const file = path.join(home, "session.jsonl");
+  fs.writeFileSync(file, transcript);
+  const child = spawn(process.execPath, ["scripts/sessions/upload-claude-code.js", "--hook"], {
+    env: { PATH: process.env.PATH, HOME: home, ARCHIVE_URL: `http://127.0.0.1:${server.address().port}`, ...env },
+  });
+  child.stdin.end(JSON.stringify({ hook_event_name: event, transcript_path: file }));
+  const output = [];
+  child.stdout.on("data", (d) => output.push(String(d)));
+  child.stderr.on("data", (d) => output.push(String(d)));
+  const code = await new Promise((done) => child.on("close", done));
+  server.close();
+  return { received, code, output: output.join("") };
+}
+const transcriptOf = (n) => Array.from({ length: n }, (_, i) =>
+  JSON.stringify({ type: i % 2 ? "assistant" : "user", sessionId: "hook-test-0001", timestamp: `2026-11-15T14:0${i % 10}:00Z`, message: { content: [{ type: "text", text: `message ${i}` }] } })).join("\n");
+
+test("sessions archive: the hook only sends from James's own cloud environments, without holding the key", async () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "hook-"));
+  const cloud = { CLAUDE_CODE_REMOTE: "true" };
+  let r = await runUploadHook({ env: cloud, transcript: transcriptOf(4), home });
+  assert.equal(r.received.length, 0, "someone else's cloud session sends nothing");
+  assert.equal(r.code, 0);
+  assert.equal(r.output, "", "the hook never prints anything");
+  r = await runUploadHook({ env: { ...cloud, CATTELL_ARCHIVE: "1" }, transcript: transcriptOf(4), home });
+  assert.deepEqual(r.received, [{ auth: null, offset: 0, count: 4 }], "the network secret adds the key outside the session");
+  r = await runUploadHook({ env: {}, transcript: transcriptOf(4), home: fs.mkdtempSync(path.join(os.tmpdir(), "hook-")) });
+  assert.equal(r.received.length, 0, "on a computer without the key, nothing is sent");
+});
+
+test("sessions archive: the hook sends only what is new since last time", async () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "hook-"));
+  const env = { ARCHIVE_KEY: ARCHIVE_KEY };
+  let r = await runUploadHook({ env, transcript: transcriptOf(3), home });
+  assert.deepEqual(r.received, [{ auth: `Bearer ${ARCHIVE_KEY}`, offset: 0, count: 3 }]);
+  r = await runUploadHook({ env, transcript: transcriptOf(6), home });
+  assert.deepEqual(r.received, [{ auth: `Bearer ${ARCHIVE_KEY}`, offset: 2, count: 4 }], "the last message sent before is sent again, in case the answer grew");
+  r = await runUploadHook({ env, transcript: transcriptOf(6), home, event: "Stop" });
+  assert.deepEqual(r.received, [{ auth: `Bearer ${ARCHIVE_KEY}`, offset: 5, count: 1 }]);
+  fs.mkdirSync(path.join(home, ".cache", "cattell-archive", "sending.lock"));
+  r = await runUploadHook({ env, transcript: transcriptOf(8), home });
+  assert.equal(r.received.length, 0, "a second copy waits for the one already sending");
 });

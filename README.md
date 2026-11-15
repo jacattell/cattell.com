@@ -349,13 +349,32 @@ The export's `claude_code_cloud` file only lists scheduled tasks. It does not ho
 
 ### Send Claude Code sessions automatically
 
-`.claude/settings.json` in this repository runs the upload script when a Claude Code session in this repository ends. It does nothing on a computer without the key.
+`.claude/settings.json` runs the upload script after each of Claude's replies, and when a session ends. Each time, it sends only what is new. It does nothing unless one of these is true:
+
+- **On a computer:** the key is saved in `~/.config/cattell-archive/key`.
+- **In a cloud session:** the environment has `CATTELL_ARCHIVE=1`. Nobody else's environment has this, so nobody else's sessions are sent.
+
+Cloud sessions only run hooks saved in the session's repository, and only when the session has one repository. So each repository needs the hook:
+
+- **This repository:** already set up.
+- **Your other repositories:** copy `scripts/sessions/for-other-repos/cattell-archive.sh` to `.claude/hooks/cattell-archive.sh` there, and `scripts/sessions/for-other-repos/settings.json` to `.claude/settings.json` (or merge its `hooks` into the existing file). The script fetches the upload script from this public repository.
+- **Repositories that aren't yours,** such as UKGovCamp's: don't add it. Sessions there aren't sent.
+
+To set up a cloud environment (once for each environment, at [claude.ai/code](https://claude.ai/code)):
+
+1. Open the environment for editing.
+2. Under **Environment variables**, add `CATTELL_ARCHIVE=1`.
+3. Under **Network secrets**, choose **Add secret**. Name: `cattell.com archive`. Allowed websites: `www.cattell.com`. Custom headers: `Authorization`, prefix `Bearer`, and the archive key as the value. The key is added to requests on their way out, so it never enters the session.
+4. Save. Sessions started after this are sent.
 
 To do the same for every project on a computer, add this to `~/.claude/settings.json` there, with the real path to this repository:
 
 ```json
 {
   "hooks": {
+    "Stop": [
+      { "hooks": [{ "type": "command", "command": "node /path/to/cattell.com/scripts/sessions/upload-claude-code.js --hook", "async": true }] }
+    ],
     "SessionEnd": [
       { "hooks": [{ "type": "command", "command": "node /path/to/cattell.com/scripts/sessions/upload-claude-code.js --hook", "timeout": 30 }] }
     ]
@@ -363,7 +382,7 @@ To do the same for every project on a computer, add this to `~/.claude/settings.
 }
 ```
 
-Cloud sessions (claude.ai/code) are only sent if their environment has the key in `ARCHIVE_KEY` and is allowed to reach `www.cattell.com`.
+Past cloud sessions aren't in the claude.ai data export. `claude --teleport` shows them on a computer, but only saves them there once a new message is sent, which uses some of your plan's usage.
 
 ## Old addresses
 
