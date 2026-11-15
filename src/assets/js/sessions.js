@@ -5,7 +5,7 @@
   const app = document.getElementById("sessions");
   const SOURCES = { code: "Claude Code", chat: "Claude chat" };
   /** Who or what a message is from, for example "Tool result: Bash". */
-  const label = (m) => ({ prompt: "James", answer: "Claude", thinking: "Claude's thinking", tool: "Tool call", result: "Tool result" }[m.kind] || "Message") + (m.tool ? `: ${m.tool}` : "");
+  const label = (m) => ({ prompt: "James", answer: "Claude", thinking: "Claude's thinking", tool: "Tool call", result: "Tool result", file: "Attached file" }[m.kind] || "Message") + (m.tool ? `: ${m.tool}` : "");
   const el = (tag, attrs = {}, ...children) => {
     const e = document.createElement(tag);
     for (const [k, v] of Object.entries(attrs)) {

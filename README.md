@@ -343,7 +343,9 @@ Claude chats: in Claude, go to **Settings** > **Privacy** and export your data. 
 node scripts/sessions/import-claude-export.js path/to/unzipped-folder
 ```
 
-Chats cannot be sent automatically, so repeat the export when you want the archive brought up to date.
+The export arrives as several zip files. Only `conversations-000.zip` is needed: unzip it and give the script that folder. Chats cannot be sent automatically, so repeat the export when you want the archive brought up to date.
+
+The export's `claude_code_cloud` file only lists scheduled tasks. It does not hold the cloud Claude Code sessions themselves.
 
 ### Send Claude Code sessions automatically
 
