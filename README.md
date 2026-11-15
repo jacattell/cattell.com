@@ -190,7 +190,7 @@ Use a GitHub App, so a sign-in can only ever change this repository.
    - `SESSION_SECRET`: a long random string (at least 32 characters), as a **Secret**. A password manager can generate one.
 6. Redeploy (**Deployments** > latest > **Retry deployment**), then go to `/edit/` and sign in.
 
-An older OAuth App also works, but its sign-in can change all your public repositories.
+It must be a GitHub App. An older "OAuth App" won't work: the editor doesn't ask for the wider permission one would need, which covers all your public repositories.
 
 Signing out cancels the GitHub key straight away. Sign-out only works from the editor's own button, so other sites can't sign you out.
 
@@ -206,6 +206,8 @@ Every page has a Content-Security-Policy that only lets the browser run this sit
 - images from any secure (`https:`) address
 
 The few small inline scripts (the light/dark script, and two on the GOV.UK version) live in `src/_includes/` and are allowed by their hashes, worked out at build time, so editing them is safe. No page may show another site inside it. The editor pages (`/edit/`) have an even stricter policy on top.
+
+The API (`/api/...`: chat, forms, editor, sessions archive) only answers on `www.cattell.com`. Cloudflare also serves the site at `cattell-com.pages.dev`, and each preview at its own `pages.dev` address; Cloudflare's rate limiting and other security rules don't cover those, so the API is switched off there (`functions/api/_middleware.js`, `lib/address.js`). Those addresses are also kept out of search engines.
 
 A test checks every built page: if a page gets an inline script, style or event attribute, or embeds a frame from anywhere but YouTube's privacy-enhanced player, the tests fail. To embed something else, add its address to `frame-src` (or the right part of the policy) in `src/_headers.njk`.
 

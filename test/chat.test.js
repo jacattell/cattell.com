@@ -1143,3 +1143,29 @@ test("sessions archive: the hook sends only what is new since last time", async 
   r = await runUploadHook({ env, transcript: transcriptOf(8), home });
   assert.equal(r.received.length, 0, "a second copy waits for the one already sending");
 });
+
+test("the API only answers on the site's own address, not Cloudflare's pages.dev ones", async () => {
+  const { refuseOtherAddress } = await import("../lib/address.js");
+  for (const ok of ["https://www.cattell.com/api/chat", "http://localhost:8788/api/chat", "http://127.0.0.1:8788/api/form", "https://notpages.dev/api/chat"]) {
+    assert.equal(refuseOtherAddress(new Request(ok)), null, ok);
+  }
+  for (const no of ["https://cattell-com.pages.dev/api/chat", "https://some-branch.cattell-com.pages.dev/api/sessions", "https://CATTELL-COM.PAGES.DEV/api/edit/me"]) {
+    const res = refuseOtherAddress(new Request(no, { method: "POST" }));
+    assert.equal(res.status, 404, no);
+    assert.match((await res.json()).error, /www\.cattell\.com/);
+  }
+  // The check runs before every API function, and those addresses are kept out of search engines.
+  const middleware = fs.readFileSync("functions/api/_middleware.js", "utf8");
+  assert.match(middleware, /refuseOtherAddress\(context\.request\) \?\? context\.next\(\)/);
+  const headers = fs.readFileSync("_site/_headers", "utf8");
+  assert.match(headers, /https:\/\/:project\.pages\.dev\/\*\n\s+X-Robots-Tag: noindex/);
+  assert.match(headers, /https:\/\/:version\.:project\.pages\.dev\/\*\n\s+X-Robots-Tag: noindex/);
+});
+
+test("week notes editor: sign-in asks GitHub for no wider permission", async () => {
+  const { handleLogin } = await import("../lib/editor.js");
+  const res = await handleLogin(new Request("https://www.cattell.com/api/auth/login"), { GITHUB_CLIENT_ID: "id", GITHUB_CLIENT_SECRET: "secret", SESSION_SECRET: "s".repeat(32) });
+  const to = new URL(res.headers.get("Location"));
+  assert.equal(to.origin + to.pathname, "https://github.com/login/oauth/authorize");
+  assert.equal(to.searchParams.get("scope"), null);
+});

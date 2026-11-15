@@ -29,3 +29,11 @@ layout: false
   X-Robots-Tag: noindex, nofollow
   Cache-Control: no-store
   Content-Security-Policy: default-src 'self'; script-src 'self' '{{ themeScript | cspHash }}'; style-src 'self'; img-src 'self' https: data:; connect-src 'self'; frame-src 'none'; form-action 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'
+
+{# Cloudflare's own addresses for this project (and for previews): kept out of search engines,
+    so only www.cattell.com is listed. #}
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex
+
+https://:version.:project.pages.dev/*
+  X-Robots-Tag: noindex
