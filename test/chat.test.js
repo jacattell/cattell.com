@@ -936,12 +936,26 @@ test("sessions archive: reads chats from a claude.ai data export", async () => {
       { sender: "human", text: "What is this?", content: [{ type: "text", text: "What is this?" }], created_at: "2026-11-14T18:00:00Z" },
       { sender: "assistant", text: "", content: [{ type: "tool_use", id: "w1", name: "web_search", input: { query: "badge" } }, { type: "tool_result", tool_use_id: "w1", content: [{ type: "text", text: "Sutton Hoo" }] }, { type: "text", text: "A pin badge." }], created_at: "2026-11-14T18:01:00Z" },
       { sender: "human", text: "Older exports only have this field", created_at: "2026-11-14T18:02:00Z" },
+      { sender: "human", text: "", content: [{ type: "injected_prompt_block", prompt: "not typed by James" }, { type: "text", text: "Here is my CV" }], attachments: [{ file_name: "cv.txt", extracted_content: "James Cattell, delivery manager" }, { file_name: "photo.png" }], created_at: "2026-11-14T18:03:00Z" },
+      { sender: "assistant", content: [
+        { type: "thinking", thinking: "", hidden: true, summaries: [{ summary: "Reading the CV." }, { summary: "Checking dates." }] },
+        { type: "thinking", thinking: "", hidden: true },
+        { type: "tool_use", id: "w2", name: "web_fetch", input: { url: "https://www.cattell.com" } },
+        { type: "tool_result", tool_use_id: "w2", content: [{ type: "knowledge", title: "cattell.com", url: "https://www.cattell.com", text: "Week notes" }, { type: "local_resource", file_path: "/mnt/out/cv.pdf" }, { type: "image", file_uuid: "x" }] },
+      ], created_at: "2026-11-14T18:04:00Z" },
     ] },
     { uuid: "empty-chat-0001", name: "Empty", chat_messages: [] },
   ]);
   assert.equal(chats.length, 1, "empty chats are left out");
   assert.deepEqual([chats[0].source, chats[0].id, chats[0].title, chats[0].updated], ["chat", "93a0d0f5-e0d0-4181-a321-c2e9d53de95f", "Mother's sewing box find", "2026-11-14T18:31:00Z"]);
-  assert.deepEqual(chats[0].messages.map((m) => [m.kind, m.tool || "", m.text]), [["prompt", "", "What is this?"], ["tool", "web_search", '{\n  "query": "badge"\n}'], ["result", "web_search", "Sutton Hoo"], ["answer", "", "A pin badge."], ["prompt", "", "Older exports only have this field"]]);
+  assert.deepEqual(chats[0].messages.map((m) => [m.kind, m.tool || "", m.text]), [["prompt", "", "What is this?"], ["tool", "web_search", '{\n  "query": "badge"\n}'], ["result", "web_search", "Sutton Hoo"], ["answer", "", "A pin badge."], ["prompt", "", "Older exports only have this field"],
+    ["prompt", "", "Here is my CV"], ["file", "cv.txt", "James Cattell, delivery manager"],
+    ["thinking", "", "Reading the CV.\nChecking dates."],
+    ["tool", "web_fetch", '{\n  "url": "https://www.cattell.com"\n}'],
+    ["result", "web_fetch", "cattell.com\nhttps://www.cattell.com\nWeek notes\n\n[File: /mnt/out/cv.pdf]\n\n[image]"]]);
+  assert.ok(!JSON.stringify(chats).includes("not typed by James"), "notes added by claude.ai are left out");
+  const withKey = parseClaudeExport([{ uuid: "secret-file-0001", chat_messages: [{ sender: "human", content: [{ type: "text", text: "my settings" }], attachments: [{ file_name: ".env", extracted_content: "RESEND_API_KEY=re_abcdefgh_ABCDEFGHIJKLMNOPQRSTUV" }] }] }]);
+  assert.equal(withKey[0].messages[1].text, "RESEND_API_KEY=[secret removed]", "secrets are removed from attached files too");
   assert.deepEqual(parseClaudeExport({ not: "a list" }), []);
 });
 
@@ -998,6 +1012,7 @@ test("sessions archive: thinking, tool calls and results are saved, searchable, 
   assert.equal((await (await edit("sessions?q=sunshine&only=talk")).json()).results.length, 0, "the search can leave out everything but prompts and answers");
   assert.equal((await (await edit("sessions?q=existing+notes")).json()).results[0].kind, "thinking");
   assert.equal((await (await edit("sessions?q=swimming&only=talk")).json()).results.length, 1);
+  assert.equal((await handleUpload(sendSession({ ...aSession, messages: [{ kind: "file", tool: "cv.txt", text: "my CV" }] }), env)).status, 200, "attached files can be saved");
 });
 
 test("sessions archive: keys, tokens and passwords are removed before a session is sent", async () => {
