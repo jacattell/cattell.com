@@ -83,6 +83,21 @@ img { max-width: 100%; height: auto; }
 /* One blank line above the licence and copyright. */
 .footer-legal { margin-top: calc(0.25rem + 1.6em); }
 .site-footer a { white-space: nowrap; }
+/* Footer icons. Icons copied from www.ukgovcamp.com (MIT licence). */
+.footer-icons { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 0 -5px; padding: 0; }
+.footer-icons li { margin: 0; }
+/* Keeps all 8 icons on one line on small phones. */
+@media (max-width: 400px) { .footer-icons { gap: 0; } }
+.footer-icons a { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; min-height: 40px; }
+.footer-icons img { display: block; }
+/* Email, X and GitHub icons: black in light mode, white in dark mode. */
+.footer-icons .icon-on-dark { display: none; }
+:root[data-theme="dark"] .footer-icons .icon-on-light { display: none; }
+:root[data-theme="dark"] .footer-icons .icon-on-dark { display: block; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .footer-icons .icon-on-light { display: none; }
+  :root:not([data-theme="light"]) .footer-icons .icon-on-dark { display: block; }
+}
 
 .crumb { color: var(--muted); font-size: 0.9rem; margin-bottom: 0.25rem; }
 .goal { color: var(--muted); }

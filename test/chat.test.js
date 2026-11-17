@@ -82,8 +82,10 @@ test("every page footer has the links, licence and copyright", () => {
   for (const page of ["_site/index.html", "_site/week-notes/2026/14/index.html", "_site/404.html"]) {
     const html = fs.readFileSync(page, "utf8");
     const footer = html.slice(html.indexOf("<footer"));
-    const text = footer.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
-    assert.match(text, /Contact me · Week notes feed · Source on GitHub/, page);
+    for (const alt of ["Contact me", "Bluesky", "LinkedIn", "Mastodon", "X (Twitter)", "YouTube", "Source on GitHub", "Week notes feed (RSS)"]) {
+      assert.ok(footer.includes(`alt="${alt}"`), `${page}: ${alt} icon`);
+    }
+    assert.match(footer, /href="https:\/\/mastodon\.me\.uk\/@jacattell" rel="me"/, page);
     assert.match(footer, /© James Arthur Cattell\. All content is available under the <a href="https:\/\/creativecommons\.org\/licenses\/by-sa\/4\.0\/" rel="license">Creative Commons BY-SA 4\.0<\/a> licence, except where otherwise stated<\/p>/, page);
   }
 });
@@ -277,7 +279,7 @@ test("the How-to page has moved to Hidden stuff, and its old addresses redirect"
 });
 
 test("each page's Source on GitHub link goes to that page's own file", () => {
-  const link = (file) => fs.readFileSync(file, "utf8").match(/href="([^"]+)">Source on GitHub/)[1];
+  const link = (file) => fs.readFileSync(file, "utf8").match(/href="([^"]+)">(?:Source on GitHub|<img[^>]*alt="Source on GitHub")/)[1];
   const base = "https://github.com/jacattell/cattell.com/blob/main/";
   assert.equal(link("_site/week-notes/2026/14/index.html"), base + "src/week-notes/2026/14.md");
   assert.equal(link("_site/index.html"), base + "src/index.md");
@@ -286,7 +288,7 @@ test("each page's Source on GitHub link goes to that page's own file", () => {
   // Every link points at a file that exists in the repo
   const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(`${d}/${e.name}`) : e.name.endsWith(".html") ? [`${d}/${e.name}`] : []));
   for (const file of walk("_site")) {
-    const m = fs.readFileSync(file, "utf8").match(/href="https:\/\/github\.com\/jacattell\/cattell\.com\/blob\/main\/([^"]+)">Source on GitHub/);
+    const m = fs.readFileSync(file, "utf8").match(/href="https:\/\/github\.com\/jacattell\/cattell\.com\/blob\/main\/([^"]+)">(?:Source on GitHub|<img[^>]*alt="Source on GitHub")/);
     if (m) assert.ok(fs.existsSync(m[1]), `${file}: ${m[1]}`);
   }
 });

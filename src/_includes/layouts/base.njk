@@ -40,8 +40,16 @@
   </main>
   <footer class="site-footer">
     <div class="wrap">
-      <p class="footer-links"><a href="/contact/">Contact me</a> <span class="sep" aria-hidden="true">·</span> <a href="/week-notes/feed.xml">Week notes feed</a> <span class="sep" aria-hidden="true">·</span> <a href="{{ page.inputPath | githubSource }}">Source on GitHub</a></p>
-      <div class="footer-legal">
+      <ul class="footer-icons">
+        <li><a href="/contact/"><img class="icon-on-light" src="/assets/icons/email-black.png" alt="Contact me" width="31" height="31"><img class="icon-on-dark" src="/assets/icons/email-white.png" alt="Contact me" width="31" height="31"></a></li>
+        <li><a href="https://bsky.app/profile/jacattell.bsky.social"><img src="/assets/icons/bluesky.png" alt="Bluesky" width="31" height="31"></a></li>
+        <li><a href="https://www.linkedin.com/in/jacattell/"><img src="/assets/icons/linkedin.png" alt="LinkedIn" width="31" height="31"></a></li>
+        <li><a href="https://mastodon.me.uk/@jacattell" rel="me"><img src="/assets/icons/mastodon.png" alt="Mastodon" width="31" height="31"></a></li>
+        <li><a href="https://x.com/jaCattell"><img class="icon-on-light" src="/assets/icons/x-black.png" alt="X (Twitter)" width="31" height="31"><img class="icon-on-dark" src="/assets/icons/x-white.png" alt="X (Twitter)" width="31" height="31"></a></li>
+        <li><a href="https://www.youtube.com/@jacattell"><img src="/assets/icons/youtube.png" alt="YouTube" width="31" height="31"></a></li>
+        <li><a href="{{ page.inputPath | githubSource }}"><img class="icon-on-light" src="/assets/icons/github-black.png" alt="Source on GitHub" width="31" height="31"><img class="icon-on-dark" src="/assets/icons/github-white.png" alt="Source on GitHub" width="31" height="31"></a></li>
+        <li><a href="/week-notes/feed.xml"><img src="/assets/icons/rss.png" alt="Week notes feed (RSS)" width="31" height="31"></a></li>
+      </ul>      <div class="footer-legal">
         <p>© {{ site.author }}. All content is available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license">Creative Commons BY-SA 4.0</a> licence, except where otherwise stated</p>
       </div>
     </div>
