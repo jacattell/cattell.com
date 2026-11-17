@@ -56,3 +56,11 @@
 .site-form .govuk-input, .site-form .govuk-textarea { margin-bottom: govuk-spacing(4); }
 .site-form .trap { position: absolute; left: -999rem; }
 .site-form .human-check { margin-bottom: govuk-spacing(4); min-height: 65px; }
+
+// Footer icons (same links as the main site footer)
+.footer-icons { list-style: none; display: flex; flex-wrap: wrap; gap: govuk-spacing(2); margin: 0 0 govuk-spacing(4) -5px; padding: 0; }
+.footer-icons li { margin: 0; }
+.footer-icons a { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; min-height: 40px; }
+.footer-icons img { display: block; }
+@media (max-width: 400px) { .footer-icons { gap: 0; } }
+.govuk-footer__licence-description { margin-top: 0; }
