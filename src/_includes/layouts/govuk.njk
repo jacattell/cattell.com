@@ -137,17 +137,24 @@
     </main>
   </div>
 
+  {#- Same links and text as the main site footer (layouts/base.njk). The GOV.UK version has no dark mode, so only the light icons are used. #}
   <footer class="govuk-footer">
     <div class="govuk-width-container">
       <div class="govuk-footer__meta">
         <div class="govuk-footer__meta-item govuk-footer__meta-item--grow">
           <h2 class="govuk-visually-hidden">Links</h2>
-          <ul class="govuk-footer__inline-list">
-            <li class="govuk-footer__inline-list-item"><a class="govuk-footer__link" href="{{ g }}/contact/">Contact me</a></li>
-            <li class="govuk-footer__inline-list-item"><a class="govuk-footer__link" href="/week-notes/feed.xml">Week notes feed</a></li>
-            <li class="govuk-footer__inline-list-item"><a class="govuk-footer__link" href="{{ (p.inputPath or page.inputPath) | githubSource }}">Source on GitHub</a></li>
+          <ul class="footer-icons">
+            <li><a class="govuk-footer__link" href="{{ g }}/contact/"><img src="/assets/icons/email-black.png" alt="Contact me" width="31" height="31"></a></li>
+            <li><a class="govuk-footer__link" href="https://bsky.app/profile/jacattell.bsky.social"><img src="/assets/icons/bluesky.png" alt="Bluesky" width="31" height="31"></a></li>
+            <li><a class="govuk-footer__link" href="https://www.linkedin.com/in/jacattell/"><img src="/assets/icons/linkedin.png" alt="LinkedIn" width="31" height="31"></a></li>
+            <li><a class="govuk-footer__link" href="https://mastodon.me.uk/@jacattell" rel="me"><img src="/assets/icons/mastodon.png" alt="Mastodon" width="31" height="31"></a></li>
+            <li><a class="govuk-footer__link" href="https://x.com/jaCattell"><img src="/assets/icons/x-black.png" alt="X (Twitter)" width="31" height="31"></a></li>
+            <li><a class="govuk-footer__link" href="https://www.youtube.com/@jacattell"><img src="/assets/icons/youtube.png" alt="YouTube" width="31" height="31"></a></li>
+            <li><a class="govuk-footer__link" href="{{ (p.inputPath or page.inputPath) | githubSource }}"><img src="/assets/icons/github-black.png" alt="Source on GitHub" width="31" height="31"></a></li>
+            <li><a class="govuk-footer__link" href="/week-notes/feed.xml"><img src="/assets/icons/rss.png" alt="Week notes feed (RSS)" width="31" height="31"></a></li>
           </ul>
-          <span class="govuk-footer__licence-description">All content is available under the <a class="govuk-footer__link" href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license">Creative Commons BY-SA 4.0</a> licence, except where otherwise stated <a class="govuk-footer__link" href="{{ g }}/hidden/">π<span class="govuk-visually-hidden"> (hidden stuff)</span></a></span>
+          <p class="govuk-footer__licence-description">All content is available under the <a class="govuk-footer__link" href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license">Creative Commons BY-SA 4.0</a> licence, except where otherwise stated <a class="govuk-footer__link" href="{{ g }}/hidden/">π<span class="govuk-visually-hidden"> (hidden stuff)</span></a></p>
+          <p class="govuk-footer__licence-description">Light/dark and text size icons based on <a class="govuk-footer__link" href="https://thenounproject.com/icon/black-and-white-level-1502125/">Black and white level</a> and <a class="govuk-footer__link" href="https://thenounproject.com/icon/black-and-white-adjustment-1502126/">Black and white adjustment</a> by icon 54 from Noun Project (<a class="govuk-footer__link" href="https://creativecommons.org/licenses/by/3.0/">CC BY 3.0</a>)</p>
         </div>
       </div>
     </div>
