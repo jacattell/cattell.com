@@ -4,15 +4,6 @@ title: "Contact me"
 templateEngineOverride: njk,md
 ---
 
-Contact me via:
-
-- [BlueSky](https://bsky.app/profile/jacattell.bsky.social),
-- [email](mailto:james@cattell.com),
-- [LinkedIn](https://www.linkedin.com/in/jacattell/),
-- [Mastodon](https://mastodon.me.uk/deck/@jacattell),
-- [X (Twitter)](https://x.com/jaCattell),
-- [YouTube](https://www.youtube.com/@jacattell).
-
 ## Send me a message
 
 Your message is emailed to me; it is not stored on this website.
@@ -20,7 +11,7 @@ Your message is emailed to me; it is not stored on this website.
 <form class="site-form" method="post" action="/api/form">
   <input type="hidden" name="form" value="contact">
   <label for="message">How can I help?</label>
-  <textarea id="message" name="message" rows="6" maxlength="5000" required></textarea>
+  <textarea id="message" name="message" rows="3" maxlength="5000" required></textarea>
   <label for="email">Your email address</label>
   <input type="email" id="email" name="email" maxlength="254" autocomplete="email" required>
   <div class="trap" aria-hidden="true">
