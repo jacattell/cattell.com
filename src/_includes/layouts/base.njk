@@ -24,7 +24,24 @@
     <div class="wrap">
       <div class="header-top">
         <a class="site-name" href="/">{{ site.title }}</a>
-        <button type="button" class="theme-toggle" hidden>Dark mode</button>
+        <div class="header-buttons">
+          {#- Icons drawn to match "Black and white level" and "Black and white adjustment" by icon 54 (Noun Project). #}
+          <button type="button" class="icon-button theme-toggle" aria-label="Dark mode" aria-pressed="false" title="Dark mode" hidden>
+            <svg width="31" height="31" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+              <circle cx="16" cy="16" r="14.5" fill="none" stroke="currentColor" stroke-width="3"/>
+              <path class="half-normal" d="M26.6 5.4 A15 15 0 0 1 5.4 26.6 Z" fill="currentColor"/>
+              <path class="half-negative" d="M26.6 5.4 A15 15 0 0 0 5.4 26.6 Z" fill="currentColor"/>
+            </svg>
+          </button>
+          <button type="button" class="icon-button text-size" aria-label="Make text bigger" title="Make text bigger" hidden>
+            <svg width="31" height="31" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+              <rect x="1.5" y="1.5" width="29" height="29" rx="3.5" fill="none" stroke="currentColor" stroke-width="3"/>
+              <path d="M30 2 V30 H2 Z" fill="currentColor"/>
+              <path d="M6.5 9.5 H12.5 M9.5 6.5 V12.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+              <path class="minus" d="M19.5 22.5 H25.5" fill="none" stroke-width="2.4" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </div>
       </div>
       <nav aria-label="Main">
         <ul>
