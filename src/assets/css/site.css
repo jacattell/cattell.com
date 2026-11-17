@@ -134,7 +134,6 @@ button { font: inherit; padding: 0.5rem 1rem; border: 0; cursor: pointer; backgr
 button.secondary { background: var(--panel); color: var(--text); border: 1px solid var(--border); font-weight: 400; }
 button:disabled { opacity: 0.5; cursor: not-allowed; }
 .hint { color: var(--muted); font-size: 0.9rem; }
-.pi { text-align: right; }
 
 /* Floating "Share" button and panel. The footer has extra space at the bottom
    so the button never covers its text. */
