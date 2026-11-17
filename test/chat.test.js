@@ -86,7 +86,8 @@ test("every page footer has the links, licence and copyright", () => {
       assert.ok(footer.includes(`alt="${alt}"`), `${page}: ${alt} icon`);
     }
     assert.match(footer, /href="https:\/\/mastodon\.me\.uk\/@jacattell" rel="me"/, page);
-    assert.match(footer, /© James Arthur Cattell\. All content is available under the <a href="https:\/\/creativecommons\.org\/licenses\/by-sa\/4\.0\/" rel="license">Creative Commons BY-SA 4\.0<\/a> licence, except where otherwise stated <a href="\/hidden\/">π/, page);
+    assert.match(footer, /All content is available under the <a href="https:\/\/creativecommons\.org\/licenses\/by-sa\/4\.0\/" rel="license">Creative Commons BY-SA 4\.0<\/a> licence, except where otherwise stated <a href="\/hidden\/">π/, page);
+    assert.ok(!footer.includes("©"), `${page}: no copyright sign`);
   }
 });
 
