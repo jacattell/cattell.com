@@ -160,6 +160,16 @@ export default function (eleventyConfig) {
     `https://github.com/jacattell/cattell.com/blob/main/${String(inputPath).replace(/^\.\//, "")}`
   );
 
+  // The start of a piece of plain text, up to `length` characters, ending on a
+  // whole word. Adds "…" when text was cut off.
+  eleventyConfig.addFilter("preview", (text, length = 280) => {
+    const t = String(text).replace(/\s+([,.;:!?])/g, "$1").trim();
+    if (t.length <= length) return t;
+    const cut = t.slice(0, length);
+    const space = cut.lastIndexOf(" ");
+    return (space > 0 ? cut.slice(0, space) : cut).replace(/[\s.,;:!?-]+$/, "") + "…";
+  });
+
   eleventyConfig.addFilter("oneLine", (text) => String(text).replace(/\s+/g, " ").trim());
 
   eleventyConfig.addFilter("stripTags", (html) =>

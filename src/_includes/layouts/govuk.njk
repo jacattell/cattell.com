@@ -74,9 +74,10 @@
 
           {#- Parts the main site's layouts add around a page's content. #}
           {%- if p.url == "/" %}
-            {%- set latest = collections.weekNotes | last %}
-            <h2>Latest week note</h2>
-            <p><a href="{{ latest.url }}">{{ latest.data.noteTitle }}</a>{% if latest.data.summary %} - {{ latest.data.summary }}{% endif %}</p>
+            {%- for note in collections.weekNotes.slice(-3).reverse() %}
+            <h2 class="govuk-heading-m"><a class="govuk-link" href="{{ note.url }}">{{ note.data.noteTitle }}</a></h2>
+            <p class="govuk-body">{{ note.templateContent | stripTags | preview(280) }}</p>
+            {%- endfor %}
           {%- endif %}
 
           {%- if p.url == "/week-notes/" %}
@@ -146,7 +147,7 @@
             <li class="govuk-footer__inline-list-item"><a class="govuk-footer__link" href="/week-notes/feed.xml">Week notes feed</a></li>
             <li class="govuk-footer__inline-list-item"><a class="govuk-footer__link" href="{{ (p.inputPath or page.inputPath) | githubSource }}">Source on GitHub</a></li>
           </ul>
-          <span class="govuk-footer__licence-description">© {{ site.author }}. All content is available under the <a class="govuk-footer__link" href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license">Creative Commons BY-SA 4.0</a> licence, except where otherwise stated</span>
+          <span class="govuk-footer__licence-description">© {{ site.author }}. All content is available under the <a class="govuk-footer__link" href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license">Creative Commons BY-SA 4.0</a> licence, except where otherwise stated <a class="govuk-footer__link" href="{{ g }}/hidden/">π<span class="govuk-visually-hidden"> (hidden stuff)</span></a></span>
         </div>
       </div>
     </div>

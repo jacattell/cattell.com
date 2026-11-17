@@ -86,7 +86,7 @@ test("every page footer has the links, licence and copyright", () => {
       assert.ok(footer.includes(`alt="${alt}"`), `${page}: ${alt} icon`);
     }
     assert.match(footer, /href="https:\/\/mastodon\.me\.uk\/@jacattell" rel="me"/, page);
-    assert.match(footer, /© James Arthur Cattell\. All content is available under the <a href="https:\/\/creativecommons\.org\/licenses\/by-sa\/4\.0\/" rel="license">Creative Commons BY-SA 4\.0<\/a> licence, except where otherwise stated<\/p>/, page);
+    assert.match(footer, /© James Arthur Cattell\. All content is available under the <a href="https:\/\/creativecommons\.org\/licenses\/by-sa\/4\.0\/" rel="license">Creative Commons BY-SA 4\.0<\/a> licence, except where otherwise stated <a href="\/hidden\/">π/, page);
   }
 });
 
@@ -1207,4 +1207,18 @@ test("chat and forms stop reading a request that is too big", async () => {
   const { handleForm } = await import("../lib/forms.js");
   const bigForm = await handleForm(post(endless(), { "Content-Type": "application/x-www-form-urlencoded", "CF-Connecting-IP": "198.51.100.78" }), {});
   assert.match(await bigForm.text(), /too long to send/);
+});
+
+test("the home page previews the latest 3 week notes", () => {
+  const html = fs.readFileSync("_site/index.html", "utf8");
+  const main = html.slice(html.indexOf("<main"), html.indexOf("</main>"));
+  assert.ok(!main.includes("Bring us together"));
+  assert.ok(!main.includes("Latest week note"));
+  assert.ok(!main.includes("π"), "π is in the footer, not the body");
+  const previews = [...main.matchAll(/<h2><a href="(\/week-notes\/\d{4}\/\d+\/)">[^<]+<\/a><\/h2>\s*<p>([^<]*)<\/p>/g)];
+  assert.equal(previews.length, 3);
+  for (const [, , raw] of previews) {
+    const text = raw.replace(/&#39;/g, "'").replace(/&quot;/g, "\"").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+    assert.ok(text.length > 0 && text.length <= 281, text);
+  }
 });
