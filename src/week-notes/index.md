@@ -3,7 +3,7 @@ title: "Week notes"
 layout: "layouts/notes-index.njk"
 ---
 
-## About week notes
+<h2 id="about-week-notes">About week notes</h2>
 
 The world wide web (or **web** for short) is a good place for you to keep a **log** of you're activities. It's lets people see who you are, what you do and why you're doing it. If you're so inclined, you also invite comments on what you share.
 
