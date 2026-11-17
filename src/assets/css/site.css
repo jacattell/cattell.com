@@ -94,6 +94,7 @@ html[data-text-size="2"] { font-size: 168.75%; }
 .site-footer p { margin: 0; }
 /* One blank line above the licence and copyright. */
 .footer-legal { margin-top: calc(0.25rem + 1.6em); }
+.footer-legal p + p { margin-top: 0.5rem; }
 .site-footer a { white-space: nowrap; }
 /* Footer icons. Icons copied from www.ukgovcamp.com (MIT licence). */
 .footer-icons { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 0 -5px; padding: 0; }
