@@ -76,8 +76,20 @@ img { max-width: 100%; height: auto; }
 .site-header ul { list-style: none; display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; margin: 0; padding: 0; }
 .site-header li { margin: 0; }
 .site-header nav a[aria-current] { font-weight: 700; color: var(--text); }
-.site-header .theme-toggle { flex-shrink: 0; padding: 0.2rem 0.6rem; font-size: 0.85rem; font-weight: 400; background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 999px; }
-.site-header .theme-toggle:hover { border-color: var(--text); }
+/* Light/dark and text size buttons. The icons are the same size as the footer icons (31px). */
+.header-buttons { display: flex; flex-shrink: 0; gap: 4px; }
+.icon-button { display: inline-flex; align-items: center; justify-content: center; min-width: 40px; min-height: 40px; padding: 0; background: none; border: 0; color: var(--text); cursor: pointer; }
+.icon-button[hidden] { display: none; }
+.icon-button svg { display: block; }
+/* Pressed (dark mode on): the icon shows its negative, with the other half filled. */
+.theme-toggle .half-negative { display: none; }
+.theme-toggle[aria-pressed="true"] .half-normal { display: none; }
+.theme-toggle[aria-pressed="true"] .half-negative { display: inline; }
+/* The minus sign sits on the filled half, so it uses the header background colour. */
+.text-size .minus { stroke: var(--panel); }
+/* Text size: normal, then 25% bigger, then 50% bigger. */
+html[data-text-size="1"] { font-size: 140.625%; }
+html[data-text-size="2"] { font-size: 168.75%; }
 .site-footer { border-top: 1px solid var(--border); color: var(--muted); font-size: 0.9rem; padding: 1rem 0 5rem; }
 .site-footer p { margin: 0; }
 /* One blank line above the licence and copyright. */
