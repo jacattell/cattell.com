@@ -4,10 +4,6 @@ title: "Contact me"
 templateEngineOverride: njk,md
 ---
 
-## Send me a message
-
-Your message is emailed to me; it is not stored on this website.
-
 <form class="site-form" method="post" action="/api/form">
   <input type="hidden" name="form" value="contact">
   <label for="message">How can I help?</label>
