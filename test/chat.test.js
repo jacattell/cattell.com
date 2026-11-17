@@ -401,10 +401,10 @@ test("the forms check visitors are human, once Turnstile is set up", async () =>
   const { handleForm } = await import("../lib/forms.js");
   const env = { RESEND_API_KEY: "test-key", FORM_TO: "james@example.com", TURNSTILE_SITE_KEY: "0x-site", TURNSTILE_SECRET_KEY: "turnstile-secret" };
   const sent = [];
-  const net = (human) => async (url, init) => {
+  const net = (human, hostname = "www.cattell.com") => async (url, init) => {
     if (url.startsWith("https://challenges.cloudflare.com/")) {
       sent.push({ check: Object.fromEntries(new URLSearchParams(init.body)) });
-      return new Response(JSON.stringify({ success: human }));
+      return new Response(JSON.stringify({ success: human, hostname }));
     }
     sent.push({ email: JSON.parse(init.body) });
     return new Response("{}");
@@ -424,6 +424,10 @@ test("the forms check visitors are human, once Turnstile is set up", async () =>
   assert.equal(res.headers.get("Location"), "/contact/thanks/");
   assert.deepEqual(sent.at(-2).check, { secret: "turnstile-secret", response: "good", remoteip: "10.0.0.3" });
   assert.ok(sent.at(-1).email);
+  // A passed check from another website: refused
+  res = await handleForm(post({ "cf-turnstile-response": "good" }, "10.0.0.5"), env, net(true, "evil.example"));
+  assert.equal(res.status, 400);
+  assert.match(await res.text(), /are you human/);
   // Cloudflare can't be reached: refused rather than let through
   res = await handleForm(post({ "cf-turnstile-response": "good" }, "10.0.0.4"), env, async (url) => { if (url.includes("challenges")) throw new Error("down"); return new Response("{}"); });
   assert.equal(res.status, 400);
@@ -1159,7 +1163,7 @@ test("the API only answers on the site's own address, not Cloudflare's pages.dev
   }
   // The check runs before every API function, and those addresses are kept out of search engines.
   const middleware = fs.readFileSync("functions/api/_middleware.js", "utf8");
-  assert.match(middleware, /refuseOtherAddress\(context\.request\) \?\? context\.next\(\)/);
+  assert.match(middleware, /withSecurityHeaders\(refuseOtherAddress\(context\.request\) \?\? \(await context\.next\(\)\)\)/);
   const headers = fs.readFileSync("_site/_headers", "utf8");
   assert.match(headers, /https:\/\/:project\.pages\.dev\/\*\n\s+X-Robots-Tag: noindex/);
   assert.match(headers, /https:\/\/:version\.:project\.pages\.dev\/\*\n\s+X-Robots-Tag: noindex/);
@@ -1230,4 +1234,34 @@ test("the hidden pages are kept out of search engines", () => {
   }
   assert.ok(!/<meta name="robots"/.test(fs.readFileSync("_site/index.html", "utf8")), "the home page can still be found");
   assert.match(fs.readFileSync("_site/_headers", "utf8"), /\/hidden\/\*\s+X-Robots-Tag: noindex, nofollow/);
+});
+
+test("API replies carry the same security headers as the site's pages", async () => {
+  const { withSecurityHeaders } = await import("../lib/api-headers.js");
+  const page = withSecurityHeaders(new Response("<p>problem</p>", { status: 400, headers: { "Content-Type": "text/html; charset=utf-8", "Set-Cookie": "a=b" } }));
+  assert.equal(page.status, 400);
+  assert.equal(await page.text(), "<p>problem</p>");
+  assert.equal(page.headers.get("Set-Cookie"), "a=b");
+  assert.equal(page.headers.get("X-Content-Type-Options"), "nosniff");
+  assert.equal(page.headers.get("X-Frame-Options"), "DENY");
+  assert.match(page.headers.get("Referrer-Policy"), /strict-origin/);
+  assert.match(page.headers.get("Permissions-Policy"), /camera=\(\)/);
+  const policy = page.headers.get("Content-Security-Policy");
+  for (const part of ["default-src 'none'", "style-src 'self'", "frame-ancestors 'none'"]) assert.ok(policy.includes(part), part);
+  assert.doesNotMatch(policy, /script-src/);
+  // A header a function chose is kept; redirects keep their address; streams still stream.
+  const own = withSecurityHeaders(new Response("{}", { headers: { "Referrer-Policy": "no-referrer" } }));
+  assert.equal(own.headers.get("Referrer-Policy"), "no-referrer");
+  const moved = withSecurityHeaders(new Response(null, { status: 303, headers: { Location: "/contact/thanks/" } }));
+  assert.equal(moved.status, 303);
+  assert.equal(moved.headers.get("Location"), "/contact/thanks/");
+  const stream = new ReadableStream({ start(c) { c.enqueue(new TextEncoder().encode("data: hi\\n\\n")); c.close(); } });
+  const sse = withSecurityHeaders(new Response(stream, { headers: { "Content-Type": "text/event-stream" } }));
+  assert.equal(await sse.text(), "data: hi\\n\\n");
+  // The archive upload stops reading at its limit.
+  const { handleUpload } = await import("../lib/sessions.js");
+  const key = "k".repeat(40);
+  const endless = new ReadableStream({ pull(c) { c.enqueue(new Uint8Array(65536).fill(120)); } });
+  const res = await handleUpload(new Request("https://www.cattell.com/api/sessions", { method: "POST", headers: { Authorization: `Bearer ${key}` }, body: endless, duplex: "half" }), { SESSIONS: {}, ARCHIVE_KEY: key });
+  assert.equal(res.status, 413);
 });
