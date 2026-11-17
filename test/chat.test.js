@@ -1222,3 +1222,11 @@ test("the home page previews the latest 3 week notes", () => {
     assert.ok(text.length > 0 && text.length <= 281, text);
   }
 });
+
+test("the hidden pages are kept out of search engines", () => {
+  for (const file of ["_site/hidden/index.html", "_site/hidden/bitwarden-desktop-upgrade/index.html"]) {
+    assert.match(fs.readFileSync(file, "utf8"), /<meta name="robots" content="noindex, nofollow">/, file);
+  }
+  assert.ok(!/<meta name="robots"/.test(fs.readFileSync("_site/index.html", "utf8")), "the home page can still be found");
+  assert.match(fs.readFileSync("_site/_headers", "utf8"), /\/hidden\/\*\s+X-Robots-Tag: noindex, nofollow/);
+});
