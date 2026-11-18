@@ -65,7 +65,7 @@ It started on Monday...
 
 ## Run it on your computer
 
-You need [Node.js](https://nodejs.org/) 22 or later and [Hugo](https://gohugo.io/installation/) (the version in `.hugo-version`). There is nothing to `npm install`.
+You need [Node.js](https://nodejs.org/) 22 or later. If the Hugo version in `.hugo-version` isn't installed, `npm run build` downloads it (checked against Hugo's published checksums). There is nothing to `npm install`. For `npm run dev`, install [Hugo](https://gohugo.io/installation/) yourself.
 
 ```bash
 npm run dev     # preview at http://localhost:1313
@@ -141,13 +141,9 @@ The Worker adds `api.cattell.com` itself (from `wrangler.jsonc`). It refuses req
 
 ### 5. Change the website's build settings, then merge
 
-1. In the Pages project (`cattell-com`), go to **Settings** > **Build** and set **Build command** to `npm run build`. The output directory (`public`) is set by `wrangler.toml`, so the dashboard won't let you change it.
-2. In **Settings** > **Variables and Secrets**, add as **Text**:
-   - `HUGO_VERSION`: `0.170.1` (the version in `.hugo-version`)
-   - `NODE_VERSION`: `22`
-   - `HUGO_PARAMS_TURNSTILESITEKEY`: the Turnstile site key (it is public)
-3. Merge the pull request. The site rebuilds in a couple of minutes.
-4. Check the home page, a week note, the archive search, the contact form and Ask my AI.
+1. In the Pages project (`cattell-com`), go to **Settings** > **Build** and set **Build command** to `npm run build`. The output directory (`public`) is set by `wrangler.toml`, so the dashboard won't let you change it. No build variables are needed: the build downloads the Hugo version in `.hugo-version` itself, after checking it against Hugo's published checksums.
+2. Merge the pull request. The site rebuilds in a couple of minutes.
+3. Check the home page, a week note, the archive search, the contact form and Ask my AI.
 
 ### 6. Tidy up
 

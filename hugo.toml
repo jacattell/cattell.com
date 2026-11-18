@@ -13,8 +13,8 @@ timeZone = "UTC"
   repo = "https://github.com/jacattell/cattell.com"
   # The separate address for the chat and forms (workers/public).
   api = "https://api.cattell.com"
-  # Cloudflare Turnstile site key (public). Set HUGO_PARAMS_TURNSTILESITEKEY when building to turn the check on.
-  turnstileSiteKey = ""
+  # Cloudflare Turnstile site key. It is public. The secret key is only in the cattell-public Worker.
+  turnstileSiteKey = "0x4AAAAAAF-iTVHILNcGmisT"
 
 [markup.goldmark.renderer]
   # Raw HTML in Markdown is not allowed. Use a shortcode instead (layouts/_shortcodes).
