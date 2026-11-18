@@ -1,10 +1,8 @@
 ---
 title: "Hidden pages"
 noindex: true
+# No page at /hidden/ itself. Pages in this folder (such as the Bitwarden guide) still work at their own addresses.
+build:
+  render: never
+  list: local
 ---
-
-Pages I use myself. Search engines are asked not to list them.
-
-- [Bitwarden desktop upgrade](/hidden/bitwarden-desktop-upgrade/)
-- [Multi Post](https://multi-post.cattell.com/)
-- [Admin: edit week notes, Claude sessions, chat logs](https://admin.cattell.com/) (you must sign in)
