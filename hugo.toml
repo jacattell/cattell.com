@@ -74,10 +74,6 @@ timeZone = "UTC"
     pageRef = "/unconference"
     weight = 3
   [[menus.main]]
-    name = "Social media archive"
-    pageRef = "/archive"
-    weight = 4
-  [[menus.main]]
     name = "Ask my AI"
     pageRef = "/chat"
     weight = 5
