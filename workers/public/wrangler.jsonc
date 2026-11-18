@@ -1,0 +1,24 @@
+// cattell-public: https://api.cattell.com (chat and forms). See README.md, "Switching over".
+// Secrets (Cloudflare → Workers → cattell-public → Settings → Variables and Secrets), never here:
+//   ANTHROPIC_API_KEY, RESEND_API_KEY, FORM_TO, TURNSTILE_SITE_KEY, TURNSTILE_SECRET_KEY
+{
+  "name": "cattell-public",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [{ "pattern": "api.cattell.com", "custom_domain": true }],
+  "observability": { "enabled": true, "logs": { "invocation_logs": false } },
+  "vars": {
+    "SITE": "https://www.cattell.com",
+    "API_HOST": "api.cattell.com",
+    "CHAT_DAILY_CAP": "500"
+  },
+  // The chat logs (30 days). The same store as before, so old logs stay readable.
+  "kv_namespaces": [{ "binding": "CHAT_LOGS", "id": "460882b27420480cbe556d48ac0e1224" }],
+  // Firm per-visitor limits, shared by every copy of the Worker.
+  "ratelimits": [
+    { "name": "CHAT_LIMIT", "namespace_id": "1001", "simple": { "limit": 6, "period": 60 } },
+    { "name": "FORM_LIMIT", "namespace_id": "1002", "simple": { "limit": 5, "period": 60 } }
+  ]
+}

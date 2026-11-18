@@ -1,0 +1,25 @@
+// cattell-admin: https://admin.cattell.com, behind Cloudflare Access. See README.md, "Admin tools".
+// Secrets (Cloudflare → Workers → cattell-admin → Settings → Variables and Secrets), never here:
+//   GITHUB_APP_PRIVATE_KEY, ARCHIVE_KEY
+// Settings set in the dashboard and kept between deploys ("keep_vars"):
+//   ADMIN_EMAILS (your Google email), ACCESS_TEAM (e.g. cattell.cloudflareaccess.com), ACCESS_AUD,
+//   GITHUB_APP_ID, GITHUB_APP_INSTALLATION_ID
+{
+  "name": "cattell-admin",
+  "main": "src/index.js",
+  "compatibility_date": "2026-11-01",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [{ "pattern": "admin.cattell.com", "custom_domain": true }],
+  "observability": { "enabled": true, "logs": { "invocation_logs": false } },
+  // The pages and scripts in public/. The Worker runs first, so even these need the sign-in.
+  "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": true, "html_handling": "auto-trailing-slash" },
+  "vars": {
+    "ADMIN_HOST": "admin.cattell.com",
+    "SITE": "https://www.cattell.com",
+    "REPO": "jacattell/cattell.com"
+  },
+  "keep_vars": true,
+  "kv_namespaces": [{ "binding": "CHAT_LOGS", "id": "460882b27420480cbe556d48ac0e1224" }],
+  "d1_databases": [{ "binding": "SESSIONS", "database_name": "cattell-sessions", "database_id": "0397570f-5ed6-4b43-b767-cec9ae7f7136" }]
+}

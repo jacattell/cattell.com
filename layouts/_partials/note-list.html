@@ -1,0 +1,9 @@
+{{- /* A list of week notes, newest first. Pass a page collection. */}}
+<ul class="note-list">
+  {{- range . }}
+  <li>
+    <a href="{{ .RelPermalink }}">{{ .Title }}</a>
+    {{- with .Params.summary }}<span class="note-summary">{{ . }}</span>{{ end }}
+  </li>
+  {{- end }}
+</ul>

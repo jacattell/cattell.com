@@ -1,0 +1,12 @@
+{{ define "main" }}
+<div class="prose">
+  <h1>{{ .Title }}</h1>
+  {{ .Content }}
+</div>
+<section aria-labelledby="latest-notes" class="latest">
+  <h2 id="latest-notes">Latest week notes</h2>
+  {{- $notes := where (where site.RegularPages "Section" "week-notes") "Kind" "page" }}
+  {{ partial "note-list.html" (first 5 $notes.ByDate.Reverse) }}
+  <p><a href="/week-notes/">All week notes</a></p>
+</section>
+{{ end }}

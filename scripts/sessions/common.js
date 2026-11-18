@@ -1,4 +1,4 @@
-// Shared by the scripts that send Claude sessions to the archive on cattell.com.
+// Shared by the scripts that send Claude sessions to the archive on admin.cattell.com.
 // See "Claude sessions archive" in the README.
 import fs from "node:fs";
 import os from "node:os";
@@ -13,7 +13,7 @@ export const KEY_FILE = path.join(os.homedir(), ".config", "cattell-archive", "k
  */
 export function archiveUrl(given) {
   let url;
-  try { url = new URL(given || "https://www.cattell.com"); } catch { throw new Error("ARCHIVE_URL isn't a web address."); }
+  try { url = new URL(given || "https://admin.cattell.com"); } catch { throw new Error("ARCHIVE_URL isn't a web address."); }
   const thisComputer = url.protocol === "http:" && ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
   if (url.protocol !== "https:" && !thisComputer) throw new Error("ARCHIVE_URL must start with https://, so the archive key is never sent unprotected.");
   return url.origin;
@@ -36,7 +36,7 @@ export function settings() {
 export async function upload(session, { url, key }, send = fetch, start = 0) {
   let saved = 0;
   for (const part of uploadParts(session, undefined, start)) {
-    const res = await send(`${url}/api/sessions`, {
+    const res = await send(`${url}/api/upload`, {
       method: "POST",
       headers: { "Content-Type": "application/json", ...(key ? { Authorization: `Bearer ${key}` } : {}) },
       body: JSON.stringify(part),

@@ -1,5 +1,9 @@
 node_modules/
-_site/
+/public/
+/resources/
+.hugo_build.lock
+assets/generated/
+static/archive/posts.json
 .env
 .wrangler/
 .dev.vars

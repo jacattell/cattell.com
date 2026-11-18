@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }} – {{ site.Title }}{{ end }}</title>
+  <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ with .Params.summary }}{{ . }}{{ else }}{{ site.Params.description }}{{ end }}{{ end }}">
+  <link rel="canonical" href="{{ .Permalink }}">
+  {{- if or .Params.noindex (hasPrefix .RelPermalink "/hidden/") }}
+  <meta name="robots" content="noindex, nofollow">
+  {{- end }}
+  {{- /* Sets light or dark before the page draws, so it doesn't flash. A file, not inline, so the CSP needs no exceptions. */}}
+  {{- with resources.Get "js/theme-init.js" | minify | fingerprint }}
+  <script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}"></script>
+  {{- end }}
+  {{- with resources.Get "css/site.css" | minify | fingerprint }}
+  <link rel="stylesheet" href="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}">
+  {{- end }}
+  {{- with resources.Get "js/theme.js" | minify | fingerprint }}
+  <script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" defer></script>
+  {{- end }}
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  {{- with site.GetPage "/week-notes" }}{{ with .OutputFormats.Get "atom" }}
+  <link rel="alternate" type="application/atom+xml" title="Week notes" href="{{ .RelPermalink }}">
+  {{- end }}{{ end }}
+  {{- block "head" . }}{{ end }}
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <header class="site-header">
+    <div class="wrap header-row">
+      <a class="site-name" href="/">{{ site.Title }}</a>
+      <button type="button" class="theme-toggle" aria-pressed="false" hidden>Dark mode</button>
+    </div>
+    <nav class="wrap site-nav" aria-label="Main">
+      <ul>
+        {{- $page := . }}
+        {{- range site.Menus.main }}
+        {{- $current := or ($page.IsMenuCurrent "main" .) ($page.HasMenuCurrent "main" .) }}
+        <li><a href="{{ .URL }}"{{ if $current }} aria-current="{{ if eq $page.RelPermalink .URL }}page{{ else }}true{{ end }}"{{ end }}>{{ .Name }}</a></li>
+        {{- end }}
+      </ul>
+    </nav>
+  </header>
+  <main id="main" class="wrap" tabindex="-1">
+    {{- block "main" . }}{{ end }}
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <h2 class="visually-hidden">About this website</h2>
+      <ul class="footer-links">
+        <li><a href="/contact/">Contact me</a></li>
+        <li><a href="/feedback/">Give feedback on working with me</a></li>
+        <li><a href="/accessibility/">Accessibility</a></li>
+        <li><a href="/privacy/">Privacy</a></li>
+      </ul>
+      <p class="footer-title">Find me elsewhere</p>
+      <ul class="footer-links">
+        <li><a href="https://bsky.app/profile/jacattell.bsky.social">Bluesky</a></li>
+        <li><a href="https://mastodon.me.uk/@jacattell" rel="me">Mastodon</a></li>
+        <li><a href="https://www.linkedin.com/in/jacattell/">LinkedIn</a></li>
+        <li><a href="https://www.youtube.com/@jacattell">YouTube</a></li>
+        <li><a href="https://x.com/jaCattell">X (Twitter)</a></li>
+        <li><a href="{{ site.Params.repo }}">Source code on GitHub</a></li>
+        <li><a href="/week-notes/feed.xml">Week notes feed</a></li>
+      </ul>
+      <p class="footer-legal">Words and pictures are available under the <a href="https://creativecommons.org/licenses/by-sa/4.0/" rel="license">Creative Commons BY-SA 4.0</a> licence, unless it says otherwise. <a href="/hidden/" class="quiet-link">π<span class="visually-hidden"> Hidden pages</span></a></p>
+    </div>
+  </footer>
+  {{- block "scripts" . }}{{ end }}
+</body>
+</html>

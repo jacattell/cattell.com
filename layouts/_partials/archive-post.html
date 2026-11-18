@@ -1,0 +1,25 @@
+{{- /* One social media archive post. Keep in step with render() in assets/js/archive.js. */}}
+<article class="post">
+  <p class="post-meta"><time datetime="{{ .date }}">{{ .when }}</time>{{ if .reply }} · Reply{{ else if .thread }} · Thread{{ end }}</p>
+  <p class="post-text">{{ range .parts }}{{ with .u }}<a href="{{ . }}">{{ . }}</a>{{ else }}{{ .t }}{{ end }}{{ end }}</p>
+  {{- with .pictures }}
+  <ul class="post-images">
+    {{- range . }}
+    <li><a href="{{ .full }}"><img src="{{ .src }}" alt="{{ with .alt }}{{ . }}{{ else }}Image without a description{{ end }}" loading="lazy" decoding="async"></a></li>
+    {{- end }}
+  </ul>
+  {{- end }}
+  {{- range .other }}
+  <p class="post-extra"><a href="{{ .url }}">{{ .kind }}</a>{{ with .alt }}: {{ . }}{{ end }}</p>
+  {{- end }}
+  {{- range .videos }}
+  <p class="post-extra"><a href="{{ .url }}">Video on YouTube</a></p>
+  {{- end }}
+  {{- with .link }}
+  <p class="post-extra">Link: <a href="{{ .url }}">{{ .title }}</a></p>
+  {{- end }}
+  {{- with .quote }}
+  <p class="post-extra">Quoting <a href="{{ . }}">another post</a></p>
+  {{- end }}
+  <p class="post-on">On {{ range $i, $o := .on }}{{ if $i }} · {{ end }}<a href="{{ $o.url }}">{{ $o.name }}</a>{{ end }}</p>
+</article>

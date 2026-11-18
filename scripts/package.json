@@ -1,0 +1,8 @@
+{
+  "name": "cattell-archive-tools",
+  "private": true,
+  "type": "module",
+  "description": "Tools James runs on his own computer to copy archive images. Not used to build or run the website.",
+  "scripts": { "fetch-media": "node archive/fetch-media.js" },
+  "dependencies": { "sharp": "^0.35.5" }
+}

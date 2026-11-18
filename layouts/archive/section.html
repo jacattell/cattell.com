@@ -1,0 +1,40 @@
+{{ define "main" }}
+{{- $a := resources.Get "generated/archive-summary.json" | transform.Unmarshal }}
+<div class="prose">
+  <h1>{{ .Title }}</h1>
+  <p class="lede">Everything I've posted on social media, in one place. If I shared a post on more than one platform, it appears once, with a link to each.</p>
+  <p class="meta">{{ $a.total }} posts: {{ range $i, $s := $a.sources }}{{ if $i }}{{ if eq $i (sub (len $a.sources) 1) }} and {{ else }}, {{ end }}{{ end }}{{ $s.shown }} on {{ $s.name }}{{ end }}.</p>
+</div>
+
+<form class="archive-search" role="search" hidden>
+  <label class="label" for="archive-q">Search posts</label>
+  <p class="hint" id="archive-q-hint">For example: unconference, Cheadle, agile</p>
+  <input id="archive-q" type="search" autocomplete="off" aria-describedby="archive-q-hint">
+  <fieldset>
+    <legend>Show posts from</legend>
+    {{- range $a.sources }}
+    <label class="choice"><input type="checkbox" name="platform" value="{{ .key }}" checked> {{ .name }}</label>
+    {{- end }}
+    <label class="choice"><input type="checkbox" name="replies"> Include my replies to other people</label>
+  </fieldset>
+</form>
+<p class="archive-status" role="status" aria-live="polite"></p>
+<div class="archive-results"></div>
+<button type="button" class="archive-more button-secondary" hidden>Show more posts</button>
+
+<div class="archive-browse">
+  <h2>Browse by year</h2>
+  <ul class="years-list">
+    {{- range $a.years }}
+    <li><a href="/archive/{{ .year }}/">{{ .year }}</a> <span class="meta">({{ .count }} posts)</span></li>
+    {{- end }}
+  </ul>
+  <h2>Latest posts</h2>
+  {{- range $a.latest }}{{ partial "archive-post.html" . }}{{ end }}
+</div>
+{{ end }}
+{{ define "scripts" }}
+{{- with resources.Get "js/archive.js" | minify | fingerprint }}
+<script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" defer></script>
+{{- end }}
+{{ end }}

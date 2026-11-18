@@ -1,0 +1,35 @@
+# Security headers for www.cattell.com (Cloudflare Pages). See README.md, "How it fits together".
+# The site is plain files: the only scripts are this site's own, Cloudflare's
+# "Are you human?" check on the forms, and Cloudflare Web Analytics.
+# form-action includes 'self' because browsers also check the redirect back to the
+# thank-you page after a form is sent to api.cattell.com.
+/*
+  Content-Security-Policy: default-src 'none'; script-src 'self' https://challenges.cloudflare.com https://static.cloudflareinsights.com; style-src 'self'; img-src 'self'; connect-src 'self' https://api.cattell.com https://cloudflareinsights.com; frame-src https://challenges.cloudflare.com; form-action 'self' https://api.cattell.com; manifest-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+  Permissions-Policy: accelerometer=(), autoplay=(), camera=(), display-capture=(), geolocation=(), gyroscope=(), microphone=(), payment=(), usb=(), interest-cohort=()
+
+/css/*
+  Cache-Control: public, max-age=31536000, immutable
+/js/*
+  Cache-Control: public, max-age=31536000, immutable
+/assets/*
+  Cache-Control: public, max-age=86400
+
+/chat-context.txt
+  X-Robots-Tag: noindex
+/archive/posts.json
+  X-Robots-Tag: noindex
+/hidden/*
+  X-Robots-Tag: noindex, nofollow
+/contact/thanks/*
+  X-Robots-Tag: noindex
+/feedback/thanks/*
+  X-Robots-Tag: noindex
+
+# Cloudflare's own address for the project: kept out of search engines.
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex
