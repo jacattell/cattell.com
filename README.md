@@ -148,7 +148,7 @@ The Worker adds `api.cattell.com` itself (from `wrangler.jsonc`). It refuses req
 ### 6. Tidy up
 
 1. For both Workers (`cattell-public` and `cattell-admin`), go to **Settings** > **Build** > **Branch control** and set the production branch back to `main`.
-2. In the Pages project's **Settings** > **Variables and Secrets**, delete what it no longer uses: `ANTHROPIC_API_KEY`, `RESEND_API_KEY`, `FORM_TO`, `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `SESSION_SECRET`, `ARCHIVE_KEY`. The `CHAT_LOGS` and `SESSIONS` bindings go automatically, because `wrangler.toml` no longer lists them.
+2. In the Pages project's **Settings** > **Variables and Secrets**, delete what it no longer uses: `ANTHROPIC_API_KEY`, `RESEND_API_KEY`, `FORM_TO`, `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `SESSION_SECRET`, `ARCHIVE_KEY`. The dashboard may still list the old `CHAT_LOGS` and `SESSIONS` bindings, greyed out, because `wrangler.toml` now controls them. They do nothing: the website has no Functions that could use them.
 3. In Cloudflare, **Security** > **WAF** > **Rate limiting rules**: change "Chat and forms" to match hostname `api.cattell.com` (paths `/chat` and `/form`).
 4. In Turnstile, check the widget's hostnames include `www.cattell.com`.
 5. In each Claude Code cloud environment, change the archive network secret's allowed website from `www.cattell.com` to `admin.cattell.com`.
