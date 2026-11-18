@@ -1,28 +1,15 @@
 {
   "name": "cattell.com",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "description": "James Arthur Cattell's personal website",
   "type": "module",
-  "engines": {
-    "node": ">=20"
-  },
+  "engines": { "node": ">=22" },
   "scripts": {
-    "build": "eleventy",
-    "dev": "eleventy --serve",
-    "preview": "npm run build && wrangler pages dev",
-    "test": "npm run build && node --test \"test/*.test.js\"",
-    "archive:fetch": "node scripts/archive/fetch-bluesky.js && node scripts/archive/fetch-mastodon.js && node scripts/archive/fetch-media.js"
-  },
-  "dependencies": {
-    "@11ty/eleventy": "^3.1.8",
-    "@anthropic-ai/sdk": "^1.8.0",
-    "markdown-it": "^15.0.3"
-  },
-  "devDependencies": {
-    "govuk-frontend": "^6.6.0",
-    "sass": "^1.108.2",
-    "sharp": "^0.35.5",
-    "wrangler": "^4.162.0"
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/prepare.mjs && hugo server",
+    "test": "node scripts/build.mjs && node --test \"test/*.test.js\"",
+    "admin:css": "node scripts/admin-css.mjs",
+    "archive:fetch": "node scripts/archive/fetch-bluesky.js && node scripts/archive/fetch-mastodon.js && npm --prefix scripts run fetch-media"
   }
 }

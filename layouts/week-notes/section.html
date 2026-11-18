@@ -1,0 +1,23 @@
+{{ define "main" }}
+{{- if eq .RelPermalink "/week-notes/" }}
+<div class="prose">
+  <h1>{{ .Title }}</h1>
+  <p class="lede">What I did each week, and what I learned. Newest first.</p>
+</div>
+{{- range .Sections.ByTitle.Reverse }}
+<section aria-labelledby="y{{ .File.ContentBaseName }}">
+  <h2 id="y{{ .File.ContentBaseName }}"><a href="{{ .RelPermalink }}">{{ strings.TrimPrefix "Week notes " .Title }}</a></h2>
+  {{- with .Params.goal }}<p class="goal"><strong>Goal for the year:</strong> {{ . }}</p>{{ end }}
+  {{ partial "note-list.html" .Pages.ByDate.Reverse }}
+</section>
+{{- end }}
+<div class="prose about-notes">
+  {{ .Content }}
+</div>
+{{- else }}
+<p class="crumb"><a href="/week-notes/">Week notes</a></p>
+<h1>{{ .Title }}</h1>
+{{- with .Params.goal }}<p class="goal"><strong>Goal for the year:</strong> {{ . }}</p>{{ end }}
+{{ partial "note-list.html" .Pages.ByDate.Reverse }}
+{{- end }}
+{{ end }}

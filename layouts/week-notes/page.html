@@ -1,0 +1,16 @@
+{{ define "main" }}
+<article class="prose">
+  <p class="crumb"><a href="/week-notes/">Week notes</a> <span aria-hidden="true">›</span> <a href="{{ .Parent.RelPermalink }}">{{ .Parent.File.ContentBaseName }}</a></p>
+  <h1>{{ .Title }}</h1>
+  <p class="meta">Week starting <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "Monday 2 January 2006" }}</time></p>
+  {{- with .Params.summary }}<p class="lede">{{ . }}</p>{{ end }}
+  {{ .Content }}
+</article>
+{{- $notes := (where site.RegularPages "Section" "week-notes").ByDate }}
+<nav class="pager" aria-label="Other week notes">
+  {{- /* In Hugo, Pages.Next gives the page before this one in the list, so with oldest-first order it is the older note. */}}
+  {{- with $notes.Next . }}<a class="pager-older" href="{{ .RelPermalink }}" rel="prev"><span class="pager-label">Older</span> {{ .Title }}</a>{{ end }}
+  {{- with $notes.Prev . }}<a class="pager-newer" href="{{ .RelPermalink }}" rel="next"><span class="pager-label">Newer</span> {{ .Title }}</a>{{ end }}
+</nav>
+{{ partial "share.html" . }}
+{{ end }}

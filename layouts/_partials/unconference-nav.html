@@ -1,0 +1,19 @@
+{{- $book := site.GetPage "/unconference" }}
+{{- $current := . }}
+<nav class="sidebar" aria-labelledby="book-contents">
+  <h2 id="book-contents">Guide contents</h2>
+  <ol>
+    <li><a href="{{ $book.RelPermalink }}"{{ if eq $current $book }} aria-current="page"{{ end }}>Introduction</a></li>
+    {{- range where $book.Pages.ByWeight "Params.chapter" true }}
+    <li><a href="{{ .RelPermalink }}"{{ if eq $current . }} aria-current="page"{{ end }}>{{ .Title }}</a></li>
+    {{- end }}
+  </ol>
+  {{- with where $book.Pages "Params.chapter" "!=" true }}
+  <h2>Also about unconferences</h2>
+  <ul>
+    {{- range .ByTitle }}
+    <li><a href="{{ .RelPermalink }}"{{ if eq $current . }} aria-current="page"{{ end }}>{{ .Title }}</a></li>
+    {{- end }}
+  </ul>
+  {{- end }}
+</nav>

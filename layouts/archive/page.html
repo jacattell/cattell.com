@@ -1,0 +1,13 @@
+{{ define "main" }}
+{{- $y := .Params.archive }}
+<p class="crumb"><a href="/archive/">Social media archive</a></p>
+<h1>{{ $y.year }}{{ if gt $y.pages 1 }} <span class="meta">(page {{ $y.page }} of {{ $y.pages }})</span>{{ end }}</h1>
+<p class="meta">{{ $y.total }} posts, newest first.</p>
+{{- range $y.items }}{{ partial "archive-post.html" . }}{{ end }}
+{{- if or $y.newer $y.older }}
+<nav class="pager" aria-label="Pages for {{ $y.year }}">
+  {{- with $y.newer }}<a class="pager-older" href="{{ . }}" rel="prev"><span class="pager-label">Newer posts</span> Page {{ sub $y.page 1 }}</a>{{ end }}
+  {{- with $y.older }}<a class="pager-newer" href="{{ . }}" rel="next"><span class="pager-label">Older posts</span> Page {{ add $y.page 1 }}</a>{{ end }}
+</nav>
+{{- end }}
+{{ end }}

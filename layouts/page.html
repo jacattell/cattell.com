@@ -1,0 +1,9 @@
+{{ define "main" }}
+<article class="prose">
+  {{- with .Params.crumb }}<p class="crumb"><a href="{{ .url }}">{{ .text }}</a></p>{{ end }}
+  <h1>{{ .Title }}</h1>
+  {{- with .Params.lede }}<p class="lede">{{ . }}</p>{{ end }}
+  {{ .Content }}
+</article>
+{{- if not (or .Params.noshare .Params.noindex) }}{{ partial "share.html" . }}{{ end }}
+{{ end }}

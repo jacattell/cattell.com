@@ -1,0 +1,10 @@
+{
+  "name": "cattell-accessibility-check",
+  "private": true,
+  "type": "module",
+  "description": "Checks the built website with axe in a real browser. Used only by GitHub Actions; never part of the website.",
+  "dependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "playwright": "1.65.1"
+  }
+}

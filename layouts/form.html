@@ -1,0 +1,50 @@
+{{ define "main" }}
+<div class="prose">
+  <h1>{{ .Title }}</h1>
+  {{ .Content }}
+</div>
+{{- $name := .Params.form }}
+<form class="site-form" method="post" action="{{ site.Params.api }}/form">
+  <input type="hidden" name="form" value="{{ $name }}">
+  {{- if eq $name "contact" }}
+  <div class="field">
+    <label class="label" for="message">How can I help?</label>
+    <textarea id="message" name="message" rows="5" maxlength="5000" required></textarea>
+  </div>
+  <div class="field">
+    <label class="label" for="email">Your email address</label>
+    <p class="hint" id="email-hint">I'll only use this to reply to you.</p>
+    <input type="email" id="email" name="email" maxlength="254" autocomplete="email" spellcheck="false" aria-describedby="email-hint" required>
+  </div>
+  {{- else if eq $name "feedback" }}
+  <fieldset class="field">
+    <legend class="label">Where did we work together?</legend>
+    {{- range hugo.Data.forms.worked_on }}
+    <label class="choice"><input type="radio" name="where" value="{{ . }}" required> {{ . }}</label>
+    {{- end }}
+    <label class="choice"><input type="radio" name="where" value="Other"> Somewhere else</label>
+    <label class="label label-small" for="where_other">If somewhere else, where?</label>
+    <input type="text" id="where_other" name="where_other" maxlength="200">
+  </fieldset>
+  <div class="field">
+    <label class="label" for="feedback">What should I stop, start or continue doing?</label>
+    <textarea id="feedback" name="feedback" rows="6" maxlength="5000" required></textarea>
+  </div>
+  <div class="field">
+    <label class="label" for="name">Your name (optional)</label>
+    <input type="text" id="name" name="name" maxlength="200" autocomplete="name">
+  </div>
+  {{- end }}
+  <div class="trap" aria-hidden="true">
+    <label for="website">Leave this empty</label>
+    <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+  </div>
+  {{ partial "human-check.html" . }}
+  <button type="submit" class="button">{{ .Params.button | default "Send" }}</button>
+</form>
+{{ end }}
+{{ define "scripts" }}
+{{- with resources.Get "js/forms.js" | minify | fingerprint }}
+<script src="{{ .RelPermalink }}" integrity="{{ .Data.Integrity }}" defer></script>
+{{- end }}
+{{ end }}

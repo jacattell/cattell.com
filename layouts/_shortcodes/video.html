@@ -1,0 +1,3 @@
+{{- /* A YouTube video, as a link: no YouTube code or tracking loads on this site. */}}
+{{- $id := .Get "id" }}{{ $title := .Get "title" }}
+<p class="video-link"><a href="https://www.youtube.com/watch?v={{ $id }}">Watch “{{ $title }}” on YouTube</a></p>

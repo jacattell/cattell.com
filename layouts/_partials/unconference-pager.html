@@ -1,0 +1,9 @@
+{{- $book := site.GetPage "/unconference" }}
+{{- $chapters := slice $book }}{{ range where $book.Pages.ByWeight "Params.chapter" true }}{{ $chapters = $chapters | append . }}{{ end }}
+{{- $i := -1 }}{{ range $n, $p := $chapters }}{{ if eq $p $ }}{{ $i = $n }}{{ end }}{{ end }}
+{{- if ge $i 0 }}
+<nav class="pager" aria-label="Guide chapters">
+  {{- if gt $i 0 }}{{ with index $chapters (sub $i 1) }}<a class="pager-older" href="{{ .RelPermalink }}" rel="prev"><span class="pager-label">Previous</span> {{ if eq . $book }}Introduction{{ else }}{{ .Title }}{{ end }}</a>{{ end }}{{ end }}
+  {{- if lt $i (sub (len $chapters) 1) }}{{ with index $chapters (add $i 1) }}<a class="pager-newer" href="{{ .RelPermalink }}" rel="next"><span class="pager-label">Next</span> {{ .Title }}</a>{{ end }}{{ end }}
+</nav>
+{{- end }}

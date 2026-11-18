@@ -1,0 +1,87 @@
+# Hugo settings for www.cattell.com. See README.md.
+baseURL = "https://www.cattell.com/"
+locale = "en-GB"
+title = "James Arthur Cattell"
+enableRobotsTXT = false
+disableKinds = ["taxonomy", "term"]
+# Sitemap is built by layouts/sitemap.xml so hidden pages stay out of it.
+timeZone = "UTC"
+
+[params]
+  description = "Senior delivery manager in UK government. Week notes, unconferences and things I make."
+  author = "James Arthur Cattell"
+  repo = "https://github.com/jacattell/cattell.com"
+  # The separate address for the chat and forms (workers/public).
+  api = "https://api.cattell.com"
+  # Cloudflare Turnstile site key. It is public. The secret key is only in the cattell-public Worker.
+  turnstileSiteKey = "0x4AAAAAAF-iTVHILNcGmisT"
+
+[markup.goldmark.renderer]
+  # Raw HTML in Markdown is not allowed. Use a shortcode instead (layouts/_shortcodes).
+  unsafe = false
+[markup.goldmark.parser]
+  autoHeadingID = true
+[markup.goldmark.extensions]
+  linkify = true
+  typographer = false
+
+[permalinks.page]
+  week-notes = "/week-notes/:sections[1:]/:contentbasename/"
+
+[outputs]
+  home = ["html", "chatcontext", "redirects"]
+  section = ["html"]
+  page = ["html"]
+
+# What the AI chat reads: the site's pages and the archive, as plain text (/chat-context.txt).
+[outputFormats.chatcontext]
+  baseName = "chat-context"
+  mediaType = "text/plain"
+  isPlainText = true
+  notAlternative = true
+
+# Old addresses that now redirect (/_redirects, read by Cloudflare Pages).
+[outputFormats.redirects]
+  baseName = "_redirects"
+  mediaType = "text/redirects"
+  isPlainText = true
+  notAlternative = true
+
+# The week notes feed, /week-notes/feed.xml (turned on in content/week-notes/_index.md).
+[outputFormats.atom]
+  baseName = "feed"
+  mediaType = "application/atom+xml"
+  isPlainText = false
+  rel = "alternate"
+
+[mediaTypes."text/redirects"]
+  delimiter = ""
+
+[mediaTypes."application/atom+xml"]
+  suffixes = ["xml"]
+
+[menus]
+  [[menus.main]]
+    name = "Work with me"
+    pageRef = "/delivery"
+    weight = 1
+  [[menus.main]]
+    name = "Week notes"
+    pageRef = "/week-notes"
+    weight = 2
+  [[menus.main]]
+    name = "Unconference guide"
+    pageRef = "/unconference"
+    weight = 3
+  [[menus.main]]
+    name = "Social media archive"
+    pageRef = "/archive"
+    weight = 4
+  [[menus.main]]
+    name = "Ask my AI"
+    pageRef = "/chat"
+    weight = 5
+
+[minify.tdewolff.html]
+  keepQuotes = true
+  keepDefaultAttrVals = true

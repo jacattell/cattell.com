@@ -1,0 +1,8 @@
+{{- /* Makes the archive's year pages from assets/generated/archive-pages.json (made by scripts/prepare.mjs). */}}
+{{- with resources.Get "generated/archive-pages.json" }}
+{{- range . | transform.Unmarshal }}
+  {{- $title := printf "Social media archive: %v" .year }}
+  {{- if gt .pages 1 }}{{ $title = printf "%s (page %v of %v)" $title .page .pages }}{{ end }}
+  {{- $.AddPage (dict "path" .path "title" $title "kind" "page" "params" (dict "archive" .) "content" (dict "mediaType" "text/markdown" "value" "")) }}
+{{- end }}
+{{- end }}

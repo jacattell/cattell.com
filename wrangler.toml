@@ -1,16 +1,5 @@
-# Cloudflare Pages settings. See README for how the project is set up.
+# Cloudflare Pages settings for www.cattell.com. See README.md, "How it fits together".
+# The website is plain files: no Functions, and no access to the chat logs or sessions database.
 name = "cattell-com"
-pages_build_output_dir = "_site"
+pages_build_output_dir = "public"
 compatibility_date = "2026-11-01"
-
-# Chat logs: conversations are kept here for 30 days (see "Chat logs" in the README).
-[[kv_namespaces]]
-binding = "CHAT_LOGS"
-id = "460882b27420480cbe556d48ac0e1224"
-
-# Claude sessions archive: prompts and answers are kept in this D1 database
-# (see "Claude sessions archive" in the README).
-[[d1_databases]]
-binding = "SESSIONS"
-database_name = "cattell-sessions"
-database_id = "0397570f-5ed6-4b43-b767-cec9ae7f7136"

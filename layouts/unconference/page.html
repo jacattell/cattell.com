@@ -1,0 +1,12 @@
+{{ define "main" }}
+<div class="with-sidebar">
+  <article class="prose">
+    <p class="crumb"><a href="/unconference/">Unconference guide</a></p>
+    <h1>{{ .Title }}</h1>
+    {{ .Content }}
+    {{ partial "unconference-pager.html" . }}
+  </article>
+  {{ partial "unconference-nav.html" . }}
+</div>
+{{ partial "share.html" . }}
+{{ end }}

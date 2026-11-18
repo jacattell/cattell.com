@@ -23,15 +23,14 @@ jobs:
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
+      - run: .github/scripts/install-hugo.sh
       - run: npm run build
       - name: Check links
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2
         with:
           args: >-
             --config lychee.toml
-            --root-dir "${{ github.workspace }}/_site"
+            --root-dir "${{ github.workspace }}/public"
             --no-progress
-            "_site/**/*.html"
+            "public/**/*.html"
           fail: true

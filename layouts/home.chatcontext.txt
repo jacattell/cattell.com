@@ -1,0 +1,20 @@
+{{- $pages := slice "/" "/delivery" "/contact" "/unconference" -}}
+WEBSITE: {{ site.BaseURL }} - the personal website of {{ site.Params.author }}.
+{{ range $pages }}{{ with site.GetPage . }}
+{{ upper .Title }} ({{ .Permalink }})
+{{ .Plain | strings.TrimSpace }}
+{{ end }}{{ end }}
+WEEK NOTES ({{ site.BaseURL }}week-notes/) - every note, newest first
+{{- with site.GetPage "/week-notes" }}{{ range .Sections.ByTitle.Reverse }}
+{{ strings.TrimPrefix "Week notes " .Title }}{{ with .Params.goal }} (goal: {{ . }}){{ end }}
+{{- range .Pages.ByDate.Reverse }}
+- {{ .Title }}: {{ .Permalink }}{{ with .Params.summary }} - {{ . }}{{ end }}
+{{- end }}{{ end }}{{ end }}
+{{ with first 1 (where site.RegularPages "Section" "week-notes").ByDate.Reverse }}{{ range . }}
+LATEST WEEK NOTE IN FULL
+{{ .Title }}: {{ .Plain | strings.TrimSpace }}
+{{ end }}{{ end }}
+SOCIAL MEDIA ARCHIVE ({{ site.BaseURL }}archive/)
+{{ site.Params.author }}'s own social media posts, newest first. Posts shared on several platforms appear once. Each post starts with: date and time (UK) | platforms | link. Not listed here, but searchable on the archive page: replies to other people, and posts only on X (Twitter).
+
+{{ with resources.Get "generated/chat-archive.txt" }}{{ .Content }}{{ end }}

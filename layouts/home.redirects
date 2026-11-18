@@ -1,0 +1,12 @@
+# Old addresses: from the Google Sites website, and pages that have moved. Made by layouts/home.redirects.
+{{- $rules := slice "/james /" "/home /" "/personal /" "/weeknotes /week-notes/" "/week-notes/2022/2022-week-39 /week-notes/2022/39/" "/how-to /hidden/" "/how-to/bitwarden-desktop-upgrade /hidden/bitwarden-desktop-upgrade/" "/edit https://admin.cattell.com/" "/edit/chats https://admin.cattell.com/chats/" "/edit/sessions https://admin.cattell.com/sessions/" "/govuk /" }}
+{{- range (where site.RegularPages "Section" "week-notes") }}
+  {{- $week := int .File.ContentBaseName }}{{ $year := .Parent.File.ContentBaseName }}
+  {{- $rules = $rules | append (printf "/week-notes/%s-week-%02d %s" $year $week .RelPermalink) }}
+  {{- if lt $week 10 }}{{ $rules = $rules | append (printf "/week-notes/%s-week-%d %s" $year $week .RelPermalink) }}{{ end }}
+{{- end }}
+{{- range $rules }}{{ $r := split . " " }}
+{{ index $r 0 }} {{ index $r 1 }} 301
+{{ index $r 0 }}/ {{ index $r 1 }} 301
+{{- end }}
+/govuk/* / 301

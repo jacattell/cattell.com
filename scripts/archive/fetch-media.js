@@ -9,7 +9,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 import sharp from "sharp";
 import { DATA_DIR, readPosts } from "./common.js";
-import { groupPosts, PLATFORMS, youtubeThumbnail } from "../../lib/archive.js";
+import { groupPosts, PLATFORMS, youtubeThumbnail } from "../lib/archive.js";
 
 const OUT_DIR = path.join(DATA_DIR, "..", "src", "assets", "archive");
 const MEDIA_FILE = path.join(DATA_DIR, "media.json");

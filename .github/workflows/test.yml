@@ -1,7 +1,7 @@
-# Runs the tests (npm test) on every pull request and every change to main,
-# including changes saved by the week notes editor. Many tests check security
-# settings (the Content-Security-Policy, sign-in, size limits), so a failed run
-# means something needs a look before or soon after it goes live.
+# Runs the tests on every pull request and every change to main, including changes
+# saved by the week notes editor.
+#   test           npm test: builds the site and checks pages, security settings and both Workers
+#   accessibility  checks pages against WCAG 2.2 AA with axe, in light and dark mode
 # Actions are pinned to an exact commit, so a changed tag can't change what runs.
 name: Tests
 
@@ -24,6 +24,23 @@ jobs:
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
+      - run: .github/scripts/install-hugo.sh
       - run: npm test
+
+  accessibility:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: test/a11y/package-lock.json
+      - run: .github/scripts/install-hugo.sh
+      - run: npm run build
+      # The checker's own packages: used only here, never in the website.
+      - run: npm ci --prefix test/a11y
+      - run: npx --prefix test/a11y playwright install --with-deps chromium
+      - run: node test/a11y/check.mjs public
