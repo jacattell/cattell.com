@@ -176,7 +176,6 @@
 
     app.replaceChildren(
       el("p", {}, "Your prompts and Claude's answers, with Claude's thinking, tool calls and tool results, from Claude Code and Claude chats. Only you can see this page."),
-      el("p", {}, el("a", { href: "/" }, "Back to the week notes editor")),
       form, summary, status, list, more);
     await page(true);
   }

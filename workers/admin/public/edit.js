@@ -85,9 +85,7 @@
   function signInView(reason) {
     show("Edit week notes", problem(reason === "setup"
       ? "Saving to GitHub isn't set up yet. See \"Admin tools\" in the README."
-      : "Your sign-in has run out. Reload the page to sign in again."),
-      el("p", {}, el("a", { href: "/chats/" }, "Read the chat logs")),
-      el("p", {}, el("a", { href: "/sessions/" }, "Search the Claude sessions archive")));
+      : "Your sign-in has run out. Reload the page to sign in again."));
   }
 
   // ---- list ----
@@ -113,7 +111,7 @@
       el("button", { type: "submit" }, "Start note"));
     const byYear = {};
     notes.forEach((n) => (byYear[n.year] ??= []).push(n));
-    show("Edit week notes", signOutForm(login), el("p", {}, el("a", { href: "/chats/" }, "Read the chat logs")), el("p", {}, el("a", { href: "/sessions/" }, "Search the Claude sessions archive")), newForm,
+    show("Edit week notes", signOutForm(login), newForm,
       el("h2", {}, "Your notes"),
       ...Object.keys(byYear).sort((a, b) => b - a).flatMap((y) => [
         el("h3", {}, y),

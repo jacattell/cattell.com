@@ -79,8 +79,7 @@
     more.textContent = "Show older conversations";
     more.addEventListener("click", page);
     app.replaceChildren(
-      el("p", {}, "Conversations from the ", el("a", { href: "/chat/" }, "Chat page"), ", newest first. Each one is deleted automatically 30 days after its last message."),
-      el("p", {}, el("a", { href: "/" }, "Back to the week notes editor")),
+      el("p", {}, "Conversations from the ", el("a", { href: "https://www.cattell.com/chat/" }, "Ask my AI page"), ", newest first. Each one is deleted automatically 30 days after its last message."),
       list, more);
     await page();
   }
