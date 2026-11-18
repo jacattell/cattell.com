@@ -31,6 +31,8 @@ If you think I could help you or your organisation, please [get in touch](/conta
 
 ## My experience
 
+Between some of these roles I worked as a community manager, building and coaching communities of practice in government. I can share my full CV on request.
+
 Senior delivery manager, Department for Environment, Food & Rural Affairs (via TPX Impact), July to September 2026:
 
 - Responsible for the supplier transition from Hitachi to Kainos.
