@@ -284,7 +284,7 @@ button { font: inherit; font-weight: 700; min-height: 2.75rem; padding: 0.5rem 1
 button:hover { background: #005a30; }
 button.secondary { color: var(--text); background: var(--panel); border-color: var(--border); box-shadow: none; }
 button:disabled { opacity: 0.6; cursor: not-allowed; }
-.editor-row { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+.editor-row { display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
 .editor-short { width: 8rem; }
 .editor-body { font-family: ui-monospace, Consolas, monospace; font-size: 1rem; line-height: 1.5; }
 .editor-actions { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin-top: 1.5rem; }
