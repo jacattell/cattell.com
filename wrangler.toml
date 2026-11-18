@@ -1,0 +1,5 @@
+# Cloudflare Pages settings for www.cattell.com. See README.md, "How it fits together".
+# The website is plain files: no Functions, and no access to the chat logs or sessions database.
+name = "cattell-com"
+pages_build_output_dir = "public"
+compatibility_date = "2026-11-01"

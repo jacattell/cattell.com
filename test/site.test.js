@@ -210,3 +210,10 @@ test("the build needs no npm packages", () => {
   assert.equal(pkg.devDependencies, undefined);
   assert.equal(read(".hugo-version").trim().split(".").length, 3);
 });
+
+test("Cloudflare Pages builds into public/, with no access to private data", () => {
+  const config = read("wrangler.toml");
+  assert.match(config, /^pages_build_output_dir = "public"$/m);
+  assert.doesNotMatch(config, /kv_namespaces|d1_databases|\[vars\]/);
+  assert.ok(!fs.existsSync("functions"), "no Pages Functions");
+});

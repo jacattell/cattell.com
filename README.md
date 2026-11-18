@@ -141,9 +141,7 @@ The Worker adds `api.cattell.com` itself (from `wrangler.jsonc`). It refuses req
 
 ### 5. Change the website's build settings, then merge
 
-1. In the Pages project (`cattell-com`), go to **Settings** > **Build**:
-   - Build command: `npm run build`
-   - Build output directory: `public`
+1. In the Pages project (`cattell-com`), go to **Settings** > **Build** and set **Build command** to `npm run build`. The output directory (`public`) is set by `wrangler.toml`, so the dashboard won't let you change it.
 2. In **Settings** > **Variables and Secrets**, add as **Text**:
    - `HUGO_VERSION`: `0.170.1` (the version in `.hugo-version`)
    - `NODE_VERSION`: `22`
@@ -154,7 +152,7 @@ The Worker adds `api.cattell.com` itself (from `wrangler.jsonc`). It refuses req
 ### 6. Tidy up
 
 1. For both Workers (`cattell-public` and `cattell-admin`), go to **Settings** > **Build** > **Branch control** and set the production branch back to `main`.
-2. In the Pages project's **Settings** > **Variables and Secrets**, delete what it no longer uses: `ANTHROPIC_API_KEY`, `RESEND_API_KEY`, `FORM_TO`, `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `SESSION_SECRET`, `ARCHIVE_KEY`. Under **Bindings**, remove `CHAT_LOGS` and `SESSIONS`.
+2. In the Pages project's **Settings** > **Variables and Secrets**, delete what it no longer uses: `ANTHROPIC_API_KEY`, `RESEND_API_KEY`, `FORM_TO`, `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`, `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `SESSION_SECRET`, `ARCHIVE_KEY`. The `CHAT_LOGS` and `SESSIONS` bindings go automatically, because `wrangler.toml` no longer lists them.
 3. In Cloudflare, **Security** > **WAF** > **Rate limiting rules**: change "Chat and forms" to match hostname `api.cattell.com` (paths `/chat` and `/form`).
 4. In Turnstile, check the widget's hostnames include `www.cattell.com`.
 5. In each Claude Code cloud environment, change the archive network secret's allowed website from `www.cattell.com` to `admin.cattell.com`.
