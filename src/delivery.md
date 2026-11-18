@@ -31,7 +31,22 @@ If you think I could help you or your organisation, please [get in touch](/conta
 
 ## My experience
 
-Senior delivery manager, Department for Education (via Transform), April to June 2025.
+Senior delivery manager, Department for Environment, Food & Rural Affairs (via TPX Impact), July to September 2026:
+
+- Responsible for the supplier transition from Hitachi to Kainos.
+- Audited and rescheduled all team meetings, including Scrum events.
+- Took control of the team’s finances and forecasting.
+
+Design led engagement specialist, The Pensions Regulator, September 2025 to June 2026:
+
+- Ran the Pensions Data and Digital Industry Working Group.
+- Brought the group together every 2 months for workshops.
+- Built a community space for the group to work together between workshops.
+
+Senior delivery manager, Department for Education (via Transform), June to September 2025:
+
+- Ran a multidisciplinary agile service delivery team iterating the DfE Connect service.
+- Helped renew the strategy for the team and wider programme.
 
 Senior delivery manager, Navy Digital (via Digi2al Ltd), July 2023 to May 2024:
 
