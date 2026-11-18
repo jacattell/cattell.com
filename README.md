@@ -54,7 +54,7 @@ It started on Monday...
 | Ask my AI | `content/chat.md`, `layouts/chat.html`, `assets/js/chat.js`, `workers/public/src/chat.js` |
 | Week notes | `content/week-notes/YEAR/WEEK.md` |
 | Unconference guide | `content/unconference/` (chapters have `chapter: true` and a `weight` for their order) |
-| Hidden pages | `content/hidden/` |
+| Hidden pages (no index page; each page works at its own address) | `content/hidden/` |
 | Images | `static/assets/img/` |
 | Menu, site settings | `hugo.toml` |
 | Page design | `layouts/` and `assets/css/site.css` |

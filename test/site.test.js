@@ -13,7 +13,7 @@ const headers = read(path.join(OUT, "_headers"));
 const csp = /Content-Security-Policy: (.+)/.exec(headers)[1];
 
 test("the site has its main pages", () => {
-  for (const url of ["/", "/delivery/", "/week-notes/", "/week-notes/2026/46/", "/week-notes/2026/", "/unconference/", "/unconference/basics/", "/archive/", "/archive/2012/page-2/", "/chat/", "/contact/", "/contact/thanks/", "/feedback/", "/feedback/thanks/", "/accessibility/", "/privacy/", "/hidden/", "/hidden/bitwarden-desktop-upgrade/", "/404.html"]) {
+  for (const url of ["/", "/delivery/", "/week-notes/", "/week-notes/2026/46/", "/week-notes/2026/", "/unconference/", "/unconference/basics/", "/archive/", "/archive/2012/page-2/", "/chat/", "/contact/", "/contact/thanks/", "/feedback/", "/feedback/thanks/", "/accessibility/", "/privacy/", "/hidden/bitwarden-desktop-upgrade/", "/404.html"]) {
     assert.ok(fs.existsSync(path.join(OUT, url, url.endsWith(".html") ? "" : "index.html")), url);
   }
   assert.ok(pages.length > 250, `${pages.length} pages`);
@@ -169,7 +169,7 @@ test("old addresses redirect, including every old week note address and the old 
 });
 
 test("hidden pages and thank-you pages are kept out of search engines and the sitemap", () => {
-  for (const url of ["/hidden/", "/hidden/bitwarden-desktop-upgrade/", "/contact/thanks/"]) assert.match(page(url), /<meta name="robots" content="noindex, nofollow">/, url);
+  for (const url of ["/hidden/bitwarden-desktop-upgrade/", "/contact/thanks/"]) assert.match(page(url), /<meta name="robots" content="noindex, nofollow">/, url);
   assert.doesNotMatch(page("/"), /<meta name="robots"/);
   const sitemap = read(path.join(OUT, "sitemap.xml"));
   assert.doesNotMatch(sitemap, /\/hidden\/|\/(contact|feedback)\/thanks\/|\/archive\/20/);
@@ -216,4 +216,10 @@ test("Cloudflare Pages builds into public/, with no access to private data", () 
   assert.match(config, /^pages_build_output_dir = "public"$/m);
   assert.doesNotMatch(config, /kv_namespaces|d1_databases|\[vars\]/);
   assert.ok(!fs.existsSync("functions"), "no Pages Functions");
+});
+
+test("there is no Hidden pages page, but the pages in that folder still work", () => {
+  assert.ok(!fs.existsSync(path.join(OUT, "hidden", "index.html")));
+  assert.match(page("/hidden/bitwarden-desktop-upgrade/"), /<h1>Bitwarden desktop upgrade<\/h1>/);
+  assert.match(read(path.join(OUT, "_redirects")), /^\/how-to \/ 301$/m);
 });
