@@ -31,10 +31,11 @@ test("the archive combines cross-posts and keeps different posts apart", async (
   assert.match(leeds.text, /so much done/, "uses the longest version");
 });
 
-test("the archive never includes private Mastodon posts", () => {
+test("the Mastodon importer keeps only public posts, and removes ones that stopped being public", () => {
   const posts = JSON.parse(fs.readFileSync("archive-data/mastodon.json", "utf8"));
   const source = fs.readFileSync("scripts/archive/fetch-mastodon.js", "utf8");
-  assert.match(source, /visibility !== "public" && s\.visibility !== "unlisted"/);
+  assert.match(source, /if \(!archivable\(s\)\) \{ notPublic\.add\(s\.id\); continue; \}/);
+  assert.match(source, /savePosts\("mastodon", posts, notPublic\)/);
   assert.ok(posts.length > 0);
 });
 
@@ -561,3 +562,18 @@ test("chat and forms stop reading a request that is too big", async () => {
 
 
 
+
+test("archive privacy: only public Mastodon posts, and protected X archives are refused", async () => {
+  const { mastodonArchivable } = await import("../scripts/archive/common.js");
+  for (const [visibility, ok] of [["public", true], ["unlisted", false], ["private", false], ["direct", false], [undefined, false]]) {
+    assert.equal(mastodonArchivable({ visibility }), ok, String(visibility));
+  }
+  const { wasProtected } = await import("../scripts/archive/import-x.js");
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "x-"));
+  assert.equal(wasProtected(dir), false, "no history file: never protected");
+  fs.writeFileSync(path.join(dir, "protected-history.js"), 'window.YTD.protected_history.part0 = []');
+  assert.equal(wasProtected(dir), false);
+  fs.writeFileSync(path.join(dir, "protected-history.js"), 'window.YTD.protected_history.part0 = [{"protectedHistory":{"protectedAt":"2015-01-01T00:00:00.000Z","action":"Protect"}}]');
+  assert.equal(wasProtected(dir), true);
+  fs.rmSync(dir, { recursive: true, force: true });
+});

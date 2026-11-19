@@ -6,20 +6,22 @@
 //   GITHUB_APP_ID, GITHUB_APP_INSTALLATION_ID
 {
   "name": "cattell-admin",
-  "main": "src/index.js",
+  "main": "src/entry.js",
   "compatibility_date": "2026-11-01",
   "workers_dev": false,
   "preview_urls": false,
   "routes": [{ "pattern": "admin.cattell.com", "custom_domain": true }],
-  "observability": { "enabled": true, "logs": { "invocation_logs": false } },
+  "observability": { "enabled": true, "redact_query_string": true, "logs": { "invocation_logs": false } },
   // The pages and scripts in public/. The Worker runs first, so even these need the sign-in.
   "assets": { "directory": "./public", "binding": "ASSETS", "run_worker_first": true, "html_handling": "auto-trailing-slash" },
   "vars": {
     "ADMIN_HOST": "admin.cattell.com",
     "SITE": "https://www.cattell.com",
-    "REPO": "jacattell/cattell.com"
+    "REPO": "jacattell/cattell.com",
+    "CHAT_DAILY_CAP": "500"
   },
   "keep_vars": true,
+  // The chat logs. Only this Worker can read them; the public Worker adds to them through the ChatLogs entrypoint (src/entry.js).
   "kv_namespaces": [{ "binding": "CHAT_LOGS", "id": "460882b27420480cbe556d48ac0e1224" }],
   "d1_databases": [{ "binding": "SESSIONS", "database_name": "cattell-sessions", "database_id": "0397570f-5ed6-4b43-b767-cec9ae7f7136" }]
 }

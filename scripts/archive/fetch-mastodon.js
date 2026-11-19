@@ -1,7 +1,9 @@
 // Downloads James's public Mastodon posts into archive-data/mastodon.json.
 // Usage: node scripts/archive/fetch-mastodon.js [--all]
 // Without --all it stops once it reaches posts it already has.
-import { getJson, readPosts, savePosts } from "./common.js";
+// Only posts with "public" visibility are kept. Unlisted, followers-only and direct posts
+// are left out, and taken out of the archive if they were in it (run with --all to check every post).
+import { getJson, readPosts, savePosts, mastodonArchivable as archivable } from "./common.js";
 
 const SERVER = "https://mastodon.me.uk";
 const ACCT = "jacattell";
@@ -28,6 +30,7 @@ function plainText(html) {
 const account = await getJson(`${SERVER}/api/v1/accounts/lookup?acct=${ACCT}`);
 const known = new Set(readPosts("mastodon").map((p) => p.id));
 const posts = [];
+const notPublic = new Set();
 let maxId;
 for (;;) {
   const page = await getJson(`${SERVER}/api/v1/accounts/${account.id}/statuses?limit=40&exclude_reblogs=true${maxId ? `&max_id=${maxId}` : ""}`);
@@ -35,7 +38,7 @@ for (;;) {
   let reachedKnown = false;
   for (const s of page) {
     maxId = s.id;
-    if (s.visibility !== "public" && s.visibility !== "unlisted") continue; // never publish private posts
+    if (!archivable(s)) { notPublic.add(s.id); continue; }
     if (known.has(s.id) && !all) reachedKnown = true;
     posts.push({
       platform: "mastodon",
@@ -52,4 +55,6 @@ for (;;) {
   if (reachedKnown) break;
 }
 
-console.log(`Mastodon: ${posts.length} posts downloaded, ${savePosts("mastodon", posts)} saved in total`);
+const before = readPosts("mastodon").length;
+const total = savePosts("mastodon", posts, notPublic);
+console.log(`Mastodon: ${posts.length} public posts downloaded, ${notPublic.size} not public left out, ${total} saved in total (${before + posts.filter((p) => !known.has(p.id)).length - total} removed)`);

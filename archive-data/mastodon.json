@@ -1,6 +1,158 @@
 [
  {
   "platform": "mastodon",
+  "id": "117643972909499680",
+  "url": "https://mastodon.me.uk/@jacattell/117643972909499680",
+  "date": "2026-11-19T16:09:27.105Z",
+  "text": "Question at #ProductForThePeople in #Leeds: \n\nQ: What community owner, edge based, distributed data centres exist, that can host my organisation's GPUs? \n\nA: Look at @heatacompute (https://heata.co) and Inference Cooperative (https://inference.coop/). \n\n#AI #Sustainability",
+  "reply": null,
+  "images": [],
+  "link": {
+   "url": "https://heata.co/",
+   "title": "heata | harnessing heat from cloud compute"
+  },
+  "quote": null
+ },
+ {
+  "platform": "mastodon",
+  "id": "117643679789960415",
+  "url": "https://mastodon.me.uk/@jacattell/117643679789960415",
+  "date": "2026-11-19T14:54:54.457Z",
+  "text": "Oooooh, an equation at #ProductForThePeople in #Leeds 🤓 \n\nThe Software Carbon Intensity specification by the Green Software Foundation provides a formula to calculate carbon produced by digital systems as an intensity metric (emissions per unit of service delivered) rather than total carbon. \n\n#cool",
+  "reply": null,
+  "images": [
+   {
+    "url": "https://mastodon.me.uk/system/media_attachments/files/117/643/677/752/754/216/original/e8917735a45bc961.jpg",
+    "alt": "Presentation slide titled \"A formula for carbon\" detailing the Software Carbon Intensity (SCI) equation: SCI = (E × I) + M per R, alongside an explanation and examples of the functional unit (R)."
+   }
+  ],
+  "link": null,
+  "quote": null
+ },
+ {
+  "platform": "mastodon",
+  "id": "117642351885774361",
+  "url": "https://mastodon.me.uk/@jacattell/117642351885774361",
+  "date": "2026-11-19T09:17:12.251Z",
+  "text": "Right! I'm away to #Leeds for my first Product for the People conference https://luma.com/7s9dnegb at Hippo Digital. \n\nWho else is on their way? 🙂 \n\n#ProductForThePeople #product #ProductManagement",
+  "reply": null,
+  "images": [
+   {
+    "url": "https://mastodon.me.uk/system/media_attachments/files/117/642/340/490/648/804/original/5638f5e933cea3c4.jpg",
+    "alt": "A large, brightly lit electronic departure board inside a train station displays four upcoming trains, all departing from Platform 14. The columns are color-coded by status: \n\n​09:07 to Liverpool Lime St (Pink header: \"Wait\"), operated by TransPennine Express.\n\n​09:02 (Expected 09:03) to Blackpool North (Blue header: \"Prepare\"), operated by Northern.\n\n​08:58 (Expected 09:00) to Redcar Central (Green header: \"Go\"), operated by TransPennine Express.\n\n​08:54 (Expected 08:57) to Liverpool Lime St (Green header: \"Go\"), operated by Northern.\n\n​Below the board, digital advertisements line the wall—including ads for Southern Comfort, a University of Huddersfield Open Day, and a skincare product reading \"BALD NEVER FELT SO GOOD\". In the foreground, a woman in a long dark coat, pink beanie, and grey backpack walks past a green and red directional sign pointing to \"Stairs to Platform 14\"."
+   },
+   {
+    "url": "https://mastodon.me.uk/system/media_attachments/files/117/642/342/747/207/188/original/002e13ad607be9d3.jpg",
+    "alt": "A close-up selfie of a smiling man with light eyes and stubble standing on an outdoor train platform. He is wearing a thick, ribbed grey knit beanie underneath the raised hood of a grey zip-up hoodie featuring a small red-and-blue emblem on the chest, along with black backpack straps. Behind him, a dark blue overhead sign reads \"Manchester Piccadilly\" next to a digital clock showing 08:59:12 and a blue \"14\" platform marker. Several other commuters with luggage are gathered along the platform in the background."
+   }
+  ],
+  "link": null,
+  "quote": null
+ },
+ {
+  "platform": "mastodon",
+  "id": "117636948644900924",
+  "url": "https://mastodon.me.uk/@jacattell/117636948644900924",
+  "date": "2026-11-18T10:23:05.329Z",
+  "text": "To anyone who says X(Twitter) is a cesspool of right-wing bigotry, I refer you to this 🙂 \n\n(I mean yes, it's still a bit shit show over there, but you gotta grab hold of the best of humanity when you can).",
+  "reply": null,
+  "images": [
+   {
+    "url": "https://mastodon.me.uk/system/media_attachments/files/117/636/946/405/708/229/original/ea3eeb7eaf878ad3.png",
+    "alt": "A dark-mode screenshot of a post on X (formerly Twitter) from the verified account NSFVoyager2 which the viewer has reposted.\n\nThe post reads:\n> For those of you watching and waiting, the time is NOW. Sister ship Voyager 1 reached one light-day distance from Earth at 10:16:07 UTC today, in 2026. V1 will be one light-day from the Sun on February 4, 2027. Why the difference? Because Earth is currently orbiting on the near side of the Sun, and so is closer (for now).\n> Because Voyager 2 lost speed during the Neptune encounter, it will take longer to reach these milestones: one light-day from the Earth on November 1, 2035, and one light-day from the Sun on November 27, 2035.\n> \nThe post is timestamped 10:15 on 18 Nov 26, and shows 588 views, 6 replies, 48 reposts, 81 likes, and 3 bookmarks."
+   }
+  ],
+  "link": null,
+  "quote": null
+ },
+ {
+  "platform": "mastodon",
+  "id": "117630400940593708",
+  "url": "https://mastodon.me.uk/@jacattell/117630400940593708",
+  "date": "2026-11-17T06:37:55.294Z",
+  "text": "Heading to #Manchester for the OneTeamGov North meetup. \n\nFor the 1st time at a lean coffee or unconference, I'm looking forward to chatting about #AI. \n\nSpent the last 2 weeks moving https://cattell.com from Google Sites to Cloudflare and github , thanks to Claude. \n\nVery impressed.",
+  "reply": null,
+  "images": [],
+  "link": {
+   "url": "https://cattell.com/",
+   "title": "James Arthur Cattell"
+  },
+  "quote": null
+ },
+ {
+  "platform": "mastodon",
+  "id": "117611239690270585",
+  "url": "https://mastodon.me.uk/@jacattell/117611239690270585",
+  "date": "2026-11-13T21:24:57.814Z",
+  "text": "Ambika Bhakti Mod in Black Doves S2 E1 = Awesome 🙂",
+  "reply": null,
+  "images": [],
+  "link": null,
+  "quote": null
+ },
+ {
+  "platform": "mastodon",
+  "id": "117604449773366971",
+  "url": "https://mastodon.me.uk/@jacattell/117604449773366971",
+  "date": "2026-11-12T16:38:11.914Z",
+  "text": "Enter the @ukgovcamp lottery for a ticket to our #Manchester event on Saturday 16 January 2027 https://luma.com/kwpj3osz #ukgc27 \n\nAnyone interested in making the public sector better is welcome.",
+  "reply": null,
+  "images": [],
+  "link": {
+   "url": "https://luma.com/kwpj3osz",
+   "title": "UK Gov Camp 2027 · Luma"
+  },
+  "quote": null
+ },
+ {
+  "platform": "mastodon",
+  "id": "117604017269202132",
+  "url": "https://mastodon.me.uk/@jacattell/117604017269202132",
+  "date": "2026-11-12T14:48:12.417Z",
+  "text": "I published, \"Week 46, 2026\" https://www.cattell.com/week-notes/2026/46/ (first version, so just bullet points at the moment). #weeknotes",
+  "reply": null,
+  "images": [
+   {
+    "url": "https://mastodon.me.uk/system/media_attachments/files/117/604/017/257/562/331/original/ec0cac1d92265058.png",
+    "alt": "Mobile screenshot of a blog post titled \"Week 46, 2026\" on James Arthur Cattell's website (cattell.com). The post notes that he has been using Claude Code to build a new tech stack to migrate away from Google Sites, and that he applied for Senior Delivery Manager roles in the Government Digital Service."
+   }
+  ],
+  "link": null,
+  "quote": null
+ },
+ {
+  "platform": "mastodon",
+  "id": "117600527379865595",
+  "url": "https://mastodon.me.uk/@jacattell/117600527379865595",
+  "date": "2026-11-12T00:00:40.933Z",
+  "text": "@Moosical I'll help run @oggcamp with you, if you like? \n\nI recently did the #Manchester venue search for @ukgovcamp 2027 ( #ukgc27 ) https://www.google.com/maps/d/viewer?mid=1-jk23XGEcl2ecYhkpheZj8yr1DFS2no \n\nNow taking care for sponsorship https://ukgovcamp.com/become-a-sponsor/ and have so far raised £12k https://ukgovcamp.com/sponsors/",
+  "reply": {
+   "url": null,
+   "self": false
+  },
+  "images": [],
+  "link": {
+   "url": "https://www.google.com/maps/d/viewer?mid=1-jk23XGEcl2ecYhkpheZj8yr1DFS2no",
+   "title": "UKGovCamp 2027 Manchester Venues – Google My Maps"
+  },
+  "quote": null
+ },
+ {
+  "platform": "mastodon",
+  "id": "117600467744885602",
+  "url": "https://mastodon.me.uk/@jacattell/117600467744885602",
+  "date": "2026-11-11T23:45:30.973Z",
+  "text": "Finally moved https://cattell.com off Google Sites (https://sites.google.com/a/cattell.com/www). \n\nThe source is now on GitHub, the site is built with Build Awesome (@11ty) and hosted on Cloudflare Pages. \n\nAll done with the help of Anthropic's Claude Code. \n\nI wonder what else I can move there?",
+  "reply": null,
+  "images": [],
+  "link": {
+   "url": "https://cattell.com/",
+   "title": "James Arthur Cattell"
+  },
+  "quote": null
+ },
+ {
+  "platform": "mastodon",
   "id": "117428055720592494",
   "url": "https://mastodon.me.uk/@jacattell/117428055720592494",
   "date": "2026-10-12T12:58:52.266Z",
@@ -75,20 +227,6 @@
     "alt": "A Google My Maps interface titled \"UKGovCamp 2027 Manchester Venues\" showing a map of central Manchester with various marked locations. On the left panel, a list under \"Potential venues\" includes multiple tagged locations such as Campfield, Contact Theatre, Department for Education, Depot Mayfield, Manchester Central Convention Complex, and several others. On the right side, the interactive map displays pins across the city corresponding to these listed venues, marked in green, red, pink, and orange icons, alongside major railway stations like Manchester Piccadilly, Manchester Oxford Road, and Deansgate."
    }
   ],
-  "link": null,
-  "quote": null
- },
- {
-  "platform": "mastodon",
-  "id": "117393343823835971",
-  "url": "https://mastodon.me.uk/@jacattell/117393343823835971",
-  "date": "2026-10-06T09:51:10.751Z",
-  "text": "@themself UoM are on my hit list today 👍🏻",
-  "reply": {
-   "url": null,
-   "self": false
-  },
-  "images": [],
   "link": null,
   "quote": null
  },
@@ -298,20 +436,6 @@
  },
  {
   "platform": "mastodon",
-  "id": "117343473791613532",
-  "url": "https://mastodon.me.uk/@jacattell/117343473791613532",
-  "date": "2026-09-27T14:28:34.454Z",
-  "text": "@xdej thanks for the pings 🙂 \n\n@fabi1cazenave @GLaG_38 @gendarmerie question; other than here, where is everyone organising, please?",
-  "reply": {
-   "url": null,
-   "self": false
-  },
-  "images": [],
-  "link": null,
-  "quote": null
- },
- {
-  "platform": "mastodon",
   "id": "117343465862004060",
   "url": "https://mastodon.me.uk/@jacattell/117343465862004060",
   "date": "2026-09-27T14:26:33.453Z",
@@ -382,34 +506,6 @@
     "alt": "A studio product photograph on a seamless white background featuring two open laptops side-by-side. On the left is a silver Dell laptop displaying the Windows 11 desktop and File Explorer window. On the right is a dark gray Framework 13 laptop displaying the Fedora Linux desktop with open terminal and browser windows featuring the Fedora logo."
    }
   ],
-  "link": null,
-  "quote": null
- },
- {
-  "platform": "mastodon",
-  "id": "117333336350708544",
-  "url": "https://mastodon.me.uk/@jacattell/117333336350708544",
-  "date": "2026-09-25T19:30:29.376Z",
-  "text": "@janet thanks for your reply 🙂 Q: Fancy a natter next week, please?",
-  "reply": {
-   "url": null,
-   "self": false
-  },
-  "images": [],
-  "link": null,
-  "quote": null
- },
- {
-  "platform": "mastodon",
-  "id": "117327598695375958",
-  "url": "https://mastodon.me.uk/@jacattell/117327598695375958",
-  "date": "2026-09-24T19:11:19.706Z",
-  "text": "@Tony_Meredith thanks Tony 👍🏻",
-  "reply": {
-   "url": null,
-   "self": false
-  },
-  "images": [],
   "link": null,
   "quote": null
  },
@@ -544,17 +640,6 @@
    "url": null,
    "self": false
   },
-  "images": [],
-  "link": null,
-  "quote": null
- },
- {
-  "platform": "mastodon",
-  "id": "116940109504437120",
-  "url": "https://mastodon.me.uk/@jacattell/116940109504437120",
-  "date": "2026-07-18T08:47:43.878Z",
-  "text": "@phlash @kestral nice 🙂 Go to your local hackspace village for help!",
-  "reply": null,
   "images": [],
   "link": null,
   "quote": null
@@ -2663,17 +2748,6 @@
  },
  {
   "platform": "mastodon",
-  "id": "115380082716580227",
-  "url": "https://mastodon.me.uk/@jacattell/115380082716580227",
-  "date": "2025-10-15T20:32:24.186Z",
-  "text": "@otfrom fixed, with thanks 👍🏻",
-  "reply": null,
-  "images": [],
-  "link": null,
-  "quote": null
- },
- {
-  "platform": "mastodon",
   "id": "115377337394691696",
   "url": "https://mastodon.me.uk/@jacattell/115377337394691696",
   "date": "2025-10-15T08:54:13.898Z",
@@ -4693,49 +4767,10 @@
  },
  {
   "platform": "mastodon",
-  "id": "114239771575727926",
-  "url": "https://mastodon.me.uk/@jacattell/114239771575727926",
-  "date": "2025-03-28T11:16:17.023Z",
-  "text": "@phlash brill :-) Thanks Phil!",
-  "reply": null,
-  "images": [],
-  "link": null,
-  "quote": null
- },
- {
-  "platform": "mastodon",
-  "id": "114239768211614375",
-  "url": "https://mastodon.me.uk/@jacattell/114239768211614375",
-  "date": "2025-03-28T11:15:25.692Z",
-  "text": "@HRCH nice explaination, thank you (-: \n\nAsking cause I'm fascinated by risk management and making it more accessible to non-delivery/project people. Maybe even (dare I say) making risk fun, which I've had success with. Have you used risk radars before?",
-  "reply": {
-   "url": null,
-   "self": false
-  },
-  "images": [],
-  "link": null,
-  "quote": null
- },
- {
-  "platform": "mastodon",
   "id": "114239757162633544",
   "url": "https://mastodon.me.uk/@jacattell/114239757162633544",
   "date": "2025-03-28T11:12:37.096Z",
   "text": "@hillsy \"write stuff down then occasionally talk about it\" reads a bit like \"add to spreadsheet and forget about it\" 🤦🏻‍♂️",
-  "reply": {
-   "url": null,
-   "self": false
-  },
-  "images": [],
-  "link": null,
-  "quote": null
- },
- {
-  "platform": "mastodon",
-  "id": "114234410328837530",
-  "url": "https://mastodon.me.uk/@jacattell/114234410328837530",
-  "date": "2025-03-27T12:32:50.887Z",
-  "text": "@HRCH glad to read that. How would you describe proportional risk management, please?",
   "reply": {
    "url": null,
    "self": false
@@ -5613,20 +5648,6 @@
  },
  {
   "platform": "mastodon",
-  "id": "113310494516919125",
-  "url": "https://mastodon.me.uk/@jacattell/113310494516919125",
-  "date": "2024-10-15T08:28:54.406Z",
-  "text": "@ken_fallon as it was my first time at @oggcamp, maybe I'll record my experience and thoughts for @hpr? \n\n#oggcamp #oggcamp24 #oggcamp2024",
-  "reply": {
-   "url": null,
-   "self": false
-  },
-  "images": [],
-  "link": null,
-  "quote": null
- },
- {
-  "platform": "mastodon",
   "id": "113310417440288569",
   "url": "https://mastodon.me.uk/@jacattell/113310417440288569",
   "date": "2024-10-15T08:09:18.309Z",
@@ -5977,17 +5998,6 @@
    "url": "https://www.youtube.com/watch?v=pduVIUw1r9w&feature=youtu.be",
    "title": "Recruitment with Success Profiles"
   },
-  "quote": null
- },
- {
-  "platform": "mastodon",
-  "id": "113001666410413149",
-  "url": "https://mastodon.me.uk/@jacattell/113001666410413149",
-  "date": "2024-08-21T19:29:51.469Z",
-  "text": "@phlash as a lapsed atheistic, I agree.",
-  "reply": null,
-  "images": [],
-  "link": null,
   "quote": null
  },
  {
@@ -9209,23 +9219,6 @@
  },
  {
   "platform": "mastodon",
-  "id": "110735876262874361",
-  "url": "https://mastodon.me.uk/@jacattell/110735876262874361",
-  "date": "2023-07-18T15:49:37.545Z",
-  "text": "@Edent out of interest, why did you choose https://www.spreadshirt.co.uk please? I'm looking for a merch supplier and wondered why",
-  "reply": {
-   "url": null,
-   "self": false
-  },
-  "images": [],
-  "link": {
-   "url": "https://www.spreadshirt.co.uk",
-   "title": "T-Shirt Printing. Personalised T-Shirts & Hoodies | Spreadshirt"
-  },
-  "quote": null
- },
- {
-  "platform": "mastodon",
   "id": "110713720062000970",
   "url": "https://mastodon.me.uk/@jacattell/110713720062000970",
   "date": "2023-07-14T17:55:00.807Z",
@@ -9241,20 +9234,6 @@
     "video": true
    }
   ],
-  "link": null,
-  "quote": null
- },
- {
-  "platform": "mastodon",
-  "id": "110713625589009941",
-  "url": "https://mastodon.me.uk/@jacattell/110713625589009941",
-  "date": "2023-07-14T17:30:59.206Z",
-  "text": "@Edent try now. Looks like the naked URL redirect failed. Have added www.",
-  "reply": {
-   "url": null,
-   "self": false
-  },
-  "images": [],
   "link": null,
   "quote": null
  },

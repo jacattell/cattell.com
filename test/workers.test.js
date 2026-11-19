@@ -2,9 +2,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
+import fs from "node:fs";
 
 import publicWorker, { fromSite } from "../workers/public/src/index.js";
-import { validateMessages, handleChat, readClaudeStream, conversationStart, logConversation, overDailyCap, buildSystem } from "../workers/public/src/chat.js";
+import { validateMessages, handleChat, readClaudeStream, buildSystem } from "../workers/public/src/chat.js";
+import { conversationStart, logConversation, allowMessage, validLog, chatLogMethods } from "../workers/admin/src/chatlog.js";
 import { handleForm, validateForm } from "../workers/public/src/forms.js";
 import adminWorker, { handle as adminHandle, sameSite, PAGE_CSP } from "../workers/admin/src/index.js";
 import { verifyAccess, resetKeyCache } from "../workers/admin/src/access.js";
@@ -22,6 +24,8 @@ const fakeKv = () => {
     async list({ prefix }) { return { keys: [...store.keys()].filter((k) => k.startsWith(prefix)).sort().map((name) => ({ name, metadata: store.get(name).metadata, expiration: null })), list_complete: true }; },
   };
 };
+/** Stands in for the CHAT_LOG service binding: the admin Worker's ChatLogs entrypoint, over a KV store. */
+const chatLogService = (kv, extra = {}) => ({ ...chatLogMethods({ CHAT_LOGS: kv, ...extra }) });
 const ctx = () => { const waits = []; return { waits, waitUntil: (p) => waits.push(p) }; };
 const sse = (events) => new Response(new ReadableStream({ start(c) { for (const e of events) c.enqueue(new TextEncoder().encode(`event: ${e.type}\ndata: ${JSON.stringify(e)}\n\n`)); c.close(); } }), { headers: { "content-type": "text/event-stream" } });
 const claudeReply = (text, stop = "end_turn") => sse([
@@ -55,7 +59,7 @@ test("chat: streams Claude's reply, saves the log without the IP address, and co
   };
   const conversation = `${String(1e13 - Date.now()).padStart(13, "0")}-abcd1234`;
   const req = new Request("https://api.cattell.com/chat", { method: "POST", headers: { "CF-Connecting-IP": "203.0.113.9" }, body: JSON.stringify({ conversation, messages: [{ role: "user", content: "Who is James?" }] }) });
-  const { response, done } = await handleChat(req, { ANTHROPIC_API_KEY: "k", CHAT_LOGS: kv }, fetcher);
+  const { response, done } = await handleChat(req, { ANTHROPIC_API_KEY: "k", CHAT_LOG: chatLogService(kv) }, fetcher);
   const events = await readAll(response);
   await done;
   assert.equal(events.filter((e) => e.text).map((e) => e.text).join(""), "Hello there James fan");
@@ -78,16 +82,21 @@ test("chat: not set up, too big, refusals, API errors and the daily cap", async 
   assert.equal((await handleChat(req(), {})).response.status, 503);
   assert.equal((await handleChat(req("x".repeat(70_000)), { ANTHROPIC_API_KEY: "k" })).response.status, 413);
   assert.equal((await handleChat(req("{bad"), { ANTHROPIC_API_KEY: "k" })).response.status, 400);
-  const refused = await handleChat(req(), { ANTHROPIC_API_KEY: "k" }, async (u) => (String(u).includes("anthropic") ? claudeReply("No", "refusal") : new Response("")));
+  const service = chatLogService(fakeKv());
+  const refused = await handleChat(req(), { ANTHROPIC_API_KEY: "k", CHAT_LOG: service }, async (u) => (String(u).includes("anthropic") ? claudeReply("No", "refusal") : new Response("")));
   assert.match(JSON.stringify(await readAll(refused.response)), /can't help with that/);
-  const busy = await handleChat(req(), { ANTHROPIC_API_KEY: "k" }, async (u) => (String(u).includes("anthropic") ? new Response("{}", { status: 529 }) : new Response("")));
+  const busy = await handleChat(req(), { ANTHROPIC_API_KEY: "k", CHAT_LOG: service }, async (u) => (String(u).includes("anthropic") ? new Response("{}", { status: 529 }) : new Response("")));
   assert.equal(busy.response.status, 502);
   assert.match((await busy.response.json()).error, /busy/);
   const kv = fakeKv();
   await kv.put(`count:${new Date().toISOString().slice(0, 10)}`, "500");
-  const capped = await handleChat(req(), { ANTHROPIC_API_KEY: "k", CHAT_LOGS: kv }, async () => { throw new Error("should not call Claude"); });
+  const noClaude = async () => { throw new Error("should not call Claude"); };
+  const capped = await handleChat(req(), { ANTHROPIC_API_KEY: "k", CHAT_LOG: chatLogService(kv) }, noClaude);
   assert.equal(capped.response.status, 429);
-  assert.equal(await overDailyCap(null, 1), false);
+  assert.equal((await handleChat(req(), { ANTHROPIC_API_KEY: "k" }, noClaude)).response.status, 503, "no log service: no chat");
+  const broken = { allow: async () => { throw new Error("down"); }, save: async () => true };
+  assert.equal((await handleChat(req(), { ANTHROPIC_API_KEY: "k", CHAT_LOG: broken }, noClaude)).response.status, 503, "log service down: no chat, so no uncapped spending");
+  assert.equal(await allowMessage(null, 1), false);
 });
 
 test("chat: the Workers rate limiting binding is used when it's there", async () => {
@@ -109,6 +118,30 @@ test("chat logs: only conversation IDs the page could have made are saved", asyn
   assert.equal(conversationStart("../../x", now), null);
   assert.equal(conversationStart(`${1e13 - (now - 3 * 86400e3)}-abcd1234`, now), null, "too old");
   assert.equal(await logConversation(fakeKv(), "nope", [{ role: "user", content: "x" }], "y"), false);
+});
+
+test("chat logs: the public Worker can't read them, and the admin Worker only saves well-formed conversations", async () => {
+  const config = fs.readFileSync("workers/public/wrangler.jsonc", "utf8");
+  assert.doesNotMatch(config, /"kv_namespaces"|"d1_databases"/, "the public Worker has no storage of its own");
+  assert.match(config, /"services": \[\{ "binding": "CHAT_LOG", "service": "cattell-admin", "entrypoint": "ChatLogs" \}\]/);
+  const entry = fs.readFileSync("workers/admin/src/entry.js", "utf8");
+  assert.match(entry, /async allow\(\)/);
+  assert.match(entry, /async save\(data\)/);
+  assert.doesNotMatch(entry, /async (get|list|read|delete)/, "the entrypoint can't read, list or delete logs");
+  const kv = fakeKv();
+  const { save } = chatLogMethods({ CHAT_LOGS: kv });
+  const id = `${1e13 - Date.now()}-abcd1234`;
+  assert.equal(await save({ conversation: id, messages: [{ role: "user", content: "Hi" }], reply: "Hello" }), true);
+  for (const bad of [
+    { conversation: id, messages: [{ role: "assistant", content: "x" }], reply: "y" },
+    { conversation: id, messages: [{ role: "user", content: "x".repeat(2001) }], reply: "y" },
+    { conversation: id, messages: [{ role: "user", content: "x" }], reply: "y".repeat(20001) },
+    { conversation: "count:2026-11-19", messages: [{ role: "user", content: "x" }], reply: "y" },
+    { conversation: id, messages: "not a list", reply: "y" },
+    null,
+  ]) assert.equal(await save(bad), false);
+  assert.equal(validLog([{ role: "user", content: "a" }, { role: "assistant", content: "b" }], "c"), false, "must end with the visitor's question");
+  assert.deepEqual([...kv.store.keys()], [`conv:${id}`]);
 });
 
 test("public API: only the website may use it, only on api.cattell.com, with security headers", async () => {
