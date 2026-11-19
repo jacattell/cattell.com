@@ -41,7 +41,7 @@ export async function handle(request, env, fetcher = fetch) {
     if (request.method !== "GET" && !sameSite(request)) return json(403, { error: "Not allowed." });
     if (action === "me") return json(200, { email: who.email, github: configured(env) });
     if (["notes", "note", "preview"].includes(action)) {
-      if (!configured(env)) return json(503, { error: "Saving to GitHub isn't set up yet. See \"Admin tools\" in the README." });
+      if (!configured(env)) return json(503, { error: "Saving to GitHub isn't set up yet." });
       return handleNotes(action, request, env, fetcher);
     }
     if (action === "chats" || action === "chat") return handleChats(action, request, env);

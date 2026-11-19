@@ -100,7 +100,7 @@ export function validateUpload(body) {
  */
 export async function handleUpload(request, env = {}, now = Date.now()) {
   if (request.method !== "POST") return json(405, { error: "Use POST." });
-  if (!env.SESSIONS || !env.ARCHIVE_KEY || env.ARCHIVE_KEY.length < 32) return json(503, { error: "The sessions archive isn't set up yet. See \"Claude sessions archive\" in the README." });
+  if (!env.SESSIONS || !env.ARCHIVE_KEY || env.ARCHIVE_KEY.length < 32) return json(503, { error: "The sessions archive isn't set up yet." });
   const sent = /^Bearer (.+)$/.exec(request.headers.get("Authorization") || "")?.[1];
   if (!sent || !(await sameSecret(sent, env.ARCHIVE_KEY))) return json(401, { error: "The archive key is missing or wrong." });
 
@@ -160,7 +160,7 @@ const sessionRow = (r) => ({ id: r.id, source: r.source, title: r.title, project
  */
 export async function handleSessions(action, request, env) {
   const url = new URL(request.url);
-  if (!env.SESSIONS) return json(503, { error: "The sessions archive isn't set up yet. See \"Claude sessions archive\" in the README." });
+  if (!env.SESSIONS) return json(503, { error: "The sessions archive isn't set up yet." });
   const db = await database(env);
   const source = SOURCES.includes(url.searchParams.get("source")) ? url.searchParams.get("source") : null;
   const from = Math.max(0, Math.min(1_000_000, Number.parseInt(url.searchParams.get("from") || "0", 10) || 0));

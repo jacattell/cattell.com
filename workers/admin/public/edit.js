@@ -84,7 +84,7 @@
   // ---- not set up, or signed out ----
   function signInView(reason) {
     show("Edit week notes", problem(reason === "setup"
-      ? "Saving to GitHub isn't set up yet. See \"Admin tools\" in the README."
+      ? "Saving to GitHub isn't set up yet."
       : "Your sign-in has run out. Reload the page to sign in again."));
   }
 
