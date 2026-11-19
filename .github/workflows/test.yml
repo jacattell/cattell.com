@@ -1,6 +1,6 @@
 # Runs the tests on every pull request and every change to main, including changes
 # saved by the week notes editor.
-#   test           npm test: builds the site and checks pages, security settings and both Workers
+#   test           npm test: builds the site and checks pages, security settings, page weight and both Workers
 #   accessibility  checks pages against WCAG 2.2 AA with axe, in light and dark mode
 # Actions are pinned to an exact commit, so a changed tag can't change what runs.
 name: Tests
