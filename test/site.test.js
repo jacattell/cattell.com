@@ -222,4 +222,5 @@ test("there is no Hidden pages page, but the pages in that folder still work", (
   assert.ok(!fs.existsSync(path.join(OUT, "hidden", "index.html")));
   assert.match(page("/hidden/bitwarden-desktop-upgrade/"), /<h1>Bitwarden desktop upgrade<\/h1>/);
   assert.match(read(path.join(OUT, "_redirects")), /^\/how-to \/ 301$/m);
+  assert.match(read(path.join(OUT, "_redirects")), /^\/hidden\/ \/ 301$/m, "the old Hidden pages address goes to the home page");
 });
