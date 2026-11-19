@@ -6,8 +6,6 @@ import { json, RateLimiter, limited } from "../../shared/http.js";
 const MAX_MESSAGES = 20; // per conversation
 const MAX_CHARS = 2000; // per message
 const MAX_BODY_BYTES = 64 * 1024;
-export const DAILY_CAP = 500; // messages a day from everyone together, unless CHAT_DAILY_CAP says otherwise
-export const LOG_DAYS = 30;
 
 const SYSTEM_PROMPT = `You are an AI assistant, made by Anthropic, answering visitors on the "Ask my AI" page of cattell.com, the personal website of James Arthur Cattell.
 
@@ -44,40 +42,9 @@ export function validateMessages(body) {
 }
 
 // ---------- chat logs ----------
-const CONVERSATION_ID = /^(\d{13})-([a-z0-9]{8})$/;
-
-/** The page makes a conversation ID from its start time, counted down from 10^13. Returns the start time, or null. */
-export function conversationStart(id, now = Date.now()) {
-  const m = CONVERSATION_ID.exec(String(id || ""));
-  if (!m) return null;
-  const started = 1e13 - Number(m[1]);
-  return started > now - 2 * 86400e3 && started < now + 5 * 60e3 ? started : null;
-}
-
-/** Saves the whole conversation so far, replacing the previous copy. Deleted by Cloudflare after LOG_DAYS. No IP address. */
-export async function logConversation(kv, id, messages, reply, now = Date.now()) {
-  const started = conversationStart(id, now);
-  if (!kv || started === null) return false;
-  const all = [...messages, { role: "assistant", content: reply }];
-  const turns = [];
-  for (let i = 0; i < all.length; i += 2) turns.push({ q: all[i].content, a: all[i + 1]?.content ?? "" });
-  const record = { started: new Date(started).toISOString(), updated: new Date(now).toISOString(), turns };
-  await kv.put(`conv:${id}`, JSON.stringify(record), {
-    expirationTtl: LOG_DAYS * 86400,
-    metadata: { started: record.started, updated: record.updated, turns: turns.length, first: turns[0].q.slice(0, 150) },
-  });
-  return true;
-}
-
-/** A rough count of today's messages from everyone, kept in KV. Stops the bill running away if the page is abused. */
-export async function overDailyCap(kv, cap, now = Date.now()) {
-  if (!kv) return false;
-  const key = `count:${new Date(now).toISOString().slice(0, 10)}`;
-  const count = Number(await kv.get(key)) || 0;
-  if (count >= cap) return true;
-  await kv.put(key, String(count + 1), { expirationTtl: 2 * 86400 });
-  return false;
-}
+// This Worker can't read or change saved chat logs. It hands each finished conversation,
+// and the daily message count, to the admin Worker over a private link (the CHAT_LOG
+// service binding to its ChatLogs entrypoint; see workers/admin/src/chatlog.js).
 
 const perMinute = new RateLimiter(6, 60e3);
 const perDay = new RateLimiter(40, 86400e3);
@@ -134,9 +101,14 @@ export async function handleChat(request, env = {}, fetcher = fetch) {
   const { messages, error } = validateMessages(body);
   if (error) return { response: json(400, { error }) };
 
-  if (await overDailyCap(env.CHAT_LOGS, Number(env.CHAT_DAILY_CAP) || DAILY_CAP)) {
-    return { response: json(429, { error: "The chat has had a lot of messages today. Please come back tomorrow." }) };
+  // The daily cap is kept by the admin Worker. If it can't be reached, the chat stops rather than run without a cap.
+  if (!env.CHAT_LOG) return { response: json(503, { error: "Chat is not set up yet." }) };
+  let allowed;
+  try { allowed = await env.CHAT_LOG.allow(); } catch (e) {
+    console.error(`Chat: daily count failed: ${e.message}`);
+    return { response: json(503, { error: "Chat isn't working right now. Please try again later." }) };
   }
+  if (allowed !== true) return { response: json(429, { error: "The chat has had a lot of messages today. Please come back tomorrow." }) };
 
   const api = await fetcher("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -165,7 +137,7 @@ export async function handleChat(request, env = {}, fetcher = fetch) {
       const stop = await readClaudeStream(api.body, (t) => { reply += t; send({ text: t }); });
       if (stop === "refusal") { send({ error: "Sorry, the AI can't help with that request." }); reply = "[Declined to answer]"; }
       else send({ done: true });
-      if (env.CHAT_LOGS) await logConversation(env.CHAT_LOGS, body.conversation, messages, reply).catch((e) => console.error(`Chat log not saved: ${e.message}`));
+      await Promise.resolve(env.CHAT_LOG.save({ conversation: body.conversation, messages, reply })).catch((e) => console.error(`Chat log not saved: ${e.message}`));
     } catch (err) {
       console.error(`Chat: ${err.message}`);
       send({ error: err.kind === "overloaded_error" ? "Chat is busy right now. Please try again in a minute." : "Sorry, something went wrong. Please try again." });

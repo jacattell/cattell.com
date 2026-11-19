@@ -25,9 +25,14 @@ export function readPosts(platform) {
 }
 
 /** Merges new posts into the saved ones, keyed by id, and saves them newest first. */
-export function savePosts(platform, posts) {
+/** Only fully public Mastodon posts go in the archive: not unlisted, followers-only (private) or direct. */
+export const mastodonArchivable = (status) => status.visibility === "public";
+
+/** Adds or replaces posts. Posts whose IDs are in `remove` (for example, ones that are no longer public) are taken out. */
+export function savePosts(platform, posts, remove = new Set()) {
   const byId = new Map(readPosts(platform).map((p) => [p.id, p]));
   for (const p of posts) byId.set(p.id, p);
+  for (const id of remove) byId.delete(id);
   const all = [...byId.values()].sort((a, b) => b.date.localeCompare(a.date));
   fs.mkdirSync(DATA_DIR, { recursive: true });
   fs.writeFileSync(path.join(DATA_DIR, `${platform}.json`), JSON.stringify(all, null, 1) + "\n");

@@ -1,6 +1,6 @@
 // Imports tweets from an X (Twitter) archive download into archive-data/x.json.
 // Get the archive from X: Settings > Your account > Download an archive of your data.
-// Only data/tweets.js is needed. Retweets are left out; your own tweets, threads and
+// Only data/tweets.js is needed (with data/protected-history.js beside it, if the download has one). Retweets are left out; your own tweets, threads and
 // replies are kept. Images are copied into the site by fetch-media.js, as for the
 // other platforms.
 // Usage: node scripts/archive/import-x.js path/to/tweets.js
@@ -57,9 +57,27 @@ export function fromTweet(t) {
   };
 }
 
+/**
+ * True if the archive shows the account was ever protected (only followers could see its posts).
+ * The X download keeps this in data/protected-history.js, next to tweets.js. James's account was
+ * never protected, so every exported post was public; this check refuses an archive that says otherwise.
+ */
+export function wasProtected(dataDir) {
+  const file = path.join(dataDir, "protected-history.js");
+  if (!fs.existsSync(file)) return false;
+  const raw = fs.readFileSync(file, "utf8");
+  const start = raw.indexOf("[");
+  if (start < 0) return false;
+  return JSON.parse(raw.slice(start)).some((e) => /^protect/i.test(e?.protectedHistory?.action || ""));
+}
+
 if (process.argv[1] && import.meta.url.endsWith(path.basename(process.argv[1]))) {
   const file = process.argv[2];
   if (!file) { console.error("Usage: node scripts/archive/import-x.js path/to/tweets.js"); process.exit(1); }
+  if (wasProtected(path.dirname(file))) {
+    console.error("This X account was protected at some point, so some posts may not be public. Nothing imported.");
+    process.exit(1);
+  }
   const raw = fs.readFileSync(file, "utf8");
   const tweets = JSON.parse(raw.slice(raw.indexOf("["))).map((x) => x.tweet);
   const posts = tweets.map(fromTweet).filter(Boolean).sort((a, b) => b.date.localeCompare(a.date));
