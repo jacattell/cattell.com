@@ -1,0 +1,3 @@
+{{- /* Images in Markdown. loading="lazy" means a picture is only downloaded when the reader scrolls near it, which saves data and energy. */ -}}
+<img src="{{ .Destination | safeURL }}" alt="{{ .Text }}"{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy" decoding="async">
+{{- /**/ -}}

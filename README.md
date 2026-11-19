@@ -72,6 +72,8 @@ npm run dev     # preview at http://localhost:1313
 npm test        # build the site and run the tests
 ```
 
+The tests include a page weight budget (`test/weight.test.js`), because smaller pages use less data and energy. Every page must stay under 100 KB of code and text, 500 KB of pictures that load straight away, and 2 MB in total; no single picture may be over 500 KB. Pictures in week notes load only when the reader scrolls near them (`layouts/_markup/render-image.html`). If a picture is too big, shrink it to about 1000 pixels wide.
+
 The accessibility check needs a browser, so it has its own packages (used only for testing):
 
 ```bash
