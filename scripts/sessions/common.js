@@ -1,5 +1,4 @@
 // Shared by the scripts that send Claude sessions to the archive on admin.cattell.com.
-// See "Claude sessions archive" in the README.
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
