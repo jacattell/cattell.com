@@ -75,4 +75,7 @@ GitHub Actions runs both on every pull request and every change to `main`. Links
 
 ## Licence
 
-See [LICENSE](LICENSE).
+This repository uses two licences.
+
+- **Code** is under the [MIT License](LICENSE). Code means everything that builds or runs the site, for example `layouts/`, `assets/`, `scripts/`, `workers/`, `lib/`, `test/`, `.github/` and the configuration files.
+- **Content** is under [Creative Commons Attribution-ShareAlike 4.0](LICENSE-CONTENT) (CC BY-SA 4.0), unless it says otherwise. Content means the words and pictures, for example `content/`, `archive-data/` and the images in `static/assets/`.
