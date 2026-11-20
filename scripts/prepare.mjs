@@ -3,7 +3,6 @@
 // Turns the social media archive (archive-data/) into:
 //   assets/generated/archive-pages.json  year pages, read by content/archive/_content.gotmpl
 //   assets/generated/archive-summary.json counts and the latest posts, for /archive/
-//   assets/generated/chat-archive.txt    the posts the AI chat may read
 //   static/archive/posts.json            what the archive search downloads
 // All are rebuilt each time and are not saved in git.
 import fs from "node:fs";
@@ -97,19 +96,10 @@ export function prepare() {
     latest: items.filter((i) => !i.reply).slice(0, 20),
   };
 
-  // The chat reads posts not only on X, and not replies, to keep each message under 100,000 tokens.
-  const oneLine = (s) => String(s).replace(/\s+/g, " ").trim();
-  const chat = items
-    .filter((i) => !i.reply && i.on.some((o) => o.platform !== "x"))
-    .map((i) => `${i.when} | ${i.on.map((o) => o.name).join(", ")} | ${i.on[0].url}\n${oneLine(i.text)}` +
-      [...i.pictures.map((p) => ` [Image${p.alt ? `: ${oneLine(p.alt).slice(0, 150)}` : ""}]`), ...i.other.map((o) => ` [${o.kind}${o.alt ? `: ${oneLine(o.alt).slice(0, 150)}` : ""}]`), ...i.videos.map((v) => ` [YouTube video: ${v.url}]`)].join(""))
-    .join("\n\n");
-
   const search = items.map(({ parts, year, ...i }) => i);
 
   write("assets/generated/archive-pages.json", JSON.stringify(pages));
   write("assets/generated/archive-summary.json", JSON.stringify(summary));
-  write("assets/generated/chat-archive.txt", chat);
   write("static/archive/posts.json", JSON.stringify(search));
   return { items: items.length, pages: pages.length };
 }

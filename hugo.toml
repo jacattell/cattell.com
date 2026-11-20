@@ -11,7 +11,7 @@ timeZone = "UTC"
   description = "Senior delivery manager in UK government. Week notes, unconferences and things I make."
   author = "James Arthur Cattell"
   repo = "https://github.com/jacattell/cattell.com"
-  # The separate address for the chat and forms (workers/public).
+  # The separate address for the contact and feedback forms (workers/public).
   api = "https://api.cattell.com"
   # Cloudflare Turnstile site key. It is public. The secret key is only in the cattell-public Worker.
   turnstileSiteKey = "0x4AAAAAAF-iTVHILNcGmisT"
@@ -29,16 +29,9 @@ timeZone = "UTC"
   week-notes = "/week-notes/:sections[1:]/:contentbasename/"
 
 [outputs]
-  home = ["html", "chatcontext", "redirects"]
+  home = ["html", "redirects"]
   section = ["html"]
   page = ["html"]
-
-# What the AI chat reads: the site's pages and the archive, as plain text (/chat-context.txt).
-[outputFormats.chatcontext]
-  baseName = "chat-context"
-  mediaType = "text/plain"
-  isPlainText = true
-  notAlternative = true
 
 # Old addresses that now redirect (/_redirects, read by Cloudflare Pages).
 [outputFormats.redirects]
@@ -73,10 +66,6 @@ timeZone = "UTC"
     name = "Unconference guide"
     pageRef = "/unconference"
     weight = 3
-  [[menus.main]]
-    name = "Ask my AI"
-    pageRef = "/chat"
-    weight = 5
 
 [minify.tdewolff.html]
   keepQuotes = true
