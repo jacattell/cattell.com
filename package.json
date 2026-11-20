@@ -2,6 +2,7 @@
   "name": "cattell.com",
   "version": "2.0.0",
   "private": true,
+  "license": "MIT",
   "description": "James Arthur Cattell's personal website",
   "type": "module",
   "engines": { "node": ">=22" },
