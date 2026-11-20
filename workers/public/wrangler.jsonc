@@ -1,6 +1,6 @@
-// cattell-public: https://api.cattell.com (chat and forms). See README.md, "Switching over".
+// cattell-public: https://api.cattell.com (contact and feedback forms). See README.md, "Switching over".
 // Secrets (Cloudflare → Workers → cattell-public → Settings → Variables and Secrets), never here:
-//   ANTHROPIC_API_KEY, RESEND_API_KEY, FORM_TO, TURNSTILE_SITE_KEY, TURNSTILE_SECRET_KEY
+//   RESEND_API_KEY, FORM_TO, TURNSTILE_SITE_KEY, TURNSTILE_SECRET_KEY
 {
   "name": "cattell-public",
   "main": "src/index.js",
@@ -13,12 +13,8 @@
     "SITE": "https://www.cattell.com",
     "API_HOST": "api.cattell.com"
   },
-  // No access to the chat logs. Finished conversations and the daily count go to the
-  // admin Worker's private ChatLogs entrypoint, which can only add, never read.
-  "services": [{ "binding": "CHAT_LOG", "service": "cattell-admin", "entrypoint": "ChatLogs" }],
   // Firm per-visitor limits, shared by every copy of the Worker.
   "ratelimits": [
-    { "name": "CHAT_LIMIT", "namespace_id": "1001", "simple": { "limit": 6, "period": 60 } },
     { "name": "FORM_LIMIT", "namespace_id": "1002", "simple": { "limit": 5, "period": 60 } }
   ]
 }

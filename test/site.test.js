@@ -13,7 +13,7 @@ const headers = read(path.join(OUT, "_headers"));
 const csp = /Content-Security-Policy: (.+)/.exec(headers)[1];
 
 test("the site has its main pages", () => {
-  for (const url of ["/", "/delivery/", "/week-notes/", "/week-notes/2026/46/", "/week-notes/2026/", "/unconference/", "/unconference/basics/", "/archive/", "/archive/2012/page-2/", "/chat/", "/contact/", "/contact/thanks/", "/feedback/", "/feedback/thanks/", "/accessibility/", "/privacy/", "/hidden/bitwarden-desktop-upgrade/", "/404.html"]) {
+  for (const url of ["/", "/delivery/", "/week-notes/", "/week-notes/2026/46/", "/week-notes/2026/", "/unconference/", "/unconference/basics/", "/archive/", "/archive/2012/page-2/", "/contact/", "/contact/thanks/", "/feedback/", "/feedback/thanks/", "/accessibility/", "/privacy/", "/hidden/bitwarden-desktop-upgrade/", "/404.html"]) {
     assert.ok(fs.existsSync(path.join(OUT, url, url.endsWith(".html") ? "" : "index.html")), url);
   }
   assert.ok(pages.length > 250, `${pages.length} pages`);
@@ -128,14 +128,6 @@ test("the feedback form lists the same places the API accepts", async () => {
   assert.deepEqual([...yaml.matchAll(/^  - (.+)$/gm)].map((m) => m[1]), WORKED_ON);
 });
 
-test("the chat page talks to the API, and reads the reply out once", () => {
-  const html = page("/chat/");
-  assert.match(html, /data-api="https:\/\/api\.cattell\.com\/chat"/);
-  assert.match(html, /<p id="chat-announce" class="visually-hidden" role="status">/);
-  assert.doesNotMatch(html, /aria-live="polite" aria-label="Conversation"/, "the log isn't read out word by word");
-  assert.match(html, /kept for 30 days/);
-});
-
 test("week notes: titles, dates, newest first, and older/newer links", () => {
   const note = page("/week-notes/2026/46/");
   assert.match(note, /<h1>Week 46, 2026<\/h1>/);
@@ -176,14 +168,13 @@ test("hidden pages and thank-you pages are kept out of search engines and the si
   assert.match(sitemap, /https:\/\/www\.cattell\.com\/delivery\//);
 });
 
-test("the AI chat's reading list has the website and the archive, and nothing private", () => {
-  const text = read(path.join(OUT, "chat-context.txt"));
-  assert.match(text, /^WEBSITE: https:\/\/www\.cattell\.com\//);
-  assert.match(text, /WORK WITH ME \(https:\/\/www\.cattell\.com\/delivery\/\)/);
-  assert.match(text, /- Week 46, 2026: https:\/\/www\.cattell\.com\/week-notes\/2026\/46\/ - Job search \+ Claude Code/);
-  assert.match(text, /SOCIAL MEDIA ARCHIVE/);
-  assert.ok(text.length > 200_000 && text.length < 400_000, `${text.length} characters`);
-  assert.doesNotMatch(text, /admin\.cattell\.com|Claude sessions/i);
+test("Ask my AI is gone: no page, no reading list, no links, and its old addresses redirect home", () => {
+  assert.ok(!fs.existsSync(path.join(OUT, "chat")), "no /chat/ page");
+  assert.ok(!fs.existsSync(path.join(OUT, "chat-context.txt")), "no reading list");
+  for (const url of ["/", "/privacy/", "/accessibility/"]) assert.doesNotMatch(page(url), /href="\/chat\/"|Ask my AI/, url);
+  const r = read(path.join(OUT, "_redirects"));
+  assert.match(r, /^\/chat \/ 301$/m);
+  assert.match(r, /^\/chat-context\.txt \/ 301$/m);
 });
 
 test("the archive shows only local pictures, and its search data matches", () => {

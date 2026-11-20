@@ -212,7 +212,7 @@ main:focus { outline: none; }
 .sidebar a[aria-current]::before { content: "▸ "; }
 
 /* ---------- forms and buttons ---------- */
-.site-form, .chat-form, .archive-search { max-width: var(--measure); margin-top: 2rem; }
+.site-form, .archive-search { max-width: var(--measure); margin-top: 2rem; }
 .field { margin: 0 0 2rem; }
 fieldset { border: 0; padding: 0; margin: 0 0 2rem; min-width: 0; }
 legend { padding: 0; }
@@ -244,13 +244,6 @@ textarea { resize: vertical; }
 .button-row { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin-top: 1rem; }
 .trap { position: absolute; left: -9999em; }
 .human-check { margin: 0 0 2rem; }
-
-/* ---------- chat ---------- */
-.chat-log { max-width: var(--measure); min-height: 6rem; border: 2px solid var(--border); padding: 1rem; margin-top: 1.5rem; }
-.chat-log:empty::before { content: "Your conversation will appear here."; color: var(--muted); }
-.msg { margin: 0 0 1rem; white-space: pre-line; }
-.msg .who { display: block; font-weight: 700; }
-.msg.error { color: var(--error); }
 
 /* ---------- social media archive ---------- */
 .post { max-width: var(--measure); padding: 1.25rem 0; border-bottom: 1px solid var(--line); }

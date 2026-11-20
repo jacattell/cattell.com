@@ -523,7 +523,7 @@ test("sessions archive: the hook sends only what is new since last time", async 
 
 
 
-test("chat and forms stop reading a request that is too big", async () => {
+test("forms stop reading a request that is too big", async () => {
   const { readBytes, readText, readForm } = await import("../workers/shared/body.js");
   // A body that never ends: reading must stop at the limit, not run out of memory.
   let sent = 0;
@@ -532,7 +532,7 @@ test("chat and forms stop reading a request that is too big", async () => {
     pull(c) { sent += 16_384; c.enqueue(new Uint8Array(16_384).fill(97)); },
     cancel() { cancelled = true; },
   });
-  const post = (body, headers = {}) => new Request("https://www.cattell.com/api/chat", { method: "POST", headers, body, duplex: "half" });
+  const post = (body, headers = {}) => new Request("https://api.cattell.com/form", { method: "POST", headers, body, duplex: "half" });
   assert.equal(await readBytes(post(endless()), 64 * 1024), null);
   assert.ok(sent <= 64 * 1024 + 5 * 16_384, `stopped early (read ${sent} bytes)`);
   assert.ok(cancelled, "the rest of the upload is abandoned");
@@ -544,17 +544,14 @@ test("chat and forms stop reading a request that is too big", async () => {
   assert.equal(await readText(post("héllo ✓"), 100), "héllo ✓");
   assert.equal(await readText(post("x".repeat(100)), 100), "x".repeat(100));
   assert.equal(await readText(post("x".repeat(101)), 100), null);
-  assert.equal(await readText(new Request("https://www.cattell.com/api/chat", { method: "POST" }), 100), "");
+  assert.equal(await readText(new Request("https://api.cattell.com/form", { method: "POST" }), 100), "");
   const form = await readForm(post(new URLSearchParams({ form: "contact", message: "héllo ✓" })), 1000);
   assert.deepEqual(Object.fromEntries(form), { form: "contact", message: "héllo ✓" });
   const multi = new FormData();
   multi.set("message", "from a multipart form");
   assert.equal((await readForm(post(multi), 2000)).get("message"), "from a multipart form");
 
-  // The chat and the forms use it.
-  const { handleChat } = await import("../workers/public/src/chat.js");
-  const big = await handleChat(post(endless(), { "CF-Connecting-IP": "198.51.100.77" }), { ANTHROPIC_API_KEY: "k" });
-  assert.equal(big.response.status, 413);
+  // The forms use it.
   const { handleForm } = await import("../workers/public/src/forms.js");
   const bigForm = await handleForm(post(endless(), { "Content-Type": "application/x-www-form-urlencoded", "CF-Connecting-IP": "198.51.100.78" }), {});
   assert.match(await bigForm.text(), /too long to send/);

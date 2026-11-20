@@ -1,6 +1,5 @@
 // cattell-admin: https://admin.cattell.com — James's private tools.
 //   /            edit week notes (saves to GitHub as the cattellcom-editor app)
-//   /chats/      read the "Ask my AI" chat logs
 //   /sessions/   search the Claude sessions archive
 //   /api/upload  where the session upload scripts send sessions (needs ARCHIVE_KEY)
 //
@@ -11,7 +10,6 @@
 import { verifyAccess } from "./access.js";
 import { configured } from "./github.js";
 import { handleNotes } from "./notes.js";
-import { handleChats } from "./chats.js";
 import { handleSessions, handleUpload } from "./sessions.js";
 import { json, secure } from "../../shared/http.js";
 
@@ -44,7 +42,6 @@ export async function handle(request, env, fetcher = fetch) {
       if (!configured(env)) return json(503, { error: "Saving to GitHub isn't set up yet." });
       return handleNotes(action, request, env, fetcher);
     }
-    if (action === "chats" || action === "chat") return handleChats(action, request, env);
     if (["sessions", "session", "message"].includes(action)) return handleSessions(action, request, env);
     return json(404, { error: "Not found." });
   }

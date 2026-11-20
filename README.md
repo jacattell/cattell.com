@@ -7,12 +7,12 @@ James Arthur Cattell's personal website, rebuilt in November 2026 with security 
 | Address | What it is | Code | Hosted by |
 | --- | --- | --- | --- |
 | www.cattell.com | The website: plain files, no code runs | `content/`, `layouts/`, `assets/`, `static/` | Cloudflare Pages |
-| api.cattell.com | "Ask my AI" and the contact and feedback forms | `workers/public/` | Cloudflare Worker `cattell-public` |
+| api.cattell.com | The contact and feedback forms | `workers/public/` | Cloudflare Worker `cattell-public` |
 
 Why it is built this way:
 
 - **The website is only files.** [Hugo](https://gohugo.io/) turns Markdown into pages, so the build uses no npm packages that could be hijacked. The website sets no cookies.
-- **The parts that run code are on their own address.** A problem with the chat can't touch the website.
+- **The parts that run code are on their own address.** A problem with the forms can't touch the website.
 - **Strict browser rules.** No inline scripts or styles, and nothing loads from other websites except Cloudflare's "Are you human?" check and visitor counter.
 - **Accessible by design.** Large text, strong contrast in light and dark mode, no sideways scrolling at 400% zoom, and plain English. Every change is checked with [axe](https://github.com/dequelabs/axe-core) against WCAG 2.2 AA.
 
@@ -44,7 +44,6 @@ It started on Monday...
 | Home page | `content/_index.md` |
 | Work with me, accessibility, privacy | `content/delivery.md`, `content/accessibility.md`, `content/privacy.md` |
 | Contact and feedback forms | `content/contact/`, `content/feedback/`, `workers/public/src/forms.js` |
-| Ask my AI | `content/chat.md`, `assets/js/chat.js`, `workers/public/src/chat.js` |
 | Week notes | `content/week-notes/` |
 | Unconference guide | `content/unconference/` |
 | Images | `static/assets/img/` |

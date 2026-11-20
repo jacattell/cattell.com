@@ -22,16 +22,6 @@ When you send a form, what you write is emailed to me through [Resend](https://r
 
 The forms may show Cloudflare's "Are you human?" check ([Turnstile](https://www.cloudflare.com/application-services/products/turnstile/)) to stop spam.
 
-## Ask my AI
-
-When you use the [Ask my AI](/chat/) page:
-
-- your questions are sent to [Anthropic](https://www.anthropic.com/legal/privacy), which makes the AI, to get an answer
-- your questions and the answers are kept for 30 days, so I can see how the page is used, then deleted automatically
-- your IP address is not kept with them
-
-Do not share personal information on that page.
-
 ## Hosting
 
 This website is hosted by [Cloudflare](https://www.cloudflare.com/privacypolicy/). Like all web hosts, Cloudflare handles your IP address to send you pages and to block attacks.

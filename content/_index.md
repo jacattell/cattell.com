@@ -12,4 +12,3 @@ On this website you can:
 - [find out how I could help your team](/delivery/)
 - [read my week notes](/week-notes/), about what I did each week and what I learned
 - [read my guide to running an unconference](/unconference/)
-- [ask my AI questions about me and my work](/chat/)

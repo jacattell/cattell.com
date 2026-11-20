@@ -29,7 +29,6 @@ Every change to the website is checked automatically against these guidelines be
 - Some older week notes and social media posts have pictures without a description.
 - Some older week notes were written quickly and are not in plain English.
 - The "Are you human?" check on the contact and feedback forms is run by Cloudflare. If it does not work for you, message me on [Bluesky](https://bsky.app/profile/jacattell.bsky.social), [Mastodon](https://mastodon.me.uk/@jacattell) or [LinkedIn](https://www.linkedin.com/in/jacattell/) instead.
-- The "Ask my AI" page needs JavaScript.
 
 ## Tell me about a problem
 
