@@ -14,7 +14,7 @@
 command -v node >/dev/null && command -v curl >/dev/null || exit 0
 
 # --- pinned by scripts/sessions/pin-hook.mjs ---
-commit="efae3426fb480c03612a1a01f80a7dfb6a9e77c1"
+commit="23f0e4c056bde5c4dc28c5c9c67be50ea81fa89c"
 files=(
   "lib/session-formats.js 7fc751a62cf1d21b5351109247344b247ef95112eefd0213e5953e1eefe7d1ab"
   "scripts/sessions/common.js fad588a2e13926063a32310b978175004d93f184b3c06ed42c0f5b24d6ef5001"

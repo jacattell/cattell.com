@@ -1,8 +1,12 @@
 // The contact and feedback forms: POST https://api.cattell.com/form
 // Each answer is emailed to James through Resend (https://resend.com); nothing is stored.
-// Spam protection: a hidden trap field, 5 forms per visitor per hour, and the
-// Cloudflare Turnstile "are you human" check when TURNSTILE_SECRET_KEY is set
-// (the public site key is set when the website is built: HUGO_PARAMS_TURNSTILESITEKEY).
+// Spam protection: a hidden trap field, rate limits, and the Cloudflare Turnstile
+// "are you human" check (the public site key is set when the website is built:
+// HUGO_PARAMS_TURNSTILESITEKEY).
+// Rate limits: 5 forms per visitor per minute (the FORM_LIMIT binding in wrangler.jsonc;
+// Cloudflare only allows a period of 10 or 60 seconds there), plus 5 per hour in each
+// copy of the Worker (in memory, so not shared between copies). The zone's "Forms"
+// rate-limiting rule also applies.
 import { readForm } from "../../shared/body.js";
 import { RateLimiter, limited, problemPage as page } from "../../shared/http.js";
 
@@ -67,12 +71,13 @@ export function emailFor(name, values) {
   };
 }
 
-// Both keys must be set, so the form and the check always agree. The site key must match the one the website was built with.
-const humanCheckOn = (env) => Boolean(env.TURNSTILE_SITE_KEY && env.TURNSTILE_SECRET_KEY);
+// Both keys must be set. If either is missing the form refuses every message, rather than
+// sending without the check. The site key must match the one the website was built with.
+const humanCheckReady = (env) => Boolean(env.TURNSTILE_SITE_KEY && env.TURNSTILE_SECRET_KEY);
 
 const redirect = (to) => new Response(null, { status: 303, headers: { Location: to, "Cache-Control": "no-store" } });
 
-const perHour = new RateLimiter(5, 60 * 60 * 1000);
+const perHour = new RateLimiter(5, 60 * 60 * 1000); // in this copy of the Worker only
 
 // The longest real form is well under this, even written entirely in emoji.
 const MAX_FORM_BYTES = 128 * 1024;
@@ -95,13 +100,17 @@ export async function handleForm(request, env = {}, send = fetch) {
   if (data.website) return redirect(site + (FORMS[data.form]?.thanks || "/"));
 
   const ip = request.headers.get("CF-Connecting-IP") || "unknown";
-  if (await limited(env.FORM_LIMIT, perHour, ip)) return problemPage("You have sent several forms in the last hour. Please try again later, or message me on Bluesky, Mastodon or LinkedIn instead.", back);
+  if (await limited(env.FORM_LIMIT, perHour, ip)) return problemPage("You have sent several forms recently. Please try again later, or message me on Bluesky, Mastodon or LinkedIn instead.", back);
 
   const { form, values, error } = validateForm(data);
   if (error) return problemPage(error, back);
 
-  // "Are you human" check (Cloudflare Turnstile), once both keys are set.
-  if (humanCheckOn(env)) {
+  // "Are you human" check (Cloudflare Turnstile). Always required.
+  if (!humanCheckReady(env)) {
+    console.error("Form refused: TURNSTILE_SITE_KEY or TURNSTILE_SECRET_KEY is not set.");
+    return problemPage("Sorry, this form is not working at the moment. Please message me on Bluesky, Mastodon or LinkedIn instead.", back);
+  }
+  {
     const token = String(data["cf-turnstile-response"] || "");
     if (!token) return problemPage('Please complete the "are you human" check before sending. It needs JavaScript. If you can\'t use it, please message me on Bluesky, Mastodon or LinkedIn instead.', back);
     let passed = false;

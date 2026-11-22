@@ -9,6 +9,9 @@
 //   SESSIONS     the D1 database binding (wrangler.toml)
 //   ARCHIVE_KEY  a long random string; the upload scripts send it to prove who they are
 import { readText } from "../../shared/body.js";
+// The same secret scanner the upload scripts use. They redact before sending; the Worker
+// does it again, so a script that skipped it (or an older copy) can't store a key.
+import { redact } from "../../../lib/session-formats.js";
 
 const SOURCES = ["code", "chat"];
 // What a message is. Only the first two are the conversation itself; see lib/session-formats.js.
@@ -78,14 +81,14 @@ export function validateUpload(body) {
   const messages = [];
   for (const m of body.messages) {
     if (!m || !KINDS.includes(m.kind) || typeof m.text !== "string") return { error: "Each message needs a kind and text." };
-    messages.push({ kind: m.kind, tool: line(m.tool, 100), at: isoOrNull(m.at), text: m.text.slice(0, MAX_TEXT) });
+    messages.push({ kind: m.kind, tool: line(m.tool, 100), at: isoOrNull(m.at), text: redact(m.text.slice(0, MAX_TEXT)) });
   }
   return {
     upload: {
       key: `${body.source}:${body.id}`,
       source: body.source,
-      title: line(body.title, 200),
-      project: line(body.project, 200),
+      title: redact(line(body.title, 200)),
+      project: redact(line(body.project, 200)),
       started: isoOrNull(body.started),
       updated: isoOrNull(body.updated),
       offset,

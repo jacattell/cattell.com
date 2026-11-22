@@ -47,9 +47,13 @@ test("forms: check answers, email them through Resend, and send people back to t
   assert.match(validateForm({ form: "nope" }).error, /could not be found/);
 
   const sent = [];
-  const send = async (url, init) => { sent.push({ url, body: JSON.parse(init.body) }); return new Response("{}"); };
-  const env = { RESEND_API_KEY: "r", FORM_TO: "james@example.com" };
-  const ok = await handleForm(formReq({ form: "contact", message: "Hello <b>", email: "a@b.co" }), env, send);
+  const send = async (url, init) => {
+    if (url.includes("turnstile")) return new Response(JSON.stringify({ success: true, hostname: "www.cattell.com" }));
+    sent.push({ url, body: JSON.parse(init.body) });
+    return new Response("{}");
+  };
+  const env = { RESEND_API_KEY: "r", FORM_TO: "james@example.com", TURNSTILE_SITE_KEY: "site", TURNSTILE_SECRET_KEY: "secret" };
+  const ok = await handleForm(formReq({ form: "contact", message: "Hello <b>", email: "a@b.co", "cf-turnstile-response": "t" }), env, send);
   assert.equal(ok.status, 303);
   assert.equal(ok.headers.get("Location"), "https://www.cattell.com/contact/thanks/");
   assert.equal(sent[0].url, "https://api.resend.com/emails");
@@ -69,7 +73,7 @@ test("forms: check answers, email them through Resend, and send people back to t
   assert.doesNotMatch(html, /<script/);
 });
 
-test("forms: the human check is used only when both keys are set, and must come from the website's own form", async () => {
+test("forms: the human check is always required, and must come from the website's own form", async () => {
   const resend = [];
   const send = (hostname) => async (url, init) => {
     if (url.includes("turnstile")) return new Response(JSON.stringify({ success: true, hostname }));
@@ -81,7 +85,13 @@ test("forms: the human check is used only when both keys are set, and must come 
   assert.match(await (await handleForm(formReq(fields), env, send("www.cattell.com"))).text(), /complete the &quot;are you human&quot; check/);
   assert.equal((await handleForm(formReq({ ...fields, "cf-turnstile-response": "t" }), env, send("evil.example"))).status, 400, "token from another site");
   assert.equal((await handleForm(formReq({ ...fields, "cf-turnstile-response": "t" }), env, send("www.cattell.com"))).status, 303);
-  assert.equal((await handleForm(formReq(fields), { ...env, TURNSTILE_SITE_KEY: "" }, send("x"))).status, 303, "off when only one key is set");
+  const before = resend.length;
+  for (const missing of ["TURNSTILE_SITE_KEY", "TURNSTILE_SECRET_KEY"]) {
+    const res = await handleForm(formReq({ ...fields, "cf-turnstile-response": "t" }), { ...env, [missing]: "" }, send("www.cattell.com"));
+    assert.equal(res.status, 400, `refused when ${missing} is missing`);
+    assert.match(await res.text(), /not working at the moment/);
+  }
+  assert.equal(resend.length, before, "nothing is emailed when a key is missing");
 });
 
 // ---------- admin: Cloudflare Access ----------
@@ -233,4 +243,22 @@ test("editor preview: Markdown is rendered, but no HTML or unsafe links get thro
   assert.match(html, /&lt;script&gt;/, "HTML is shown as text");
   for (const bad of ["javascript:x", " javascript:x", "//evil.example", "data:text/html,x", "vbscript:x"]) assert.equal(safeUrl(bad), null, bad);
   for (const ok of ["https://a.b", "mailto:a@b.c", "/week-notes/", "#top"]) assert.equal(safeUrl(ok), ok);
+});
+
+test("sessions archive: the Worker removes secrets itself, even if the upload script didn't", async () => {
+  const { validateUpload } = await import("../workers/admin/src/sessions.js");
+  const key = "sk-ant-api03-" + "a1B2".repeat(12);
+  const { upload } = validateUpload({
+    source: "code",
+    id: "session-12345678",
+    title: `Rotate ${key}`,
+    messages: [
+      { kind: "result", text: `ANTHROPIC_API_KEY=${key}` },
+      { kind: "prompt", text: "Ordinary words, a path /home/james/site and a date 2026-11-22 stay." },
+    ],
+  });
+  assert.doesNotMatch(JSON.stringify(upload), new RegExp(key), "the key is not stored anywhere");
+  assert.match(upload.messages[0].text, /\[secret removed\]/);
+  assert.match(upload.title, /\[secret removed\]/);
+  assert.equal(upload.messages[1].text, "Ordinary words, a path /home/james/site and a date 2026-11-22 stay.");
 });
