@@ -434,6 +434,27 @@ test("sessions archive: keys, tokens and passwords are removed before a session 
   ]) assert.equal(redact(same), same);
   assert.equal(redact(redact(env)), redact(env), "doing it twice changes nothing more");
 
+  // More keys with a known start.
+  for (const s of ["glpat-" + "Ab1".repeat(7), "hf_" + "aB3".repeat(11), "GOCSPX-" + "x1Y".repeat(9), "SG." + "aB1".repeat(8) + "." + "cD2".repeat(15), "123456789:AA" + "bC3".repeat(11)]) {
+    assert.equal(redact(`found ${s} here`), `found ${gone} here`, s);
+  }
+  // Random-looking strings with no known start, such as a Cloudflare API token, are removed:
+  // on their own, after a word, and in a web address.
+  const random = "9fKz2LmQ8vR4tY7wPb3nXc6sJ1hGdK5eA0uV";
+  assert.equal(redact(`I pasted ${random} into the box`), `I pasted ${gone} into the box`);
+  assert.equal(redact(`token: ${random}`), `token: ${gone}`);
+  assert.equal(redact(`https://example.com/img?t=${random}&v=1`), `https://example.com/img?t=${gone}&v=1`);
+  assert.equal(redact(`base64 ${random}==`), `base64 ${gone}`);
+  // ...but hex fingerprints, IDs, paths, integrity hashes and long names are kept.
+  for (const same of [
+    "commit 453ba8b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7, SHA-256 " + "3ccbc3626e6a8e79fa3444ad682e5d7bc01172efc7bf9fa416ff0519a13c753d",
+    "database 0397570f-5ed6-4b43-b767-cec9ae7f7136",
+    'integrity="sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC"',
+    "/home/claude/repo/workers/admin/src/sessions/index2025Version3.js",
+    "AbstractSingletonProxyFactoryBean2WithLongName",
+    "claude/security-review-gemini-2026-11-20-follow-up-Version2",
+  ]) assert.equal(redact(same), same);
+
   // Both readers do it, in every kind of message and in the title.
   const code = parseClaudeCode([
     { type: "user", message: { content: `My key is ${secrets.github}` } },
