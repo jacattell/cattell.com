@@ -129,14 +129,14 @@ test("the feedback form lists the same places the API accepts", async () => {
 });
 
 test("week notes: titles, dates, newest first, and older/newer links", () => {
-  const note = page("/week-notes/2026/46/");
-  assert.match(note, /<h1>Week 46, 2026<\/h1>/);
-  assert.match(note, /Week starting <time datetime="2026-11-09">Monday 9 November 2026<\/time>/);
-  assert.match(note, /<a class="pager-older" href="\/week-notes\/2026\/14\/" rel="prev"><span class="pager-label">Older<\/span> Week 14, 2026<\/a>/);
+  const note = page("/week-notes/2026/47/");
+  assert.match(note, /<h1>Week 47, 2026<\/h1>/);
+  assert.match(note, /Week starting <time datetime="2026-11-16">Monday 16 November 2026<\/time>/);
+  assert.match(note, /<a class="pager-older" href="\/week-notes\/2026\/46\/" rel="prev"><span class="pager-label">Older<\/span> Week 46, 2026<\/a>/);
   assert.doesNotMatch(note, /pager-newer/, "the newest note has no newer link");
-  assert.match(page("/week-notes/2026/14/"), /<a class="pager-newer" href="\/week-notes\/2026\/46\/" rel="next"><span class="pager-label">Newer<\/span> Week 46, 2026<\/a>/);
+  assert.match(page("/week-notes/2026/46/"), /<a class="pager-newer" href="\/week-notes\/2026\/47\/" rel="next"><span class="pager-label">Newer<\/span> Week 47, 2026<\/a>/);
   const index = page("/week-notes/");
-  assert.ok(index.indexOf("Week 46, 2026") < index.indexOf("Week 14, 2026"), "newest first");
+  assert.ok(index.indexOf("Week 47, 2026") < index.indexOf("Week 46, 2026"), "newest first");
   assert.match(page("/week-notes/2024/"), /Goal for the year:<\/strong> Come to terms with/);
   const home = page("/");
   assert.match(home, /<h2 id="latest-notes">Latest week notes<\/h2>/);
@@ -147,7 +147,7 @@ test("the week notes feed lists the newest notes", () => {
   const feed = read(path.join(OUT, "week-notes", "feed.xml"));
   assert.match(feed, /^<\?xml version="1.0" encoding="utf-8"\?>\s*<feed xmlns="http:\/\/www\.w3\.org\/2005\/Atom"/);
   assert.match(feed, /<link rel="self" href="https:\/\/www\.cattell\.com\/week-notes\/feed\.xml"\/>/);
-  assert.match(feed, /<title>Week 46, 2026: Job search \+ Claude Code<\/title>/);
+  assert.match(feed, /<title>Week 47, 2026: Trains, trustees and Christmas lights<\/title>/);
   assert.equal((feed.match(/<entry>/g) || []).length, 20);
 });
 
